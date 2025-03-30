@@ -285,20 +285,20 @@ i:hover{
     background-color: #efefef;
 }
 
-/* Responsive Design */
-@media screen and (max-width: 768px) {
+
+@media screen and (max-width: 600px) {
     .series-header {
-        flex-direction: column;
+        flex-direction: row;
         align-items: center;
-        text-align: center;
+        text-align: left;
     }
 
     .series-poster {
-        margin: 0 0 10px 0;
+        margin: 0 10px 0 0;
     }
 
     .series-info {
-        text-align: center;
+        text-align: left;
     }
 
     .series-body {
@@ -310,49 +310,52 @@ i:hover{
 .fa-github{font-size: 50px; text-align: center;}
 
 @media screen and (max-width:600px) {
-    @media screen and (max-width:600px) {
-        .body{
-            min-width: 300px;
-        }
-        .nav {
-            display: grid !important;
-            grid-template-columns: 1fr !important;
-            grid-template-rows: 1fr 1fr !important;
-            padding: 0;
-            padding: 20px 40px;
-        }
-    
-        .title {
-            grid-column: 1 !important; 
-            grid-row: 1 !important;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-    
-        input {
-            grid-column: 1 !important; 
-            grid-row: 2 !important;
-            justify-self: center; 
-            width: 100%;
-        }
+    .body{
+        min-width: 300px;
+    }
+    .nav {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: 1fr 1fr !important;
+        padding: 0;
+        padding: 20px 40px;
+    }
 
-        .fa-magnifying-glass {
-            display: none;
-        }
-        .movie-title{
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .watchbtn{
-            margin-top: 10px;
-            width: 40%;
-            height: 40px;
-            font-size: 18px;
-        }
-        footer{
-            padding: 20px;
-            justify-content: center;
-            background-color: #14080e;
-        }
+    .title {
+        grid-column: 1 !important; 
+        grid-row: 1 !important;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    input {
+        grid-column: 1 !important; 
+        grid-row: 2 !important;
+        justify-self: center; 
+        width: 100%;
+    }
+
+    .series-title {
+        font-size: 24px;
+        margin: 0;
+    }
+
+    .fa-magnifying-glass {
+        display: none;
+    }
+    .movie-title{
+        font-size: 24px;
+        font-weight: 600;
+    }
+    .watchbtn{
+        margin-top: 10px;
+        width: 40%;
+        height: 40px;
+        font-size: 18px;
+    }
+    footer{
+        padding: 20px;
+        justify-content: center;
+        background-color: #14080e;
     }
 }
