@@ -40,7 +40,7 @@ async function WatchMovie(movieId) {
             <h1>${movie.title}</h1>
             <p><em>${movie.tagline || "No tagline available"}</em></p>
             <div class="video-container">
-                <iframe src="${embedUrl}" width="800" height="450" frameborder="0" allowfullscreen></iframe>
+                <iframe src="${embedUrl}" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${movie.overview || "No overview available."}</p>
@@ -86,7 +86,7 @@ async function WatchTV(seriesId) {
             <h1>${series.name}</h1>
             <p><em>${series.tagline || "No tagline available"}</em></p>
             <div class="video-container">
-                <iframe id="video-player" src="https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/1" width="800" height="450" frameborder="0" allowfullscreen></iframe>
+                <iframe id="video-player" src="https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/1" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${series.overview || "No overview available."}</p>

@@ -218,6 +218,7 @@ body {
     background-color: rgba(20, 20, 20, 0.9); 
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    overflow: hidden;
 }
 
 .container > div h1 {
@@ -249,6 +250,7 @@ body {
     width: 100%;
     max-width: 800px;
     height: 450px;
+    overflow: hidden;
 }
 
 /* Movie Details Section */
@@ -376,4 +378,7 @@ body {
             display: none;
         }
     }
+}
+.video-container iframe {
+    overflow: hidden;
 }
