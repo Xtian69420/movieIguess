@@ -286,7 +286,11 @@ i:hover{
 }
 
 
-@media screen and (max-width: 600px) {
+.fa-instagram{font-size: 50px; text-align: center;}
+.fa-linkedin-in{font-size: 50px; text-align: center;}
+.fa-github{font-size: 50px; text-align: center;}
+
+@media screen and (max-width:600px) {
     .series-header {
         flex-direction: row;
         align-items: center;
@@ -304,12 +308,6 @@ i:hover{
     .series-body {
         padding: 15px;
     }
-}
-.fa-instagram{font-size: 50px; text-align: center;}
-.fa-linkedin-in{font-size: 50px; text-align: center;}
-.fa-github{font-size: 50px; text-align: center;}
-
-@media screen and (max-width:600px) {
     .body{
         min-width: 300px;
     }

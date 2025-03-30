@@ -320,7 +320,7 @@ body {
     background-color: #2c0a0a; 
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 600px) {
     .container {
         padding: 15px;
     }
@@ -343,8 +343,23 @@ body {
 .fa-linkedin-in{font-size: 50px; text-align: center;}
 .fa-github{font-size: 50px; text-align: center;}
 
-@media screen and (max-width:600px) {
     @media screen and (max-width:600px) {
+        .container {
+            padding: 15px;
+        }
+    
+        .video-container iframe {
+            width: 100%;
+            height: auto;
+        }
+    
+        .container > div h1 {
+            font-size: 2em;
+        }
+    
+        .movie-details {
+            padding: 15px;
+        }
         .body{
             min-width: 300px;
         }
@@ -378,7 +393,6 @@ body {
             display: none;
         }
     }
-}
 .video-container iframe {
     overflow: hidden;
 }
