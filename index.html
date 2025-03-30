@@ -8,6 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
     <link rel="icon" href="src/icon.svg">
+    <link rel="stylesheet" href="search.css">
 </head>
 <body>
     <header class="nav">
@@ -22,9 +23,12 @@
     </div>
 
     <!-- MOVIE LIST -->
-    <p class="textCategory">Trending <i class="fa-solid fa-fire"></i></p>
+    <p class="textCategory">Movies <i class="fa-solid fa-fire"></i></p>
     <div class="movie-container"></div>
 
+    <p class="textCategory">Series <i class="fa-solid fa-fire"></i></p>
+    <div class="series-container"></div>
+    
     <footer>
         <p class="title">Movie, I guess?</p>
         <div class="contanctInfos">
@@ -34,7 +38,8 @@
         </div>
     </footer>
 
-    <script src="./src/home.js" type="module"></script>
+    <script src="./src/home.js"></script>
+    <script src="src/search.js"></script>
 
     <script>
         function ins(){window.open('https://www.instagram.com/chrstnsgn_/', '_blank');}
