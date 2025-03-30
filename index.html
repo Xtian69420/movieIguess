@@ -12,13 +12,18 @@
 <body>
     <header class="nav">
         <p class="title" onclick="home()"><i class="fa-solid fa-film"></i> Movie, I guess?</p>
-        
         <input type="text" placeholder="Search a movie/series">
         <i class="fa-solid fa-magnifying-glass"></i>
     </header>
-    <p class="textCategory">Trending <i class="fa-solid fa-fire"></i></p>
-    <div class="movie-container">
+
+    <!-- BACKDROP SLIDER (DASHBOARD) -->
+    <div class="backdrop-container">
+        <div class="backdrop-slider"></div>
     </div>
+
+    <!-- MOVIE LIST -->
+    <p class="textCategory">Trending <i class="fa-solid fa-fire"></i></p>
+    <div class="movie-container"></div>
 
     <footer>
         <p class="title">Movie, I guess?</p>
@@ -28,6 +33,7 @@
             <i class="fa-brands fa-github" onclick="git()"></i>
         </div>
     </footer>
+
     <script src="./src/home.js" type="module"></script>
 
     <script>

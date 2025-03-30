@@ -148,6 +148,49 @@ i{
     font-weight: 700;
     margin-left: 5%;
 }
+.backdrop-container {
+    width: 100%;
+    height: 400px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 20px;
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 90%;
+    justify-self: center;
+}
+
+.backdrop-slider {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    transition: opacity 1s ease-in-out;
+}
+
+.backdrop-container::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.textCategory,
+.movie-container {
+    position: relative;
+    z-index: 2;
+}
+
+
+
+@media screen and (max-width: 600px) {
+    .backdrop-container {
+        height: 250px;
+    }
+}
 
 @media screen and (max-width:600px) {
     @media screen and (max-width:600px) {
