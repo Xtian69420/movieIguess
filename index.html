@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
+    <link rel="icon" href="src/icon.svg">
+</head>
+<body>
+    <header class="nav">
+        <p class="title" onclick="home()"><i class="fa-solid fa-film"></i> Movie, I guess?</p>
+        
+        <input type="text" placeholder="Search a movie/series">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </header>
+    <p class="textCategory">Trending <i class="fa-solid fa-fire"></i></p>
+    <div class="movie-container">
+    </div>
+
+    <footer>
+        <p class="title">Movie, I guess?</p>
+        <div class="contanctInfos">
+            <i class="fa-brands fa-instagram" onclick="ins()"></i>
+            <i class="fa-brands fa-linkedin-in" onclick="lin()"></i>
+            <i class="fa-brands fa-github" onclick="git()"></i>
+        </div>
+    </footer>
+    <script src="./src/home.js" type="module"></script>
+
+    <script>
+        function ins(){window.open('https://www.instagram.com/chrstnsgn_/', '_blank');}
+        function lin(){window.open('https://www.linkedin.com/in/christian-signo-070733323/', '_blank')}
+        function git(){window.open('https://github.com/Xtian69420', '_blank')}
+
+        function home(){
+            window.location.href="index.html";
+        }
+    </script>
+</body>
+</html>

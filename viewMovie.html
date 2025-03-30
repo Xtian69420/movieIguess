@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watch</title>
+    <link rel="stylesheet" href="view.css">
+    <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
+    <link rel="icon" href="src/icon.svg">
+</head>
+<body>
+    <div class="background"></div>
+    <header class="nav">
+        <p class="title" onclick="home()"><i class="fa-solid fa-film"></i> Movie, I guess?</p>
+        <input type="text" placeholder="Search a movie/series">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </header>
+    <div class="container"></div>
+    <footer>
+        <p class="title">Movie, I guess?</p>
+        <div class="contanctInfos">
+            <i class="fa-brands fa-instagram" onclick="ins()"></i>
+            <i class="fa-brands fa-linkedin-in" onclick="lin()"></i>
+            <i class="fa-brands fa-github" onclick="git()"></i>
+        </div>
+    </footer>
+    <script>
+        function home(){
+            window.location.href="index.html";
+        }
+    </script>
+    <script src="src/view.js"></script>
+</body>
+</html>

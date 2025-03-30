@@ -1,0 +1,249 @@
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif
+}
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    min-width: 300px;
+}
+
+body {
+    position: relative;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: inherit;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(10px);
+    z-index: -1;
+}
+
+
+.nav{
+    display: grid;
+    grid-template-columns: 1fr 30% 5%;
+    padding: 10px;
+    padding-left: 75px;
+    padding-right: 75px;
+    justify-content: center;
+    background-color: #14080e;
+    margin-bottom: 20px;
+}
+
+input{
+    grid-row: 1;
+    grid-column: 2;
+    width: 90%;
+    height: 80%;
+    align-self: center;
+    justify-self: center;
+    border: none;
+    border-radius: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    font-size: 18px;
+}
+
+.fa-magnifying-glass{
+    grid-row: 1;
+    grid-column: 3;
+    font-size: 34px;
+    color: #c1c1c1;
+    align-self: center;
+    justify-self: center;
+    cursor: pointer;
+}
+
+.title{
+    grid-row: 1;
+    grid-column: 1;
+    color: #c1c1c1;
+    font-size: 28px;
+    text-align: start;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+
+i{
+    color: #c1c1c1;
+    cursor: pointer;
+}
+
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+.movie-details {
+    background-color: #14080e;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.movie-header {
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    height: 300px;
+    display: flex;
+    align-items: flex-end;
+    padding: 20px;
+}
+
+.movie-poster {
+    width: 150px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+    margin-right: 20px;
+}
+
+.movie-info {
+    color: #ffffff;
+}
+
+.movie-title {
+    font-size: 2em;
+    margin: 0;
+}
+
+.movie-genres {
+    font-size: 1em;
+    color: #c1c1c1;
+    margin: 5px 0;
+}
+
+.movie-release-date,
+.movie-status {
+    font-size: 0.9em;
+    margin: 5px 0;
+}
+
+.movie-body {
+    padding: 20px;
+}
+
+.movie-overview {
+    font-size: 1em;
+    margin-bottom: 20px;
+    color: #c1c1c1;
+}
+
+.movie-language,
+.movie-rating {
+    font-size: 0.9em;
+    margin: 5px 0;
+    color: #c1c1c1;
+}
+.watchbtn{
+    background-color:#cecece;
+    width: 30%;
+    height: 60px;
+    border: none;
+    border-radius: 10px;
+    font-size: 30px;
+    color: rgb(63, 10, 10);
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.watchbtn:hover{
+    color: #14080e;
+    background-color: #ffffff;
+}
+
+footer{
+    padding: 10px;
+    padding-left: 130px;
+    padding-right: 130px;
+    justify-content: center;
+    background-color: #14080e;
+}
+
+i{
+    color: #c1c1c1;
+    cursor: pointer;
+}
+
+i:hover{
+    color: #ffffff;
+}
+.contanctInfos{
+    display: grid;
+    grid-template-columns: 20% 20% 20%;
+    justify-content: center;
+    margin: 0 auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.fa-instagram{font-size: 50px; text-align: center;}
+.fa-linkedin-in{font-size: 50px; text-align: center;}
+.fa-github{font-size: 50px; text-align: center;}
+
+@media screen and (max-width:600px) {
+    @media screen and (max-width:600px) {
+        .body{
+            min-width: 300px;
+        }
+        .nav {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            grid-template-rows: 1fr 1fr !important;
+            padding: 0;
+            padding: 20px 40px;
+        }
+    
+        .title {
+            grid-column: 1 !important; 
+            grid-row: 1 !important;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    
+        input {
+            grid-column: 1 !important; 
+            grid-row: 2 !important;
+            justify-self: center; 
+            width: 100%;
+        }
+
+        .fa-magnifying-glass {
+            display: none;
+        }
+        .movie-title{
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .watchbtn{
+            margin-top: 10px;
+            width: 40%;
+            height: 40px;
+            font-size: 18px;
+        }
+        footer{
+            padding: 20px;
+            justify-content: center;
+            background-color: #14080e;
+        }
+    }
+}
