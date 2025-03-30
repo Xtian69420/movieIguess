@@ -220,7 +220,7 @@ i{
         text-align: center;
     }
     .fa-magnifying-glass {
-        display: none;
+        display: none !important;
     }
     .movie-card {
         background: linear-gradient(to right, rgb(118, 41, 41), rgb(16, 4, 59));

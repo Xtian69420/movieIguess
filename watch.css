@@ -390,7 +390,7 @@ body {
             background-color: #14080e;
         }
         .fa-magnifying-glass{
-            display: none;
+            display: none !important;
         }
     }
 .video-container iframe {

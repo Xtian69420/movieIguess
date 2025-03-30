@@ -339,7 +339,7 @@ i:hover{
     }
 
     .fa-magnifying-glass {
-        display: none;
+        display: none !important;
     }
     .movie-title{
         font-size: 24px;
