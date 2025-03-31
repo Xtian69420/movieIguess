@@ -317,6 +317,35 @@ i{
         font-size: 12px;
         display: none;
     }
+
+    .series-card {
+        background: linear-gradient(to right, rgb(118, 41, 41), rgb(16, 4, 59));
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        width: 150px;
+        text-align: center;
+        border-radius: 30px;
+        cursor: pointer;
+        animation-duration: 1s all;
+    }
+    .series-overview {
+        display: none;
+    }
+    .series-rating {
+        display: none;
+    }
+
+    .series-title {
+        font-size: 14px;
+        margin: 10px 0;
+        color: #ffffff;
+    }
+
+    .series-release-date{
+        font-size: 12px;
+        display: none;
+    }
     footer{
         padding: 20px;
         justify-content: center;
