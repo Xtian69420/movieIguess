@@ -20,7 +20,7 @@ if (type === "movie" && movieId) {
 async function WatchMovie(movieId) {
     console.log("Fetching Movie:", movieId);
 
-    const embedUrl = `https://vidsrc.icu/embed/movie/${movieId}?seekto=480`;  // Use seekto=480 for 8 minutes  // Use t=480s for 8 minutes
+    const embedUrl = `https://vidsrc.icu/embed/movie/${movieId}`; 
 
     try {
         const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`);
@@ -116,7 +116,7 @@ async function WatchTV(seriesId) {
 function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
 
-    const embedUrl = `https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
+    const embedUrl = `https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}/0`;
     document.getElementById('video-player').src = embedUrl;
 
     // Update title to show episode number
