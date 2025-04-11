@@ -17,11 +17,10 @@ if (type === "movie" && movieId) {
     document.querySelector('.container').innerHTML = `<p>Error: Invalid or missing ID.</p>`;
 }
 
-// 🛠 Watch Movie Function
 async function WatchMovie(movieId) {
     console.log("Fetching Movie:", movieId);
 
-    const embedUrl = `https://vidsrc.icu/embed/movie/${movieId}`;
+    const embedUrl = `https://vidsrc.icu/embed/movie/${movieId}?seekto=480`;  // Use seekto=480 for 8 minutes  // Use t=480s for 8 minutes
 
     try {
         const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`);
@@ -56,6 +55,7 @@ async function WatchMovie(movieId) {
         document.querySelector('.container').innerHTML = `<p>Error loading movie details.</p>`;
     }
 }
+
 
 async function WatchTV(seriesId) {
     console.log("Fetching TV Series:", seriesId);
