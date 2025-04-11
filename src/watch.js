@@ -56,7 +56,6 @@ async function WatchMovie(movieId) {
     }
 }
 
-
 async function WatchTV(seriesId) {
     console.log("Fetching TV Series:", seriesId);
 
@@ -78,15 +77,17 @@ async function WatchTV(seriesId) {
         let episodesHTML = "";
         for (let i = 1; i <= episodes; i++) {
             episodesHTML += `
-                <button onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${i})">Episode ${i}</button>
+                <button id="episode-${i}" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${i})">Episode ${i}</button>
             `;
         }
 
+        // Set initial episode and title
+        const defaultEpisode = 1;
         document.querySelector('.container').innerHTML = `
-            <h1>${series.name}</h1>
+            <h1>${series.name} - Episode ${defaultEpisode}</h1>
             <p><em>${series.tagline || "No tagline available"}</em></p>
             <div class="video-container">
-                <iframe id="video-player" src="https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/1" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
+                <iframe id="video-player" src="https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${defaultEpisode}" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${series.overview || "No overview available."}</p>
@@ -102,6 +103,10 @@ async function WatchTV(seriesId) {
                 ${episodesHTML}
             </div>
         `;
+
+        // Set initial active episode button
+        document.getElementById(`episode-${defaultEpisode}`).classList.add('active');
+        
     } catch (error) {
         console.error("Error fetching TV show:", error);
         document.querySelector('.container').innerHTML = `<p>Error loading TV show details.</p>`;
@@ -112,5 +117,17 @@ function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
 
     const embedUrl = `https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
-    document.getElementById('video-player').src = embedUrl;  
+    document.getElementById('video-player').src = embedUrl;
+
+    // Update title to show episode number
+    document.querySelector('h1').innerHTML = `${document.querySelector('h1').innerText.split(' -')[0]} - Episode ${episodeNumber}`;
+
+    // Remove 'active' class from all buttons
+    const allButtons = document.querySelectorAll('.episode-buttons button');
+    allButtons.forEach(button => {
+        button.classList.remove('active');
+    });
+
+    // Add 'active' class to the selected button
+    document.getElementById(`episode-${episodeNumber}`).classList.add('active');
 }
