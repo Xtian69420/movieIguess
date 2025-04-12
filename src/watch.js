@@ -10,15 +10,13 @@ console.log("Type:", type);
 const API_KEY = '97df57ffd9278a37bc12191e00332053';
 let currentServerUrl = 'https://player.videasy.net/embed/';
 
-// https://vidjoy.pro/embed/tv/
 const servers = [
     { name: 'Netflix', url: 'https://player.videasy.net/embed/' },
-    { name: 'WatchTogether', url: 'https://vidjoy.pro/embed/'},
+    { name: 'WatchTogether', url: 'https://vidjoy.pro/embed/' },
     { name: 'Vidsrc-1', url: 'https://vidsrc.to/embed/' },
     { name: 'Vidsrc-2', url: 'https://vidsrc.me/embed/' },
-    { name: '2embed', url: 'https://2embed.org/embed/' },
-    { name: 'multiembed-1', url: 'https://multiembed.mov/embed/' },
-    { name: 'multiembed-2', url: 'https://multiembed.to/embed/' }
+    { name: 'Premium', url: 'https://111movies.com/' },
+    { name: 'Multi-embed', url: 'https://www.vidsrc.wtf/api/3/' }
 ];
 
 if (type === "movie" && movieId) {
@@ -32,18 +30,23 @@ if (type === "movie" && movieId) {
 async function WatchMovie(movieId) {
     console.log("Fetching Movie:", movieId);
 
-    const embedUrl = `https://player.videasy.net/movie/${movieId}`; // Default URL for movies
+    let embedUrl;
+
+    if (currentServerUrl === 'https://player.videasy.net/embed/') {
+        embedUrl = `https://player.videasy.net/movie/${movieId}`;
+    } else if (currentServerUrl === 'https://111movies.com/') {
+        embedUrl = `https://111movies.com/movie/${movieId}`;
+    } else if (currentServerUrl === 'https://www.vidsrc.wtf/api/3/') {
+        embedUrl = `https://www.vidsrc.wtf/api/3/movie/?id=${movieId}`;
+    } else {
+        embedUrl = `${currentServerUrl}movie/${movieId}`;
+    }
 
     try {
         const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`);
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch movie data (Status: ${response.status})`);
-        }
+        if (!response.ok) throw new Error(`Failed to fetch movie data (Status: ${response.status})`);
 
         const movie = await response.json();
-        console.log("Movie Data:", movie);
-
         const genres = movie.genres?.map(genre => genre.name).join(', ') || 'N/A';
         const homepage = movie.homepage ? `<a href="${movie.homepage}" target="_blank">${movie.homepage}</a>` : "No official website";
 
@@ -53,10 +56,9 @@ async function WatchMovie(movieId) {
             <div class="video-container">
                 <iframe id="video-player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen scrolling="no"></iframe>
             </div>
-            
             <div class="server-selection">
                 <h3>Choose a Server:</h3>
-                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}"onclick="changeServer('${server.url}', 'movie/${movieId}', ${index})">${server.name}</button>`).join(' ')}
+                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}" onclick="changeServer('${server.url}', 'movie/${movieId}', ${index}, 'movie')">${server.name}</button>`).join(' ')}
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${movie.overview || "No overview available."}</p>
@@ -78,20 +80,15 @@ async function WatchTV(seriesId) {
 
     try {
         const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${API_KEY}`);
-
-        if (!response.ok) {
-            throw new Error(`Failed to fetch TV show data (Status: ${response.status})`);
-        }
+        if (!response.ok) throw new Error(`Failed to fetch TV show data`);
 
         const series = await response.json();
-        console.log("TV Series Data:", series);
-
         const genres = series.genres?.map(genre => genre.name).join(', ') || 'N/A';
         const homepage = series.homepage ? `<a href="${series.homepage}" target="_blank">${series.homepage}</a>` : "No official website";
 
         let seasonButtonsHTML = "";
         series.seasons.forEach(season => {
-            if (season.season_number !== 0) { // skip specials
+            if (season.season_number !== 0) {
                 seasonButtonsHTML += `<button id="season-${season.season_number}" onclick="loadSeason(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
             }
         });
@@ -104,7 +101,7 @@ async function WatchTV(seriesId) {
             </div>
             <div class="server-selection">
                 <h3>Choose a Server:</h3>
-                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}"onclick="changeServer('${server.url}', 'tv/${seriesId}', ${index})">${server.name}</button>`).join(' ')}
+                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}" onclick="changeServer('${server.url}', 'tv/${seriesId}', ${index}, 'tv')">${server.name}</button>`).join(' ')}
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${series.overview || "No overview available."}</p>
@@ -119,22 +116,12 @@ async function WatchTV(seriesId) {
                 <h3>Select a Season:</h3>
                 ${seasonButtonsHTML}
             </div>
-            <div class="episode-buttons">
-                <h3>Select an Episode:</h3>
-                <!-- Episodes will be loaded here -->
-            </div>
+            <div class="episode-buttons"></div>
         `;
 
         const firstSeason = series.seasons.find(season => season.season_number !== 0);
         if (firstSeason) {
             loadSeason(seriesId, firstSeason.season_number);
-
-            setTimeout(() => {
-                const firstSeasonButton = document.getElementById(`season-${firstSeason.season_number}`);
-                if (firstSeasonButton) {
-                    firstSeasonButton.classList.add('active');
-                }
-            }, 100); 
         }
 
     } catch (error) {
@@ -143,26 +130,22 @@ async function WatchTV(seriesId) {
     }
 }
 
-function changeServer(serverUrl, contentPath, serverIndex) {
-    currentServerUrl = serverUrl; 
-
-    let embedUrl;
-    if (serverUrl === 'https://player.videasy.net/embed/') {
-        embedUrl = `https://player.videasy.net/${contentPath}`;
-    } else {
-        embedUrl = `${serverUrl}${contentPath}`;
-    }
-
-    const player = document.getElementById('video-player');
-    if (player) {
-        player.src = embedUrl;
-    }
+async function changeServer(serverUrl, contentPath, serverIndex, contentType) {
+    currentServerUrl = serverUrl;
 
     const serverButtons = document.querySelectorAll('.server-selection button');
     serverButtons.forEach(button => button.classList.remove('active'));
     serverButtons[serverIndex].classList.add('active');
-}
 
+    if (contentType === 'movie' && movieId) {
+        WatchMovie(movieId);
+    } else if (contentType === 'tv' && seriesId) {
+        const activeEpisode = document.querySelector('.episode-buttons button.active');
+        const seasonNumber = parseInt(document.querySelector('.season-buttons button.active')?.innerText.replace('Season ', '')) || 1;
+        const episodeNumber = parseInt(activeEpisode?.innerText.replace('Episode ', '')) || 1;
+        watchEpisode(seriesId, seasonNumber, episodeNumber);
+    }
+}
 
 async function loadSeason(seriesId, seasonNumber, event = null) {
     try {
@@ -186,9 +169,7 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
         }
 
         document.querySelectorAll('.season-buttons button').forEach(btn => btn.classList.remove('active'));
-        if (event?.target) {
-            event.target.classList.add('active');
-        }
+        if (event?.target) event.target.classList.add('active');
 
     } catch (err) {
         console.error(err);
@@ -196,20 +177,24 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
     }
 }
 
-function watchEpisode(seriesId, seasonNumber, episodeNumber) {
+async function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
 
     let embedUrl;
+
     if (currentServerUrl === 'https://player.videasy.net/embed/') {
         embedUrl = `https://player.videasy.net/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
-    } else {
+    } else if (currentServerUrl === `https://111movies.com/`) {
+        embedUrl = `https://111movies.com/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
+    } else if (currentServerUrl === 'https://www.vidsrc.wtf/api/3/') {
+        embedUrl = `https://www.vidsrc.wtf/api/3/tv/?id=${seriesId}&s=${seasonNumber}&e=${episodeNumber}`;
+    }
+    else {
         embedUrl = `${currentServerUrl}tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
     }
 
     const player = document.getElementById('video-player');
-    if (player) {
-        player.src = embedUrl;
-    }
+    if (player) player.src = embedUrl;
 
     const titleElement = document.querySelector('h1');
     if (titleElement) {
@@ -217,23 +202,7 @@ function watchEpisode(seriesId, seasonNumber, episodeNumber) {
         titleElement.innerText = `${baseTitle} - Episode ${episodeNumber}`;
     }
 
-    const allButtons = document.querySelectorAll('.episode-buttons button');
-    allButtons.forEach(button => button.classList.remove('active'));
-
+    document.querySelectorAll('.episode-buttons button').forEach(btn => btn.classList.remove('active'));
     const selectedButton = document.getElementById(`episode-${episodeNumber}`);
     if (selectedButton) selectedButton.classList.add('active');
-}
-
-
-function openWatchParty() {
-    const player = document.getElementById('video-player');
-    if (!player || !player.src) {
-        alert("No video loaded!");
-        return;
-    }
-
-    const encodedUrl = encodeURIComponent(player.src);
-    const partyUrl = `https://www.watchparty.me/party?video=${encodedUrl}`;
-
-    window.open(partyUrl, '_blank');
 }

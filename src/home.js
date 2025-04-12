@@ -14,12 +14,13 @@ async function Home() {
         const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}`);
         const data = await response.json();
 
-        console.log(data)
+        console.log(data);
         const topMovies = data.results.slice(0, 5);
         let index = 0;
 
         function updateBackdrop() {
             slider.style.backgroundImage = `url(https://image.tmdb.org/t/p/original${topMovies[index].backdrop_path})`;
+
             index = (index + 1) % topMovies.length;
         }
 
@@ -116,7 +117,7 @@ async function Home() {
         console.error('Error fetching data:', error);
     }
     
-    
+
 }
 
 Home();
