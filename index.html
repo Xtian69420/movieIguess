@@ -17,16 +17,25 @@
         <i class="fa-solid fa-magnifying-glass"></i>
     </header>
 
-    <!-- BACKDROP SLIDER (DASHBOARD) -->
+
     <div class="backdrop-container">
         <div class="backdrop-slider"></div>
     </div>
 
     <p class="textCategory">Movies <i class="fa-solid fa-fire"></i></p>
-    <div class="movie-container"></div>
+    <div class="scroll-wrapper" id="s1">
+        <div class="movie-container"></div>
+    </div>
 
     <p class="textCategory">TV Series <i class="fa-solid fa-fire"></i></p>
-    <div class="series-container"></div>
+    <div class="scroll-wrapper" id="s2">
+        <div class="series-container"></div>
+    </div>
+
+    <p class="textCategory">16+ <i class="fa-solid fa-fire"></i></p>
+    <div class="scroll-wrapper" id="s3">
+        <div class="anime-container"></div>
+    </div>
     
     <footer>
         <p class="title">Movie, I guess?</p>
@@ -49,5 +58,62 @@
             window.location.href="index.html";
         }
     </script>
+
+<script>
+    const scrollWrapper1 = document.querySelector('#s1');
+    const scrollWrapper2 = document.querySelector('#s2');
+    const scrollWrapper3 = document.querySelector('#s3');
+    const movieContainer = document.querySelector('.movie-container');
+    const tvContainer = document.querySelector('.series-container');
+    const animeContainer = document.querySelector('.anime-container');
+
+    scrollWrapper1.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            movieContainer.scrollLeft += e.deltaY;
+        }
+    });
+    scrollWrapper2.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            tvContainer.scrollLeft += e.deltaY;
+        }
+    });
+    scrollWrapper3.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            animeContainer.scrollLeft += e.deltaY;
+        }
+    });
+
+    function enableTouchScroll(container) {
+        let isTouchDown = false;
+        let startTouchX;
+        let scrollTouchLeft;
+
+        container.addEventListener('touchstart', (e) => {
+            isTouchDown = true;
+            startTouchX = e.touches[0].pageX - container.offsetLeft;
+            scrollTouchLeft = container.scrollLeft;
+        });
+
+        container.addEventListener('touchend', () => {
+            isTouchDown = false;
+        });
+
+        container.addEventListener('touchmove', (e) => {
+            if (!isTouchDown) return;
+            e.preventDefault();
+            const x = e.touches[0].pageX - container.offsetLeft;
+            const scroll = (x - startTouchX) * 2;
+            container.scrollLeft = scrollTouchLeft - scroll;
+        });
+    }
+
+    enableTouchScroll(movieContainer);
+    enableTouchScroll(tvContainer);
+    enableTouchScroll(animeContainer);
+</script>
+
 </body>
 </html>
