@@ -349,6 +349,44 @@ body {
 }
 
 
+/* Basic Button Styling */
+.server-selection button {
+    background-color: #640101; /* Green color */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px; /* Rounded corners */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-align: center;
+}
+
+.server-selection button:hover {
+    background-color: #8e0303;
+    transform: scale(1.05);
+}
+
+.server-selection button.active {
+    background-color: #230000; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.server-selection button:focus {
+    outline: none; 
+    border: 2px solid #333;
+}
+
+@media (max-width: 600px) {
+    .server-selection button {
+        width: 100%;
+        margin: 10px 0;
+    }
+}
+
+
+
 @media screen and (max-width: 600px) {
     .container {
         padding: 15px;

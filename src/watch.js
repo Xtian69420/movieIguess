@@ -9,6 +9,15 @@ console.log("Type:", type);
 
 const API_KEY = '97df57ffd9278a37bc12191e00332053';
 
+const servers = [
+    { name: 'Netflix', url: 'https://player.videasy.net/embed/' },
+    { name: 'Vidsrc-1', url: 'https://vidsrc.to/embed/' },
+    { name: 'Vidsrc-2', url: 'https://vidsrc.icu/embed/' },
+    { name: '2embed', url: 'https://2embed.org/embed/' },
+    { name: 'multiembed-1', url: 'https://multiembed.mov/embed/' },
+    { name: 'multiembed-2', url: 'https://multiembed.to/embed/' }
+];
+
 if (type === "movie" && movieId) {
     WatchMovie(movieId);
 } else if (type === "tv" && seriesId) {
@@ -20,7 +29,7 @@ if (type === "movie" && movieId) {
 async function WatchMovie(movieId) {
     console.log("Fetching Movie:", movieId);
 
-    const embedUrl = `https://vidsrc.to/embed/movie/${movieId}`; // Updated domain to vidsrc.to
+    const embedUrl = `https://player.videasy.net/movie/${movieId}`; // Default URL for movies
 
     try {
         const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`);
@@ -39,7 +48,11 @@ async function WatchMovie(movieId) {
             <h1>${movie.title}</h1>
             <p><em>${movie.tagline || "No tagline available"}</em></p>
             <div class="video-container">
-                <iframe src="${embedUrl}" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
+                <iframe id="video-player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen scrolling="no"></iframe>
+            </div>
+            <div class="server-selection">
+                <h3>Choose a Server:</h3>
+                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}"onclick="changeServer('${server.url}', 'movie/${movieId}', ${index})">${server.name}</button>`).join(' ')}
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${movie.overview || "No overview available."}</p>
@@ -55,6 +68,7 @@ async function WatchMovie(movieId) {
         document.querySelector('.container').innerHTML = `<p>Error loading movie details.</p>`;
     }
 }
+
 async function WatchTV(seriesId) {
     console.log("Fetching TV Series:", seriesId);
 
@@ -78,12 +92,15 @@ async function WatchTV(seriesId) {
             }
         });
 
-        // Initial layout, video-player iframe will be filled later
         document.querySelector('.container').innerHTML = `
             <h1>${series.name}</h1>
             <p><em>${series.tagline || "No tagline available"}</em></p>
             <div class="video-container">
-                <iframe id="video-player" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
+                <iframe id="video-player" width="100%" height="100%" frameborder="0" allowfullscreen scrolling="no"></iframe>
+            </div>
+            <div class="server-selection">
+                <h3>Choose a Server:</h3>
+                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}"onclick="changeServer('${server.url}', 'tv/${seriesId}', ${index})">${server.name}</button>`).join(' ')}
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${series.overview || "No overview available."}</p>
@@ -104,18 +121,16 @@ async function WatchTV(seriesId) {
             </div>
         `;
 
-        // Auto-load the first real season (Season 1)
         const firstSeason = series.seasons.find(season => season.season_number !== 0);
         if (firstSeason) {
             loadSeason(seriesId, firstSeason.season_number);
 
-            // Use setTimeout to ensure DOM is ready before setting the first season as active
             setTimeout(() => {
                 const firstSeasonButton = document.getElementById(`season-${firstSeason.season_number}`);
                 if (firstSeasonButton) {
                     firstSeasonButton.classList.add('active');
                 }
-            }, 100); // Delay to ensure DOM updates are completed
+            }, 100); 
         }
 
     } catch (error) {
@@ -123,6 +138,24 @@ async function WatchTV(seriesId) {
         document.querySelector('.container').innerHTML = `<p>Error loading TV show details.</p>`;
     }
 }
+
+function changeServer(serverUrl, contentPath, serverIndex) {
+    let embedUrl;
+    if (serverUrl === 'https://player.videasy.net/embed/') {
+        embedUrl = `https://player.videasy.net/${contentPath}`;
+    } else {
+        embedUrl = `${serverUrl}${contentPath}`;
+    }
+
+    const player = document.getElementById('video-player');
+    if (player) {
+        player.src = embedUrl;
+    }
+    const serverButtons = document.querySelectorAll('.server-selection button');
+    serverButtons.forEach(button => button.classList.remove('active'));
+    serverButtons[serverIndex].classList.add('active');
+}
+
 
 async function loadSeason(seriesId, seasonNumber, event = null) {
     try {
@@ -145,7 +178,6 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
             watchEpisode(seriesId, seasonNumber, seasonData.episodes[0].episode_number);
         }
 
-        // Automatically add the 'active' class to the selected season button
         document.querySelectorAll('.season-buttons button').forEach(btn => btn.classList.remove('active'));
         if (event?.target) {
             event.target.classList.add('active');
@@ -157,24 +189,21 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
     }
 }
 
-
 function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
 
-    const embedUrl = `https://vidsrc.to/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}`; // Updated domain to vidsrc.to
+    const embedUrl = `https://player.videasy.net/tv/${seriesId}/${seasonNumber}/${episodeNumber}`; // Default to player.videasy.net
     const player = document.getElementById('video-player');
     if (player) {
         player.src = embedUrl;
     }
 
-    // Update title
     const titleElement = document.querySelector('h1');
     if (titleElement) {
         const baseTitle = titleElement.innerText.split(' -')[0];
         titleElement.innerText = `${baseTitle} - Episode ${episodeNumber}`;
     }
 
-    // Update active button
     const allButtons = document.querySelectorAll('.episode-buttons button');
     allButtons.forEach(button => button.classList.remove('active'));
 
