@@ -116,7 +116,7 @@ async function WatchTV(seriesId) {
 function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
 
-    const embedUrl = `https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}/0`;
+    const embedUrl = `https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
     document.getElementById('video-player').src = embedUrl;
 
     // Update title to show episode number
