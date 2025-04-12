@@ -20,7 +20,7 @@ if (type === "movie" && movieId) {
 async function WatchMovie(movieId) {
     console.log("Fetching Movie:", movieId);
 
-    const embedUrl = `https://vidsrc.icu/embed/movie/${movieId}`; 
+    const embedUrl = `https://vidsrc.to/embed/movie/${movieId}`; // Updated domain to vidsrc.to
 
     try {
         const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${API_KEY}`);
@@ -71,23 +71,20 @@ async function WatchTV(seriesId) {
 
         const genres = series.genres?.map(genre => genre.name).join(', ') || 'N/A';
         const homepage = series.homepage ? `<a href="${series.homepage}" target="_blank">${series.homepage}</a>` : "No official website";
-        const episodes = series.number_of_episodes;
-        const seasonNumber = series.seasons[0]?.season_number || 1;
 
-        let episodesHTML = "";
-        for (let i = 1; i <= episodes; i++) {
-            episodesHTML += `
-                <button id="episode-${i}" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${i})">Episode ${i}</button>
-            `;
-        }
+        let seasonButtonsHTML = "";
+        series.seasons.forEach(season => {
+            if (season.season_number !== 0) { // skip specials
+                seasonButtonsHTML += `<button onclick="loadSeason(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
+            }
+        });
 
-        // Set initial episode and title
-        const defaultEpisode = 1;
+        // Initial layout, video-player iframe will be filled later
         document.querySelector('.container').innerHTML = `
-            <h1>${series.name} - Episode ${defaultEpisode}</h1>
+            <h1>${series.name}</h1>
             <p><em>${series.tagline || "No tagline available"}</em></p>
             <div class="video-container">
-                <iframe id="video-player" src="https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${defaultEpisode}" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
+                <iframe id="video-player" width="800" height="450" frameborder="0" allowfullscreen scrolling="no"></iframe>
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${series.overview || "No overview available."}</p>
@@ -98,36 +95,80 @@ async function WatchTV(seriesId) {
                 <p><strong>Seasons:</strong> ${series.number_of_seasons}, Episodes: ${series.number_of_episodes}</p>
                 <p><strong>Homepage:</strong> ${homepage}</p>
             </div>
+            <div class="season-buttons">
+                <h3>Select a Season:</h3>
+                ${seasonButtonsHTML}
+            </div>
             <div class="episode-buttons">
                 <h3>Select an Episode:</h3>
-                ${episodesHTML}
+                <!-- Episodes will be loaded here -->
             </div>
         `;
 
-        // Set initial active episode button
-        document.getElementById(`episode-${defaultEpisode}`).classList.add('active');
-        
+        // Auto-load the first real season
+        const firstSeason = series.seasons.find(season => season.season_number !== 0);
+        if (firstSeason) {
+            loadSeason(seriesId, firstSeason.season_number);
+        }
+
     } catch (error) {
         console.error("Error fetching TV show:", error);
         document.querySelector('.container').innerHTML = `<p>Error loading TV show details.</p>`;
     }
 }
 
+async function loadSeason(seriesId, seasonNumber, event = null) {
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}?api_key=${API_KEY}`);
+        if (!response.ok) throw new Error(`Failed to load season ${seasonNumber}`);
+
+        const seasonData = await response.json();
+        let episodesHTML = "";
+
+        seasonData.episodes.forEach(episode => {
+            episodesHTML += `<button id="episode-${episode.episode_number}" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})">Episode ${episode.episode_number}</button>`;
+        });
+
+        document.querySelector('.episode-buttons').innerHTML = `
+            <h3>Select an Episode:</h3>
+            ${episodesHTML}
+        `;
+
+        if (seasonData.episodes.length > 0) {
+            watchEpisode(seriesId, seasonNumber, seasonData.episodes[0].episode_number);
+        }
+
+        document.querySelectorAll('.season-buttons button').forEach(btn => btn.classList.remove('active'));
+        if (event?.target) {
+            event.target.classList.add('active');
+        }
+
+    } catch (err) {
+        console.error(err);
+        document.querySelector('.episode-buttons').innerHTML = `<p>Failed to load episodes for Season ${seasonNumber}.</p>`;
+    }
+}
+
 function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
 
-    const embedUrl = `https://vidsrc.icu/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
-    document.getElementById('video-player').src = embedUrl;
+    const embedUrl = `https://vidsrc.to/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}`; // Updated domain to vidsrc.to
+    const player = document.getElementById('video-player');
+    if (player) {
+        player.src = embedUrl;
+    }
 
-    // Update title to show episode number
-    document.querySelector('h1').innerHTML = `${document.querySelector('h1').innerText.split(' -')[0]} - Episode ${episodeNumber}`;
+    // Update title
+    const titleElement = document.querySelector('h1');
+    if (titleElement) {
+        const baseTitle = titleElement.innerText.split(' -')[0];
+        titleElement.innerText = `${baseTitle} - Episode ${episodeNumber}`;
+    }
 
-    // Remove 'active' class from all buttons
+    // Update active button
     const allButtons = document.querySelectorAll('.episode-buttons button');
-    allButtons.forEach(button => {
-        button.classList.remove('active');
-    });
+    allButtons.forEach(button => button.classList.remove('active'));
 
-    // Add 'active' class to the selected button
-    document.getElementById(`episode-${episodeNumber}`).classList.add('active');
+    const selectedButton = document.getElementById(`episode-${episodeNumber}`);
+    if (selectedButton) selectedButton.classList.add('active');
 }
