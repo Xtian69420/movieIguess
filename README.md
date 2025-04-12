@@ -3,7 +3,7 @@
 Welcome to **movieIguess**, your one-stop streaming frontend for movies and TV shows!  
 Discover, watch, and host watch parties with friends – all in one sleek interface.
 
-![movieIguess Banner](src/assets/banner.png)
+Link: https://xtian69420.github.io/movieIguess/
 
 ---
 
