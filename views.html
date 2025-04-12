@@ -14,6 +14,7 @@
             <tr>
                 <th style="font-size: 18px; color: rgb(95, 95, 95);">No.</th>
                 <th style="font-size: 18px; color: rgb(95, 95, 95);">Device</th>
+                <th style="font-size: 18px; color: rgb(95, 95, 95);">Location</th>
                 <th style="font-size: 18px; color: rgb(95, 95, 95);">Created At</th>
             </tr>
             <tbody id="tableBody"></tbody>
@@ -57,7 +58,8 @@
                     tbContainer.innerHTML += `
                         <tr>
                             <td style="font-size: 14px; color: rgb(95, 95, 95);">${view.view}</td>
-                            <td style="font-size: 14px; color: rgb(95, 95, 95);">${view.Device}</td>
+                            <td style="font-size: 14px; color: rgb(95, 95, 95);">${view.device}</td>
+                            <td style="font-size: 14px; color: rgb(95, 95, 95);">${view.location}</td>
                             <td style="font-size: 14px; color: rgb(95, 95, 95);">${new Date(view.createdAt).toLocaleString()}</td>
                         </tr>
                     `;
