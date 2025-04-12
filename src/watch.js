@@ -55,7 +55,6 @@ async function WatchMovie(movieId) {
         document.querySelector('.container').innerHTML = `<p>Error loading movie details.</p>`;
     }
 }
-
 async function WatchTV(seriesId) {
     console.log("Fetching TV Series:", seriesId);
 
@@ -75,7 +74,7 @@ async function WatchTV(seriesId) {
         let seasonButtonsHTML = "";
         series.seasons.forEach(season => {
             if (season.season_number !== 0) { // skip specials
-                seasonButtonsHTML += `<button onclick="loadSeason(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
+                seasonButtonsHTML += `<button id="season-${season.season_number}" onclick="loadSeason(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
             }
         });
 
@@ -105,10 +104,18 @@ async function WatchTV(seriesId) {
             </div>
         `;
 
-        // Auto-load the first real season
+        // Auto-load the first real season (Season 1)
         const firstSeason = series.seasons.find(season => season.season_number !== 0);
         if (firstSeason) {
             loadSeason(seriesId, firstSeason.season_number);
+
+            // Use setTimeout to ensure DOM is ready before setting the first season as active
+            setTimeout(() => {
+                const firstSeasonButton = document.getElementById(`season-${firstSeason.season_number}`);
+                if (firstSeasonButton) {
+                    firstSeasonButton.classList.add('active');
+                }
+            }, 100); // Delay to ensure DOM updates are completed
         }
 
     } catch (error) {
@@ -138,6 +145,7 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
             watchEpisode(seriesId, seasonNumber, seasonData.episodes[0].episode_number);
         }
 
+        // Automatically add the 'active' class to the selected season button
         document.querySelectorAll('.season-buttons button').forEach(btn => btn.classList.remove('active'));
         if (event?.target) {
             event.target.classList.add('active');
@@ -148,6 +156,7 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
         document.querySelector('.episode-buttons').innerHTML = `<p>Failed to load episodes for Season ${seasonNumber}.</p>`;
     }
 }
+
 
 function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
