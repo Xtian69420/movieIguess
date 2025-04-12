@@ -39,6 +39,7 @@
     
     <footer>
         <p class="title">Movie, I guess?</p>
+        <p class="h2" id="views" style="color: rgb(192, 192, 192); font-weight: 600;">Total Views:</p>
         <div class="contanctInfos">
             <i class="fa-brands fa-instagram" onclick="ins()"></i>
             <i class="fa-brands fa-linkedin-in" onclick="lin()"></i>
@@ -50,6 +51,31 @@
     <script src="src/search.js"></script>
 
     <script>
+        window.onload = async function () {
+            const viewText = document.getElementById('views');
+    
+            try {
+                await fetch('https://movieiguessserver.onrender.com/views/addviews', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({}) 
+                });
+
+                const response = await fetch('https://movieiguessserver.onrender.com/views/getAllViews');
+                const data = await response.json();
+
+                viewText.textContent = `TOTAL VIEWS: ${data.length.toString()}`;
+            } catch (error) {
+                console.error('Error fetching views:', error);
+                viewText.textContent = '0';
+            }
+        };
+    </script>
+    
+    <script>
+        //for footer
         function ins(){window.open('https://www.instagram.com/chrstnsgn_/', '_blank');}
         function lin(){window.open('https://www.linkedin.com/in/christian-signo-070733323/', '_blank')}
         function git(){window.open('https://github.com/Xtian69420', '_blank')}
@@ -60,6 +86,7 @@
     </script>
 
 <script>
+    //for category
     const scrollWrapper1 = document.querySelector('#s1');
     const scrollWrapper2 = document.querySelector('#s2');
     const scrollWrapper3 = document.querySelector('#s3');
