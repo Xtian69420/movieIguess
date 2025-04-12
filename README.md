@@ -12,9 +12,13 @@ Discover, watch, and host watch parties with friends – all in one sleek interf
 - 🔍 **Search & Discover**: Instantly find movies and shows using TMDB integration.
 - 📺 **Watch Streaming Content**: Stream content via embedded players (proxy to strip ads).
 - 👯 **Watch Party Mode**: Sync playback with friends and chat in real-time.
-- 💾 **Save Favorites**: Keep track of your must-watch list.
 - 🎨 **Responsive UI**: Optimized for desktop and mobile devices.
 
+---
+## Plans in the future
+- Upgrade UI
+- Search Suggestions
+- Accounts
 ---
 
 ## 🖼️ Screenshots
