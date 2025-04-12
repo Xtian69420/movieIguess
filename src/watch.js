@@ -8,11 +8,14 @@ console.log("Series ID:", seriesId);
 console.log("Type:", type);
 
 const API_KEY = '97df57ffd9278a37bc12191e00332053';
+let currentServerUrl = 'https://player.videasy.net/embed/';
 
+// https://vidjoy.pro/embed/tv/
 const servers = [
     { name: 'Netflix', url: 'https://player.videasy.net/embed/' },
+    { name: 'WatchTogether', url: 'https://vidjoy.pro/embed/'},
     { name: 'Vidsrc-1', url: 'https://vidsrc.to/embed/' },
-    { name: 'Vidsrc-2', url: 'https://vidsrc.icu/embed/' },
+    { name: 'Vidsrc-2', url: 'https://vidsrc.me/embed/' },
     { name: '2embed', url: 'https://2embed.org/embed/' },
     { name: 'multiembed-1', url: 'https://multiembed.mov/embed/' },
     { name: 'multiembed-2', url: 'https://multiembed.to/embed/' }
@@ -50,6 +53,7 @@ async function WatchMovie(movieId) {
             <div class="video-container">
                 <iframe id="video-player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen scrolling="no"></iframe>
             </div>
+            
             <div class="server-selection">
                 <h3>Choose a Server:</h3>
                 ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}"onclick="changeServer('${server.url}', 'movie/${movieId}', ${index})">${server.name}</button>`).join(' ')}
@@ -140,6 +144,8 @@ async function WatchTV(seriesId) {
 }
 
 function changeServer(serverUrl, contentPath, serverIndex) {
+    currentServerUrl = serverUrl; 
+
     let embedUrl;
     if (serverUrl === 'https://player.videasy.net/embed/') {
         embedUrl = `https://player.videasy.net/${contentPath}`;
@@ -151,6 +157,7 @@ function changeServer(serverUrl, contentPath, serverIndex) {
     if (player) {
         player.src = embedUrl;
     }
+
     const serverButtons = document.querySelectorAll('.server-selection button');
     serverButtons.forEach(button => button.classList.remove('active'));
     serverButtons[serverIndex].classList.add('active');
@@ -192,7 +199,13 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
 function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
 
-    const embedUrl = `https://player.videasy.net/tv/${seriesId}/${seasonNumber}/${episodeNumber}`; // Default to player.videasy.net
+    let embedUrl;
+    if (currentServerUrl === 'https://player.videasy.net/embed/') {
+        embedUrl = `https://player.videasy.net/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
+    } else {
+        embedUrl = `${currentServerUrl}tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
+    }
+
     const player = document.getElementById('video-player');
     if (player) {
         player.src = embedUrl;
@@ -209,4 +222,18 @@ function watchEpisode(seriesId, seasonNumber, episodeNumber) {
 
     const selectedButton = document.getElementById(`episode-${episodeNumber}`);
     if (selectedButton) selectedButton.classList.add('active');
+}
+
+
+function openWatchParty() {
+    const player = document.getElementById('video-player');
+    if (!player || !player.src) {
+        alert("No video loaded!");
+        return;
+    }
+
+    const encodedUrl = encodeURIComponent(player.src);
+    const partyUrl = `https://www.watchparty.me/party?video=${encodedUrl}`;
+
+    window.open(partyUrl, '_blank');
 }
