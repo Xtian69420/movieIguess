@@ -26,26 +26,6 @@
             const viewText = document.getElementById('views');
 
             try {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    const location = `${position.coords.latitude}, ${position.coords.longitude}`;
-
-                    fetch('https://movieiguessserver.onrender.com/views/addViews', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ location: location })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('View added:', data);
-                    })
-                    .catch(error => {
-                        console.error('Error adding view:', error);
-                    });
-                });
-
-
                 const response = await fetch('https://movieiguessserver.onrender.com/views/getAllViews');
                 const data = await response.json();
                 const tbContainer = document.getElementById('tableBody');
