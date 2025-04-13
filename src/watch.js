@@ -58,7 +58,12 @@ async function WatchMovie(movieId) {
             </div>
             <div class="server-selection">
                 <h3>Choose a Server:</h3>
-                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}" onclick="changeServer('${server.url}', 'movie/${movieId}', ${index}, 'movie')">${server.name}</button>`).join(' ')}
+                ${servers.map((server, index) => `
+                    <button class="${server.url === currentServerUrl ? 'active' : ''}" 
+                            onclick="changeServer('${server.url}', 'movie/${movieId}', ${index}, 'movie')">
+                        ${server.name}
+                    </button>
+                `).join(' ')}                
             </div>
             <div class="movie-details">
                 <p><strong>Overview:</strong> ${movie.overview || "No overview available."}</p>
@@ -143,7 +148,7 @@ async function changeServer(serverUrl, contentPath, serverIndex, contentType) {
         const activeEpisode = document.querySelector('.episode-buttons button.active');
         const seasonNumber = parseInt(document.querySelector('.season-buttons button.active')?.innerText.replace('Season ', '')) || 1;
         const episodeNumber = parseInt(activeEpisode?.innerText.replace('Episode ', '')) || 1;
-        watchEpisode(seriesId, seasonNumber, episodeNumber);
+        watchEpisode(seriesId, seasonNumber, episodeNumber); // Reload the episode with the new server
     }
 }
 
