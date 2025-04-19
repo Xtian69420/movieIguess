@@ -445,3 +445,11 @@ i{
         background-color: #14080e;
     }
 }
+
+.backdrop-slider {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: opacity 1s ease;
+    opacity: 1;
+}
