@@ -366,9 +366,6 @@ i{
     .movie-overview {
         display: none;
     }
-    .movie-rating {
-        display: none;
-    }
 
     .movie-title {
         font-size: 14px;
@@ -393,9 +390,6 @@ i{
         animation-duration: 1s all;
     }
     .series-overview {
-        display: none;
-    }
-    .series-rating {
         display: none;
     }
 
@@ -424,9 +418,6 @@ i{
     .anime-overview {
         display: none;
     }
-    .anime-rating {
-        display: none;
-    }
 
     .anime-title {
         font-size: 14px;
@@ -440,6 +431,7 @@ i{
     }
 
     footer{
+        margin-top: 20px;
         padding: 20px;
         justify-content: center;
         background-color: #14080e;
