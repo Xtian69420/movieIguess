@@ -35,15 +35,8 @@ Link: https://xtian69420.github.io/movieIguess/
 ---
 
 ## ⚙️ Tech Stack
-
-**Frontend**
-- React + TailwindCSS
-- TMDB API
-- Vidsrc.icu embeds (via backend proxy)
-
-**Backend**
 - Node.js + Express
-- MongoDB (Database name: `movieIguess`)
+- MongoDB 
 - Proxy service to clean 3rd-party embeds
 
 ---
