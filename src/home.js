@@ -14,8 +14,7 @@ async function Home() {
 
     // ========== MOVIES ==========
     try {
-        const today = new Date().toISOString().split('T')[0];
-        const response = await fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&sort_by=popularity.desc&first_air_date.gte=${today}&first_air_date.lte=${today}&with_genres=18,10759,10765&with_type=Scripted`);
+        const response = await fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}`);
         const data = await response.json();
 
         console.log('Movies:', data);
@@ -46,7 +45,8 @@ async function Home() {
 
     // ========== SERIES ==========
     try {
-        const response = await fetch(`https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}`);
+    const response = await fetch(`https://api.themoviedb.org/3/trending/tv/day?api_key=${API_KEY}`);
+
         const data = await response.json();
 
         console.log('Series:', data);
