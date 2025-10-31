@@ -85,13 +85,17 @@
                                     <span id="movieRuntime" class="text-gray-300"></span>
                                     <span id="movieGenres" class="text-gray-300 hidden sm:inline"></span>
                                 </div>
-                                <p id="movieOverview" class="text-sm sm:text-base lg:text-lg text-gray-300 mb-4 sm:mb-6 lg:mb-8 max-w-3xl leading-relaxed line-clamp-3 sm:line-clamp-none"></p>
                                 
                                 <!-- Action Buttons -->
                                 <div class="flex flex-wrap gap-2 sm:gap-4">
                                     <button id="playButton" class="netflix-button bg-white text-black px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-200 transition-colors flex items-center text-sm sm:text-base">
                                         <i class="fa-solid fa-play mr-1 sm:mr-2"></i>
                                         Play
+                                    </button>
+                                    <button id="trailerButton" onclick="openTrailerModal()" class="netflix-button bg-gray-600/70 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center text-sm sm:text-base">
+                                        <i class="fa-solid fa-video mr-1 sm:mr-2"></i>
+                                        <span class="hidden sm:inline">Trailer</span>
+                                        <span class="sm:hidden">Trailer</span>
                                     </button>
                                     <button class="netflix-button bg-gray-600/70 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center text-sm sm:text-base" onclick="showDevToast('My List')">
                                         <i class="fa-solid fa-plus mr-1 sm:mr-2"></i>
@@ -265,6 +269,40 @@
                         </div>
                         <p class="text-xs text-gray-400 mt-2">Share this link with others to let them discover this movie</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trailer Modal -->
+    <div id="trailerModal" class="fixed inset-0 z-50 hidden">
+        <!-- Modal Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-90 transition-opacity" onclick="closeTrailerModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="trailer-modal-content bg-black bg-opacity-95 backdrop-filter backdrop-blur-lg rounded-lg max-w-3xl w-full mx-4 relative border border-gray-600">
+                <!-- Close Button -->
+                <button onclick="closeTrailerModal()" class="absolute top-4 right-4 z-20 bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75 transition-all">
+                    <i class="fa-solid fa-times text-white text-lg"></i>
+                </button>
+                
+                <!-- Video Container -->
+                <div class="relative w-full" style="padding-bottom: 50%; /* Reduced aspect ratio for better fit */">
+                    <iframe 
+                        id="trailerIframe" 
+                        class="absolute top-0 left-0 w-full h-full rounded-lg" 
+                        src="" 
+                        frameborder="0" 
+                        allowfullscreen
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                    </iframe>
+                </div>
+                
+                <!-- Trailer Info -->
+                <div class="p-4">
+                    <h3 id="trailerTitle" class="text-lg font-bold text-white mb-1"></h3>
+                    <p class="text-gray-300 text-sm">Official Trailer</p>
                 </div>
             </div>
         </div>
@@ -720,6 +758,26 @@
             animation: modalFadeIn 0.3s ease-out;
         }
 
+        /* Trailer Modal Styles */
+        #trailerModal {
+            display: none;
+        }
+        
+        #trailerModal:not(.hidden) {
+            display: flex !important;
+        }
+        
+        .trailer-modal-content {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.3s ease-out;
+            max-height: 85vh;
+            overflow: hidden;
+        }
+
         @keyframes modalFadeIn {
             from {
                 opacity: 0;
@@ -818,11 +876,19 @@
         document.addEventListener('click', function(event) {
             const shareModal = document.getElementById('shareModal');
             const shareModalContent = document.querySelector('.share-modal-content');
+            const trailerModal = document.getElementById('trailerModal');
+            const trailerModalContent = document.querySelector('.trailer-modal-content');
             
             // Only close if modal is open and click is outside modal content
             if (shareModal && !shareModal.classList.contains('hidden')) {
                 if (!shareModalContent.contains(event.target) && !event.target.closest('[onclick*="openShareModal"]')) {
                     closeShareModal();
+                }
+            }
+            
+            if (trailerModal && !trailerModal.classList.contains('hidden')) {
+                if (!trailerModalContent.contains(event.target) && !event.target.closest('#trailerButton')) {
+                    closeTrailerModal();
                 }
             }
         });
@@ -834,8 +900,53 @@
                 if (shareModal && !shareModal.classList.contains('hidden')) {
                     closeShareModal();
                 }
+                const trailerModal = document.getElementById('trailerModal');
+                if (trailerModal && !trailerModal.classList.contains('hidden')) {
+                    closeTrailerModal();
+                }
             }
         });
+
+        // Trailer Modal Functions
+        function openTrailerModal() {
+            // This will be called from view.js when trailer data is available
+            const trailerModal = document.getElementById('trailerModal');
+            if (trailerModal) {
+                trailerModal.classList.remove('hidden');
+                trailerModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeTrailerModal() {
+            const trailerModal = document.getElementById('trailerModal');
+            const trailerIframe = document.getElementById('trailerIframe');
+            
+            if (trailerModal) {
+                trailerModal.classList.add('hidden');
+                trailerModal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                
+                // Stop the video by clearing the src
+                if (trailerIframe) {
+                    trailerIframe.src = '';
+                }
+            }
+        }
+
+        function playTrailer(trailerKey, title) {
+            const trailerIframe = document.getElementById('trailerIframe');
+            const trailerTitle = document.getElementById('trailerTitle');
+            
+            if (trailerIframe && trailerKey) {
+                // Set initial volume to 45% and quality to 1080p with additional quality parameters
+                trailerIframe.src = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&showinfo=0&enablejsapi=1&volume=45&vq=hd1080&hd=1&quality=hd1080`;
+                if (trailerTitle) {
+                    trailerTitle.textContent = title || 'Movie Trailer';
+                }
+                openTrailerModal();
+            }
+        }
     </script>
 
     <!-- Toast Script -->

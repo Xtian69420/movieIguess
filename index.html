@@ -214,14 +214,38 @@
                     
                     <!-- Movie Info Overlay -->
                     <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
-                        <h2 id="modalTitle" class="text-3xl lg:text-4xl font-bold text-white mb-2"></h2>
-                        <div class="flex items-center space-x-4 text-sm lg:text-base">
-                            <span id="modalRating" class="flex items-center text-yellow-400">
-                                <i class="fa-solid fa-star mr-1"></i>
-                                <span class="text-white">0.0</span>
-                            </span>
-                            <span id="modalYear" class="text-gray-300"></span>
-                            <span id="modalRuntime" class="text-gray-300"></span>
+                        <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between">
+                            <div class="flex-1">
+                                <h2 id="modalTitle" class="text-3xl lg:text-4xl font-bold text-white mb-2"></h2>
+                                <div class="flex items-center flex-wrap gap-x-4 gap-y-2 text-sm lg:text-base mb-4 lg:mb-0">
+                                    <span id="modalRating" class="flex items-center text-yellow-400">
+                                        <i class="fa-solid fa-star mr-1"></i>
+                                        <span class="text-white">0.0</span>
+                                    </span>
+                                    <span id="modalYear" class="text-gray-300"></span>
+                                    <span id="modalRuntime" class="text-gray-300"></span>
+                                    <div class="flex items-center space-x-2 ml-2 lg:hidden">
+                                        <button id="playTrailerBtn" onclick="playTrailer()" class="bg-netflix-red hover:bg-red-700 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-semibold transition-colors flex items-center text-xs lg:text-base">
+                                            <i class="fa-solid fa-play mr-1 lg:mr-2 text-xs lg:text-sm"></i>
+                                            <span class="hidden sm:inline">Play Trailer</span>
+                                            <span class="sm:hidden">Play Trailer</span>
+                                        </button>
+                                        <button id="muteBtn" onclick="toggleMute()" class="w-8 h-8 lg:w-10 lg:h-10 bg-gray-900/70 hover:bg-gray-800/70 text-white rounded-full font-semibold transition-colors flex items-center justify-center border-2 border-white/20 hidden">
+                                            <i class="fa-solid fa-volume-xmark text-xs lg:text-sm"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Desktop buttons on the right -->
+                            <div class="hidden lg:flex items-center space-x-2">
+                                <button id="playTrailerBtnDesktop" onclick="playTrailer()" class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center text-base">
+                                    <i class="fa-solid fa-play mr-2 text-sm"></i>
+                                    Play Trailer
+                                </button>
+                                <button id="muteBtnDesktop" onclick="toggleMute()" class="w-10 h-10 bg-gray-900/70 hover:bg-gray-800/70 text-white rounded-full font-semibold transition-colors flex items-center justify-center border-2 border-white/20 hidden">
+                                    <i class="fa-solid fa-volume-xmark text-sm"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -409,6 +433,198 @@
 
         // Initialize after DOM is loaded
         document.addEventListener('DOMContentLoaded', setupHorizontalScroll);
+
+        // Global variable to store current movie trailer
+        let currentMovieTrailer = null;
+        let currentMovieBackdrop = null;
+        let isTrailerMuted = true; // Start muted by default
+
+        // Function to fetch movie or TV show trailer
+        async function fetchMovieTrailer(movieId, mediaType = 'movie') {
+            try {
+                const API_KEY = '97df57ffd9278a37bc12191e00332053';
+                const endpoint = mediaType === 'tv' ? 'tv' : 'movie';
+                const response = await fetch(`https://api.themoviedb.org/3/${endpoint}/${movieId}/videos?api_key=${API_KEY}`);
+                const data = await response.json();
+                
+                // Find the first YouTube trailer
+                const trailer = data.results.find(video => 
+                    video.type === 'Trailer' && video.site === 'YouTube'
+                );
+                
+                return trailer;
+            } catch (error) {
+                console.error('Error fetching trailer:', error);
+                return null;
+            }
+        }
+
+        // Function to play trailer in modal backdrop
+        function playTrailer() {
+            if (!currentMovieTrailer) {
+                showDevToast('Trailer not available for this content');
+                return;
+            }
+
+            const modalBackdrop = document.getElementById('modalBackdrop');
+            const playTrailerBtn = document.getElementById('playTrailerBtn');
+            const playTrailerBtnDesktop = document.getElementById('playTrailerBtnDesktop');
+            const muteBtn = document.getElementById('muteBtn');
+            const muteBtnDesktop = document.getElementById('muteBtnDesktop');
+            
+            if (modalBackdrop) {
+                // Replace backdrop image with YouTube iframe (no controls, autoplay, muted initially)
+                modalBackdrop.outerHTML = `
+                    <div id="modalBackdrop" class="w-full h-full relative overflow-hidden">
+                        <iframe 
+                            id="trailerIframe"
+                            src="https://www.youtube.com/embed/${currentMovieTrailer.key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1&cc_load_policy=0&playsinline=1&widget_referrer=https%3A%2F%2Fwww.netflix.com"
+                            class="absolute inset-0 w-full h-full"
+                            style="width: 170%; height: 170%; left: -35%; top: -35%; object-fit: cover;"
+                            allowfullscreen
+                            allow="autoplay; encrypted-media">
+                        </iframe>
+                    </div>
+                `;
+                
+                // Update mobile buttons
+                if (playTrailerBtn) {
+                    playTrailerBtn.innerHTML = `
+                        <i class="fa-solid fa-stop mr-1 lg:mr-2 text-xs lg:text-sm"></i>
+                        <span class="hidden sm:inline">Stop Trailer</span>
+                        <span class="sm:hidden">Stop</span>
+                    `;
+                    playTrailerBtn.onclick = stopTrailer;
+                }
+                
+                // Update desktop buttons
+                if (playTrailerBtnDesktop) {
+                    playTrailerBtnDesktop.innerHTML = `
+                        <i class="fa-solid fa-stop mr-2 text-sm"></i>
+                        Stop Trailer
+                    `;
+                    playTrailerBtnDesktop.onclick = stopTrailer;
+                }
+                
+                // Show mute buttons
+                if (muteBtn) {
+                    muteBtn.classList.remove('hidden');
+                    muteBtn.classList.add('flex');
+                    muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark text-xs lg:text-sm"></i>';
+                }
+                
+                if (muteBtnDesktop) {
+                    muteBtnDesktop.classList.remove('hidden');
+                    muteBtnDesktop.classList.add('flex');
+                    muteBtnDesktop.innerHTML = '<i class="fa-solid fa-volume-xmark text-sm"></i>';
+                }
+            }
+        }
+
+        // Function to stop trailer and restore backdrop
+        function stopTrailer() {
+            const modalBackdrop = document.getElementById('modalBackdrop');
+            const playTrailerBtn = document.getElementById('playTrailerBtn');
+            const playTrailerBtnDesktop = document.getElementById('playTrailerBtnDesktop');
+            const muteBtn = document.getElementById('muteBtn');
+            const muteBtnDesktop = document.getElementById('muteBtnDesktop');
+            
+            if (modalBackdrop && currentMovieBackdrop) {
+                // Restore original backdrop image
+                modalBackdrop.outerHTML = `<img id="modalBackdrop" src="${currentMovieBackdrop}" alt="" class="w-full h-full object-cover">`;
+                
+                // Update mobile buttons back to play state
+                if (playTrailerBtn) {
+                    playTrailerBtn.innerHTML = `
+                        <i class="fa-solid fa-play mr-1 lg:mr-2 text-xs lg:text-sm"></i>
+                        <span class="hidden sm:inline">Play Trailer</span>
+                        <span class="sm:hidden">Play Trailer</span>
+                    `;
+                    playTrailerBtn.onclick = playTrailer;
+                }
+                
+                // Update desktop buttons back to play state
+                if (playTrailerBtnDesktop) {
+                    playTrailerBtnDesktop.innerHTML = `
+                        <i class="fa-solid fa-play mr-2 text-sm"></i>
+                        Play Trailer
+                    `;
+                    playTrailerBtnDesktop.onclick = playTrailer;
+                }
+                
+                // Hide mute buttons
+                if (muteBtn) {
+                    muteBtn.classList.add('hidden');
+                    muteBtn.classList.remove('flex');
+                }
+                
+                if (muteBtnDesktop) {
+                    muteBtnDesktop.classList.add('hidden');
+                    muteBtnDesktop.classList.remove('flex');
+                }
+                
+                // Reset mute state
+                isTrailerMuted = true;
+            }
+        }
+
+        // Function to toggle mute/unmute
+        function toggleMute() {
+            const trailerIframe = document.getElementById('trailerIframe');
+            const muteBtn = document.getElementById('muteBtn');
+            const muteBtnDesktop = document.getElementById('muteBtnDesktop');
+            
+            if (trailerIframe) {
+                try {
+                    // Use postMessage to communicate with YouTube iframe
+                    if (isTrailerMuted) {
+                        // Unmute
+                        trailerIframe.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+                        
+                        // Update both button icons
+                        if (muteBtn) {
+                            muteBtn.innerHTML = '<i class="fa-solid fa-volume-high text-xs lg:text-sm"></i>';
+                        }
+                        if (muteBtnDesktop) {
+                            muteBtnDesktop.innerHTML = '<i class="fa-solid fa-volume-high text-sm"></i>';
+                        }
+                        isTrailerMuted = false;
+                    } else {
+                        // Mute
+                        trailerIframe.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                        
+                        // Update both button icons
+                        if (muteBtn) {
+                            muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark text-xs lg:text-sm"></i>';
+                        }
+                        if (muteBtnDesktop) {
+                            muteBtnDesktop.innerHTML = '<i class="fa-solid fa-volume-xmark text-sm"></i>';
+                        }
+                        isTrailerMuted = true;
+                    }
+                } catch (error) {
+                    console.log('YouTube API not available, using fallback method');
+                    // Fallback: Just update button state without reloading iframe
+                    if (isTrailerMuted) {
+                        if (muteBtn) {
+                            muteBtn.innerHTML = '<i class="fa-solid fa-volume-high text-xs lg:text-sm"></i>';
+                        }
+                        if (muteBtnDesktop) {
+                            muteBtnDesktop.innerHTML = '<i class="fa-solid fa-volume-high text-sm"></i>';
+                        }
+                        isTrailerMuted = false;
+                    } else {
+                        if (muteBtn) {
+                            muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark text-xs lg:text-sm"></i>';
+                        }
+                        if (muteBtnDesktop) {
+                            muteBtnDesktop.innerHTML = '<i class="fa-solid fa-volume-xmark text-sm"></i>';
+                        }
+                        isTrailerMuted = true;
+                    }
+                }
+            }
+        }
     </script>
 
 <!-- Removed: legacy geolocation + external API tracking (CORS issues) -->
@@ -528,6 +744,30 @@
         #hero-play-btn {
             background-color: #ffffff !important;
             color: #000000 !important;
+        }
+    }
+
+    /* Extra margin for very small screens to prevent header overlap */
+    @media (max-width: 1023px) {
+        .pt-16 {
+            padding-top: 6rem !important; /* Increase from default 4rem to 6rem */
+        }
+        
+        /* Alternative: add margin to hero section specifically */
+        .backdrop-container {
+            margin-top: 2rem;
+        }
+        
+        /* Truncate hero description to ~25 characters on very small screens */
+        #hero-overview {
+            display: -webkit-box;
+            -webkit-line-clamp: 1;
+            line-clamp: 1;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 25ch; /* Approximately 25 characters */
         }
     }
 

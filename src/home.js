@@ -510,9 +510,52 @@ async function showMovieModal(movie, details) {
     const releaseDate = movie.release_date || movie.first_air_date;
     const mediaType = movie.title ? 'movie' : 'tv';
 
+    // Set backdrop for trailer restoration
     if (modalBackdrop && movie.backdrop_path) {
-        modalBackdrop.src = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
+        const backdropUrl = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
+        modalBackdrop.src = backdropUrl;
         modalBackdrop.alt = title;
+        // Store backdrop URL globally for trailer functionality
+        currentMovieBackdrop = backdropUrl;
+    }
+
+    // Fetch and store trailer data
+    try {
+        const trailerData = await fetchMovieTrailer(movie.id, mediaType);
+        currentMovieTrailer = trailerData;
+        
+        // Update play trailer button visibility
+        const playTrailerBtn = document.getElementById('playTrailerBtn');
+        const playTrailerBtnDesktop = document.getElementById('playTrailerBtnDesktop');
+        if (playTrailerBtn) {
+            if (trailerData) {
+                playTrailerBtn.style.display = 'flex';
+                playTrailerBtn.innerHTML = `<i class="fa-solid fa-play mr-1 lg:mr-2 text-xs lg:text-sm"></i><span class="hidden sm:inline">Play Trailer</span><span class="sm:hidden">Play Trailer</span>`;
+                playTrailerBtn.onclick = playTrailer;
+            } else {
+                playTrailerBtn.style.display = 'none';
+            }
+        }
+        if (playTrailerBtnDesktop) {
+            if (trailerData) {
+                playTrailerBtnDesktop.style.display = 'flex';
+                playTrailerBtnDesktop.innerHTML = `<i class="fa-solid fa-play mr-2 text-sm"></i>Play Trailer`;
+                playTrailerBtnDesktop.onclick = playTrailer;
+            } else {
+                playTrailerBtnDesktop.style.display = 'none';
+            }
+        }
+    } catch (error) {
+        console.error('Error fetching trailer:', error);
+        currentMovieTrailer = null;
+        const playTrailerBtn = document.getElementById('playTrailerBtn');
+        const playTrailerBtnDesktop = document.getElementById('playTrailerBtnDesktop');
+        if (playTrailerBtn) {
+            playTrailerBtn.style.display = 'none';
+        }
+        if (playTrailerBtnDesktop) {
+            playTrailerBtnDesktop.style.display = 'none';
+        }
     }
 
     if (modalPoster && movie.poster_path) {
@@ -619,6 +662,15 @@ async function showMovieModal(movie, details) {
 function closeModal() {
     const modal = document.getElementById('movieModal');
     if (modal) {
+        // Stop trailer if it's playing
+        const trailerIframe = document.getElementById('trailerIframe');
+        if (trailerIframe) {
+            // Call stopTrailer function to restore the backdrop and reset buttons
+            if (typeof stopTrailer === 'function') {
+                stopTrailer();
+            }
+        }
+        
         const modalContent = modal.querySelector('.modal-content');
         if (modalContent) {
             modalContent.classList.remove('show');
