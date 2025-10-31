@@ -3,138 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Force light mode meta tags for aggressive browsers -->
+    <meta name="color-scheme" content="light only">
+    <meta name="supported-color-schemes" content="light">
+    <meta name="theme-color" content="#000000">
+    <meta name="msapplication-navbutton-color" content="#000000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>Toast Demo - MovieIGuess</title>
     <link rel="icon" href="src/assets/logo.png">
     <link rel="stylesheet" href="toast.css">
     <style>
-        /* Force browser to respect original colors - prevent auto theme changes */
+        /* MAXIMUM FORCE: Block ALL dark mode attempts */
         :root {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
         }
         
-        * {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
+        *, *::before, *::after {
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
             filter: none !important;
             -webkit-filter: none !important;
+            -moz-filter: none !important;
+            -ms-filter: none !important;
+            -o-filter: none !important;
         }
         
         html, body {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
         }
         
-        /* Block dark mode media queries */
+        /* IMAGES AND LOGOS: Prevent any color modifications */
+        img, svg, picture, canvas, video {
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+            filter: none !important;
+            -webkit-filter: none !important;
+            -moz-filter: none !important;
+            -ms-filter: none !important;
+            -o-filter: none !important;
+            mix-blend-mode: normal !important;
+            isolation: isolate !important;
+        }
+        
+        /* Specific logo protection */
+        .logo, [class*="logo"], #logo, 
+        img[src*="logo"], img[alt*="logo"], 
+        img[src*="Logo"], img[alt*="Logo"] {
+            filter: none !important;
+            -webkit-filter: none !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+            mix-blend-mode: normal !important;
+            isolation: isolate !important;
+        }
+        
+        /* Block dark mode media queries COMPLETELY */
         @media (prefers-color-scheme: dark) {
-            * {
-                color-scheme: light !important;
-                -webkit-color-scheme: light !important;
+            *, *::before, *::after {
+                color-scheme: light only !important;
+                -webkit-color-scheme: light only !important;
+                forced-color-adjust: none !important;
+                -webkit-forced-color-adjust: none !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+            }
+            
+            img, svg, picture, canvas, video {
+                filter: none !important;
+                -webkit-filter: none !important;
                 forced-color-adjust: none !important;
                 -webkit-forced-color-adjust: none !important;
             }
         }
         
-        /* Ensure backgrounds and colors are preserved */
-        .bg-netflix-black,
-        .bg-netflix-dark,
-        .bg-black,
-        [class*="bg-"] {
+        /* Force all containers to respect original colors */
+        div, section, article, aside, main, header, footer, nav {
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
             filter: none !important;
             -webkit-filter: none !important;
-        }
-        
-        /* Prevent text color modifications */
-        .text-white,
-        .text-netflix-red,
-        .text-red-600,
-        .text-gray-400,
-        .text-gray-300,
-        .text-gray-200,
-        [class*="text-"] {
-            forced-color-adjust: none !important;
-            -webkit-forced-color-adjust: none !important;
-            filter: none !important;
-            -webkit-filter: none !important;
-        }
-        
-        /* Lock all light colors and prevent dark mode conversion */
-        .text-gray-400 {
-            color: #9ca3af !important;
-        }
-        
-        .text-gray-300 {
-            color: #d1d5db !important;
-        }
-        
-        .text-gray-200 {
-            color: #e5e7eb !important;
-        }
-        
-        .text-gray-100 {
-            color: #f3f4f6 !important;
-        }
-        
-        .bg-gray-800 {
-            background-color: #1f2937 !important;
-        }
-        
-        .bg-gray-900 {
-            background-color: #111827 !important;
-        }
-        
-        /* Lock Netflix brand colors */
-        .text-netflix-red {
-            color: #E50914 !important;
-        }
-        
-        .bg-netflix-red {
-            background-color: #E50914 !important;
-        }
-        
-        .bg-netflix-black {
-            background-color: #000000 !important;
-        }
-        
-        .bg-netflix-dark {
-            background-color: #141414 !important;
-        }
-        
-        .text-white {
-            color: #ffffff !important;
-        }
-        
-        .bg-black {
-            background-color: #000000 !important;
-        }
-        
-        /* Force borders and outlines to maintain colors */
-        .border-gray-600 {
-            border-color: #4b5563 !important;
-        }
-        
-        .border-gray-700 {
-            border-color: #374151 !important;
-        }
-        
-        /* Override any browser-imposed styles */
-        input, textarea, select, button {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
-            forced-color-adjust: none !important;
-            -webkit-forced-color-adjust: none !important;
-        }
-        
-        /* Prevent shadow color changes */
-        .shadow-lg, .shadow-xl, [class*="shadow-"] {
-            forced-color-adjust: none !important;
-            -webkit-forced-color-adjust: none !important;
         }
         
         body {

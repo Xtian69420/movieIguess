@@ -3,6 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Force light mode meta tags for aggressive browsers -->
+    <meta name="color-scheme" content="light only">
+    <meta name="supported-color-schemes" content="light">
+    <meta name="theme-color" content="#000000">
+    <meta name="msapplication-navbutton-color" content="#000000">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
     <title>MovieIGuess - Discover Amazing Movies & TV Shows</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
@@ -27,33 +34,79 @@
         }
     </script>
     <style>
-        /* Force browser to respect original colors - prevent auto theme changes */
+        /* MAXIMUM FORCE: Block ALL dark mode attempts */
         :root {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
+            supported-color-schemes: light !important;
         }
         
-        * {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
+        *, *::before, *::after {
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
             filter: none !important;
             -webkit-filter: none !important;
+            -moz-filter: none !important;
+            -ms-filter: none !important;
+            -o-filter: none !important;
         }
         
         html, body {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
+            background-color: #000000 !important;
         }
         
-        /* Block dark mode media queries */
+        /* IMAGES AND LOGOS: Prevent any color modifications */
+        img, svg, picture, canvas, video {
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+            filter: none !important;
+            -webkit-filter: none !important;
+            -moz-filter: none !important;
+            -ms-filter: none !important;
+            -o-filter: none !important;
+            mix-blend-mode: normal !important;
+            isolation: isolate !important;
+        }
+        
+        /* Specific logo protection */
+        .logo, [class*="logo"], #logo, 
+        img[src*="logo"], img[alt*="logo"], 
+        img[src*="Logo"], img[alt*="Logo"] {
+            filter: none !important;
+            -webkit-filter: none !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+            mix-blend-mode: normal !important;
+            isolation: isolate !important;
+        }
+        
+        /* Block dark mode media queries COMPLETELY */
         @media (prefers-color-scheme: dark) {
-            * {
-                color-scheme: light !important;
-                -webkit-color-scheme: light !important;
+            *, *::before, *::after {
+                color-scheme: light only !important;
+                -webkit-color-scheme: light only !important;
+                forced-color-adjust: none !important;
+                -webkit-forced-color-adjust: none !important;
+                filter: none !important;
+                -webkit-filter: none !important;
+            }
+            
+            html, body {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+            }
+            
+            img, svg, picture, canvas, video {
+                filter: none !important;
+                -webkit-filter: none !important;
                 forced-color-adjust: none !important;
                 -webkit-forced-color-adjust: none !important;
             }
@@ -145,8 +198,8 @@
         
         /* Override any browser-imposed styles */
         input, textarea, select, button {
-            color-scheme: light !important;
-            -webkit-color-scheme: light !important;
+            color-scheme: light only !important;
+            -webkit-color-scheme: light only !important;
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
         }
@@ -155,6 +208,14 @@
         .shadow-lg, .shadow-xl, [class*="shadow-"] {
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
+        }
+        
+        /* Force all containers to respect original colors */
+        div, section, article, aside, main, header, footer, nav {
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+            filter: none !important;
+            -webkit-filter: none !important;
         }
         
         @keyframes textGlowBuildUp {
