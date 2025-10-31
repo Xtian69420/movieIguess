@@ -117,7 +117,7 @@
                     <i class="fa-solid fa-fire text-netflix-red mr-3"></i>
                     Trending Movies
                 </h2>
-                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold">
+                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold" onclick="showDevToast('Trending Movies')">
                     See All <i class="fa-solid fa-chevron-right ml-1"></i>
                 </button>
             </div>
@@ -135,7 +135,7 @@
                     <i class="fa-solid fa-tv text-netflix-red mr-3"></i>
                     Popular TV Shows
                 </h2>
-                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold">
+                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold" onclick="showDevToast('Popular TV Shows')">
                     See All <i class="fa-solid fa-chevron-right ml-1"></i>
                 </button>
             </div>
@@ -153,7 +153,7 @@
                     <i class="fa-solid fa-star text-netflix-red mr-3"></i>
                     16+
                 </h2>
-                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold">
+                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold" onclick="showDevToast('Top Rated')">
                     See All <i class="fa-solid fa-chevron-right ml-1"></i>
                 </button>
             </div>
@@ -513,12 +513,10 @@
         .navbar-glass {
             padding-top: 1rem;
             padding-bottom: 1rem;
+            /* Keep the same glassmorphism as desktop; no opaque overrides */
         }
         
-        #navbar {
-            background: rgba(0, 0, 0, 0.95) !important;
-            backdrop-filter: blur(10px);
-        }
+        /* Do not override #navbar background on mobile so it keeps glass effect */
         
         .search-input {
             font-size: 16px; /* Prevents zoom on iOS */
