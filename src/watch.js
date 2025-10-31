@@ -12,11 +12,19 @@ let currentServerUrl = 'https://player.videasy.net/embed/';
 
 const servers = [
     { name: 'Netflix', url: 'https://player.videasy.net/embed/' },
-    { name: 'WatchTogether', url: 'https://vidjoy.pro/embed/' },
-    { name: 'Vidsrc-1', url: 'https://vidsrc.to/embed/' },
-    { name: 'Vidsrc-2', url: 'https://vidsrc.me/embed/' },
+    { name: 'Vidsrc-1', url: 'https://www.vidsrc.wtf/api/1/' },
+    { name: 'Vidsrc-2', url: 'https://vidsrc.wtf/api/2/' },
     { name: 'Premium', url: 'https://111movies.com/' },
-    { name: 'Multi-embed', url: 'https://www.vidsrc.wtf/api/3/' }
+    { name: 'Multi-embed', url: 'https://www.vidsrc.wtf/api/3/' },
+    { name: 'Smashy', url: 'https://smashyplayer.top/' },
+    { name: 'VidLinkPro', url: 'https://vidlink.pro/' },
+    { name: 'Prime', url: 'https://test.autoembed.cc/embed/' },
+    { name: 'Purple', url: 'https://multiembed.mov/' },
+    { name: 'Prime 2', url: 'https://www.primewire.tf/embed/' },
+    { name: 'VidRock', url: 'https://vidrock.net/' },
+    { name: 'Mega', url: 'https://vidrock.net/mega/' },
+    { name: 'VidNest', url: 'https://vidnest.fun/' },
+    { name: 'Vidzee', url: 'https://player.vidzee.wtf/embed/' }
 ];
 
 if (type === "movie" && movieId) {
@@ -65,6 +73,28 @@ async function WatchMovie(movieId) {
         embedUrl = `https://111movies.com/movie/${movieId}`;
     } else if (currentServerUrl === 'https://www.vidsrc.wtf/api/3/') {
         embedUrl = `https://www.vidsrc.wtf/api/3/movie/?id=${movieId}`;
+    } else if (currentServerUrl === 'https://www.vidsrc.wtf/api/1/') {
+        embedUrl = `https://www.vidsrc.wtf/api/1/movie?id=${movieId}`;
+    } else if (currentServerUrl === 'https://vidsrc.wtf/api/2/') {
+        embedUrl = `https://vidsrc.wtf/api/2/movie?id=${movieId}`;
+    } else if (currentServerUrl === 'https://smashyplayer.top/') {
+        embedUrl = `https://smashyplayer.top/#mv${movieId}`;
+    } else if (currentServerUrl === 'https://vidlink.pro/') {
+        embedUrl = `https://vidlink.pro/movie/${movieId}?autoplay=true&title=true`;
+    } else if (currentServerUrl === 'https://test.autoembed.cc/embed/') {
+        embedUrl = `https://test.autoembed.cc/embed/movie/${movieId}?autoplay=true&server=5`;
+    } else if (currentServerUrl === 'https://multiembed.mov/') {
+        embedUrl = `https://multiembed.mov/?video_id=${movieId}&tmdb=1`;
+    } else if (currentServerUrl === 'https://www.primewire.tf/embed/') {
+        embedUrl = `https://www.primewire.tf/embed/movie?tmdb=${movieId}`;
+    } else if (currentServerUrl === 'https://vidrock.net/') {
+        embedUrl = `https://vidrock.net/movie/${movieId}`;
+    } else if (currentServerUrl === 'https://vidrock.net/mega/') {
+        embedUrl = `https://vidrock.net/mega/movie/${movieId}`;
+    } else if (currentServerUrl === 'https://vidnest.fun/') {
+        embedUrl = `https://vidnest.fun/movie/${movieId}`;
+    } else if (currentServerUrl === 'https://player.vidzee.wtf/embed/') {
+        embedUrl = `https://player.vidzee.wtf/embed/movie/${movieId}`;
     } else {
         embedUrl = `${currentServerUrl}movie/${movieId}`;
     }
@@ -149,6 +179,9 @@ async function WatchMovie(movieId) {
                     
                     <div class="server-selection">
                         <h3>Choose Server</h3>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem; text-align: center;">
+                            💡 If the current server is slow or not working, try switching to another server below :p
+                        </p>
                         <div class="server-grid">
                             ${servers.map((server, index) => `
                                 <button class="server-btn ${server.url === currentServerUrl ? 'active' : ''}" 
@@ -326,6 +359,9 @@ async function WatchTV(seriesId) {
 
                     <div class="server-selection" id="server-selection" style="display: none;">
                         <h3>Choose Server</h3>
+                        <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-bottom: 1rem; text-align: center;">
+                            💡 If the current server is slow or not working, try switching to another server below :p
+                        </p>
                         <div class="server-grid">
                             ${servers.map((server, index) => `
                                 <button class="server-btn ${server.url === currentServerUrl ? 'active' : ''}" 
@@ -403,6 +439,26 @@ async function WatchTV(seriesId) {
                 </div>
             </div>
         `;
+        
+        // Auto-select Season 1, Episode 1
+        setTimeout(() => {
+            // Load Season 1 in sidebar and auto-select Episode 1
+            const seasonSelector = document.getElementById('season-selector');
+            if (seasonSelector) {
+                seasonSelector.value = '1';
+            }
+            loadSeasonSidebar(seriesId, 1);
+            
+            // Auto-select Season 1 for mobile
+            const season1Button = document.getElementById('season-1');
+            if (season1Button) {
+                season1Button.classList.add('active');
+                // Load Season 1 episodes for mobile
+                loadSeason(seriesId, 1);
+            }
+            
+            watchEpisode(seriesId, 1, 1);
+        }, 100);
     } catch (error) {
         console.error("Error fetching TV series:", error);
         hideLoading();
@@ -430,7 +486,7 @@ async function loadSeasonSidebar(seriesId, seasonNumber) {
             const runtime = episode.runtime ? `${episode.runtime}m` : '';
             
             return `
-                <div class="episode-card-sidebar" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})">
+                <div class="episode-card-sidebar" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})" data-episode="${episode.episode_number}">
                     <div class="episode-card-header">
                         <div class="episode-badge">E${episode.episode_number}</div>
                         <div class="episode-meta-top">
@@ -446,6 +502,15 @@ async function loadSeasonSidebar(seriesId, seasonNumber) {
                                 <i class="fa-solid fa-star"></i>
                                 <span>${episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A'}</span>
                             </div>
+                            <div class="now-playing-indicator">
+                                <div class="sound-bars">
+                                    <div class="bar"></div>
+                                    <div class="bar"></div>
+                                    <div class="bar"></div>
+                                    <div class="bar"></div>
+                                </div>
+                                <span>Now Playing</span>
+                            </div>
                             <div class="play-indicator">
                                 <i class="fa-solid fa-play"></i>
                             </div>
@@ -456,6 +521,16 @@ async function loadSeasonSidebar(seriesId, seasonNumber) {
         }).join('');
 
         document.getElementById('episodes-sidebar').innerHTML = episodesList;
+
+        // If this is Season 1 and we're auto-loading, highlight Episode 1 as playing
+        if (seasonNumber == 1) {
+            setTimeout(() => {
+                const firstEpisode = document.querySelector('.episode-card-sidebar[data-episode="1"]');
+                if (firstEpisode) {
+                    firstEpisode.classList.add('now-playing');
+                }
+            }, 50);
+        }
 
     } catch (err) {
         console.error("Error loading season for sidebar:", err);
@@ -521,8 +596,18 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
         episodeGrid.innerHTML = episodeButtons;
         episodeSelection.classList.remove('hidden');
         
-        // Scroll to episode selection
-        episodeSelection.scrollIntoView({ behavior: 'smooth' });
+        // Auto-highlight Episode 1 if this is Season 1
+        if (seasonNumber == 1) {
+            setTimeout(() => {
+                const firstEpisodeCard = episodeGrid.querySelector('.episode-card');
+                if (firstEpisodeCard) {
+                    firstEpisodeCard.classList.add('active');
+                }
+            }, 50);
+        } else {
+            // Only scroll to episode selection if it's not Season 1 (auto-loaded)
+            episodeSelection.scrollIntoView({ behavior: 'smooth' });
+        }
 
     } catch (err) {
         console.error("Error loading season:", err);
@@ -548,12 +633,43 @@ async function watchEpisode(seriesId, seasonNumber, episodeNumber) {
         embedUrl = `https://111movies.com/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
     } else if (currentServerUrl === 'https://www.vidsrc.wtf/api/3/') {
         embedUrl = `https://www.vidsrc.wtf/api/3/tv/?id=${seriesId}&s=${seasonNumber}&e=${episodeNumber}`;
+    } else if (currentServerUrl === 'https://www.vidsrc.wtf/api/1/') {
+        embedUrl = `https://www.vidsrc.wtf/api/1/tv?id=${seriesId}&s=${seasonNumber}&e=${episodeNumber}`;
+    } else if (currentServerUrl === 'https://vidsrc.wtf/api/2/') {
+        embedUrl = `https://vidsrc.wtf/api/2/tv?id=${seriesId}&s=${seasonNumber}&e=${episodeNumber}`;
+    } else if (currentServerUrl === 'https://smashyplayer.top/') {
+        embedUrl = `https://smashyplayer.top/#tv${seriesId}s${seasonNumber}e${episodeNumber}`;
+    } else if (currentServerUrl === 'https://vidlink.pro/') {
+        embedUrl = `https://vidlink.pro/tv/${seriesId}/${seasonNumber}/${episodeNumber}?autoplay=true&title=true`;
+    } else if (currentServerUrl === 'https://test.autoembed.cc/embed/') {
+        embedUrl = `https://test.autoembed.cc/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}?autoplay=true&server=5`;
+    } else if (currentServerUrl === 'https://multiembed.mov/') {
+        embedUrl = `https://multiembed.mov/?video_id=${seriesId}&tmdb=1&s=${seasonNumber}&e=${episodeNumber}`;
+    } else if (currentServerUrl === 'https://www.primewire.tf/embed/') {
+        embedUrl = `https://www.primewire.tf/embed/tv?tmdb=${seriesId}&season=${seasonNumber}&episode=${episodeNumber}`;
+    } else if (currentServerUrl === 'https://vidrock.net/') {
+        embedUrl = `https://vidrock.net/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
+    } else if (currentServerUrl === 'https://vidrock.net/mega/') {
+        embedUrl = `https://vidrock.net/mega/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
+    } else if (currentServerUrl === 'https://vidnest.fun/') {
+        embedUrl = `https://vidnest.fun/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
+    } else if (currentServerUrl === 'https://player.vidzee.wtf/embed/') {
+        embedUrl = `https://player.vidzee.wtf/embed/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
     } else {
         embedUrl = `${currentServerUrl}tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
     }
 
     const player = document.getElementById('video-player');
     if (player) player.src = embedUrl;
+
+    // Update episode highlighting in sidebar
+    const sidebarCards = document.querySelectorAll('.episode-card-sidebar');
+    sidebarCards.forEach(card => {
+        card.classList.remove('now-playing');
+        if (card.dataset.episode == episodeNumber) {
+            card.classList.add('now-playing');
+        }
+    });
 
     // Update page title
     const titleElement = document.querySelector('.watch-title');

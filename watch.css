@@ -1696,3 +1696,139 @@ body {
         width: 100%;
     }
 }
+
+/* Now Playing Episode Highlighting */
+.episode-card-sidebar {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.episode-card-sidebar.now-playing {
+    background: linear-gradient(135deg, rgba(229,9,20,0.15) 0%, rgba(229,9,20,0.05) 100%);
+    border: 2px solid rgba(229,9,20,0.6);
+    box-shadow: 
+        0 0 20px rgba(229,9,20,0.3),
+        0 4px 15px rgba(0,0,0,0.4);
+}
+
+/* Remove the shimmer effect */
+.episode-card-sidebar.now-playing::before {
+    display: none;
+}
+
+/* Now Playing Indicator */
+.now-playing-indicator {
+    display: none !important; /* Hide by default */
+    align-items: center;
+    gap: 6px;
+    background: rgba(229,9,20,0.9);
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 2px 8px rgba(229,9,20,0.4);
+}
+
+.episode-card-sidebar.now-playing .now-playing-indicator {
+    display: flex !important; /* Only show when episode is playing */
+}
+
+/* Update episode card footer to include now playing indicator */
+.episode-card-sidebar.now-playing .episode-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.episode-card-sidebar.now-playing .episode-card-footer .episode-rating {
+    flex: 1;
+}
+
+.episode-card-sidebar.now-playing .episode-card-footer .play-indicator {
+    margin-left: auto;
+}
+
+/* Cute Sound Animation */
+.sound-bars {
+    display: flex;
+    align-items: end;
+    gap: 2px;
+    height: 14px;
+}
+
+.sound-bars .bar {
+    width: 2px;
+    background: white;
+    border-radius: 1px;
+    animation: soundWave 1.5s ease-in-out infinite;
+}
+
+.sound-bars .bar:nth-child(1) {
+    height: 40%;
+    animation-delay: 0s;
+}
+
+.sound-bars .bar:nth-child(2) {
+    height: 70%;
+    animation-delay: 0.2s;
+}
+
+.sound-bars .bar:nth-child(3) {
+    height: 100%;
+    animation-delay: 0.4s;
+}
+
+.sound-bars .bar:nth-child(4) {
+    height: 60%;
+    animation-delay: 0.6s;
+}
+
+@keyframes soundWave {
+    0%, 100% {
+        transform: scaleY(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scaleY(1.8);
+        opacity: 1;
+    }
+}
+
+/* Enhanced hover effect for now playing episodes */
+.episode-card-sidebar.now-playing:hover {
+    box-shadow: 
+        0 0 25px rgba(229,9,20,0.4),
+        0 8px 25px rgba(0,0,0,0.5);
+}
+
+/* Pulse effect for episode badge when playing */
+.episode-card-sidebar.now-playing .episode-badge {
+    background: linear-gradient(135deg, #e50914, #ff4757);
+    animation: badgePulse 2s ease-in-out infinite;
+}
+
+@keyframes badgePulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(229,9,20,0.7);
+    }
+    50% {
+        box-shadow: 0 0 0 6px rgba(229,9,20,0);
+    }
+}
+
+/* Mobile Episode Card Active State */
+.episode-card.active {
+    background: linear-gradient(135deg, rgba(229,9,20,0.15) 0%, rgba(229,9,20,0.05) 100%);
+    border: 2px solid rgba(229,9,20,0.6);
+    box-shadow: 
+        0 0 20px rgba(229,9,20,0.3),
+        0 4px 15px rgba(0,0,0,0.4);
+}
+
+.episode-card.active .episode-number {
+    background: linear-gradient(135deg, #e50914, #ff4757);
+    animation: badgePulse 2s ease-in-out infinite;
+}
