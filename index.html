@@ -63,11 +63,11 @@
         <div class="backdrop-container relative h-[60vh] lg:h-[80vh] overflow-hidden">
             <div class="backdrop-slider w-full h-full bg-cover bg-center bg-no-repeat"></div>
             <!-- Gradient Overlay -->
-            <div class="absolute inset-0 bg-gradient-to-t from-netflix-black via-transparent to-transparent"></div>
-            <div class="absolute inset-0 bg-gradient-to-r from-netflix-black/80 via-transparent to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-t from-netflix-black via-transparent to-transparent pointer-events-none z-0"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-netflix-black/80 via-transparent to-transparent pointer-events-none z-0"></div>
             
             <!-- Hero Content -->
-            <div class="absolute bottom-0 left-0 p-8 lg:p-16 max-w-2xl">
+            <div class="absolute bottom-0 left-0 p-8 lg:p-16 max-w-2xl z-10">
                 <div id="hero-loading" class="animate-pulse">
                     <div class="h-12 bg-gray-600 rounded mb-4 w-3/4"></div>
                     <div class="h-6 bg-gray-600 rounded mb-6 w-full"></div>
@@ -269,7 +269,7 @@
                                     <i class="fa-solid fa-play mr-2"></i>
                                     Watch Now
                                 </button>
-                                <button class="netflix-button bg-gray-600 text-white px-8 py-3 rounded font-semibold hover:bg-gray-500 transition-colors flex items-center">
+                                <button id="modalAddToListBtn" onclick="showDevToast('Add to List')" class="netflix-button bg-gray-600 text-white px-8 py-3 rounded font-semibold hover:bg-gray-500 transition-colors flex items-center">
                                     <i class="fa-solid fa-plus mr-2"></i>
                                     Add to List
                                 </button>
@@ -520,6 +520,14 @@
         
         .search-input {
             font-size: 16px; /* Prevents zoom on iOS */
+        }
+    }
+
+    /* Ensure Play button stays white on small screens if any mobile theming interferes */
+    @media (max-width: 640px) {
+        #hero-play-btn {
+            background-color: #ffffff !important;
+            color: #000000 !important;
         }
     }
 
