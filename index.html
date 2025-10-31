@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MovieIGuess - Discover Amazing Movies & TV Shows</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
     <link rel="stylesheet" href="netflix-style.css">
     <link rel="stylesheet" href="search.css">
     <link rel="stylesheet" href="toast.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
-    <link rel="icon" href="src/icon.svg">
+    <link rel="icon" href="src/assets/logo.png">
     <script>
         tailwind.config = {
             theme: {
@@ -25,15 +26,441 @@
             }
         }
     </script>
+    <style>
+        @keyframes textGlowBuildUp {
+            0% {
+                text-shadow: 
+                    0 0 5px rgba(229, 9, 20, 0.3),
+                    0 0 10px rgba(229, 9, 20, 0.2),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.1);
+                transform: scale(1);
+            }
+            5% {
+                text-shadow: 
+                    0 0 6px rgba(229, 9, 20, 0.35),
+                    0 0 12px rgba(229, 9, 20, 0.25),
+                    0 0 18px rgba(229, 9, 20, 0.15),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.12);
+                transform: scale(1.001);
+            }
+            10% {
+                text-shadow: 
+                    0 0 7px rgba(229, 9, 20, 0.4),
+                    0 0 14px rgba(229, 9, 20, 0.3),
+                    0 0 21px rgba(229, 9, 20, 0.2),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.14);
+                transform: scale(1.002);
+            }
+            15% {
+                text-shadow: 
+                    0 0 8px rgba(229, 9, 20, 0.45),
+                    0 0 16px rgba(229, 9, 20, 0.35),
+                    0 0 24px rgba(229, 9, 20, 0.25),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.16);
+                transform: scale(1.004);
+            }
+            20% {
+                text-shadow: 
+                    0 0 9px rgba(229, 9, 20, 0.5),
+                    0 0 18px rgba(229, 9, 20, 0.4),
+                    0 0 27px rgba(229, 9, 20, 0.3),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.18);
+                transform: scale(1.006);
+            }
+            25% {
+                text-shadow: 
+                    0 0 12px rgba(229, 9, 20, 0.6),
+                    0 0 24px rgba(229, 9, 20, 0.4),
+                    0 0 36px rgba(229, 9, 20, 0.3),
+                    2px 2px 4px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.2) contrast(1.05);
+                transform: scale(1.008);
+            }
+            30% {
+                text-shadow: 
+                    0 0 13px rgba(229, 9, 20, 0.65),
+                    0 0 26px rgba(229, 9, 20, 0.45),
+                    0 0 39px rgba(229, 9, 20, 0.35),
+                    0 0 52px rgba(229, 9, 20, 0.25),
+                    2px 2px 5px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.22) contrast(1.06);
+                transform: scale(1.012);
+            }
+            35% {
+                text-shadow: 
+                    0 0 14px rgba(229, 9, 20, 0.7),
+                    0 0 28px rgba(229, 9, 20, 0.5),
+                    0 0 42px rgba(229, 9, 20, 0.4),
+                    0 0 56px rgba(229, 9, 20, 0.3),
+                    2px 2px 5px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.24) contrast(1.07);
+                transform: scale(1.016);
+            }
+            40% {
+                text-shadow: 
+                    0 0 15px rgba(229, 9, 20, 0.75),
+                    0 0 30px rgba(229, 9, 20, 0.55),
+                    0 0 45px rgba(229, 9, 20, 0.45),
+                    0 0 60px rgba(229, 9, 20, 0.35),
+                    2px 2px 5px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.26) contrast(1.08);
+                transform: scale(1.02);
+            }
+            45% {
+                text-shadow: 
+                    0 0 16px rgba(229, 9, 20, 0.8),
+                    0 0 32px rgba(229, 9, 20, 0.6),
+                    0 0 48px rgba(229, 9, 20, 0.5),
+                    0 0 64px rgba(229, 9, 20, 0.4),
+                    2px 2px 5px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.28) contrast(1.09);
+                transform: scale(1.024);
+            }
+            50% {
+                text-shadow: 
+                    0 0 18px rgba(229, 9, 20, 0.8),
+                    0 0 36px rgba(229, 9, 20, 0.6),
+                    0 0 54px rgba(229, 9, 20, 0.4),
+                    0 0 72px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.8);
+                filter: brightness(1.3) contrast(1.1);
+                transform: scale(1.028);
+            }
+            55% {
+                text-shadow: 
+                    0 0 19px rgba(229, 9, 20, 0.85),
+                    0 0 38px rgba(229, 9, 20, 0.65),
+                    0 0 57px rgba(229, 9, 20, 0.45),
+                    0 0 76px rgba(229, 9, 20, 0.35),
+                    0 0 95px rgba(229, 9, 20, 0.25),
+                    2px 2px 6px rgba(0, 0, 0, 0.85);
+                filter: brightness(1.32) contrast(1.11);
+                transform: scale(1.032);
+            }
+            60% {
+                text-shadow: 
+                    0 0 20px rgba(229, 9, 20, 0.9),
+                    0 0 40px rgba(229, 9, 20, 0.7),
+                    0 0 60px rgba(229, 9, 20, 0.5),
+                    0 0 80px rgba(229, 9, 20, 0.4),
+                    0 0 100px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.85);
+                filter: brightness(1.34) contrast(1.12);
+                transform: scale(1.036);
+            }
+            65% {
+                text-shadow: 
+                    0 0 21px rgba(229, 9, 20, 0.95),
+                    0 0 42px rgba(229, 9, 20, 0.75),
+                    0 0 63px rgba(229, 9, 20, 0.55),
+                    0 0 84px rgba(229, 9, 20, 0.45),
+                    0 0 105px rgba(229, 9, 20, 0.35),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.36) contrast(1.13);
+                transform: scale(1.038);
+            }
+            70% {
+                text-shadow: 
+                    0 0 22px rgba(229, 9, 20, 1),
+                    0 0 44px rgba(229, 9, 20, 0.8),
+                    0 0 66px rgba(229, 9, 20, 0.6),
+                    0 0 88px rgba(229, 9, 20, 0.5),
+                    0 0 110px rgba(229, 9, 20, 0.4),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.38) contrast(1.14);
+                transform: scale(1.04);
+            }
+            75% {
+                text-shadow: 
+                    0 0 22px rgba(229, 9, 20, 0.9),
+                    0 0 44px rgba(229, 9, 20, 0.7),
+                    0 0 66px rgba(229, 9, 20, 0.5),
+                    0 0 88px rgba(229, 9, 20, 0.4),
+                    0 0 110px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.35) contrast(1.13);
+                transform: scale(1.041);
+            }
+            80% {
+                text-shadow: 
+                    0 0 23px rgba(229, 9, 20, 1),
+                    0 0 46px rgba(229, 9, 20, 0.8),
+                    0 0 69px rgba(229, 9, 20, 0.6),
+                    0 0 92px rgba(229, 9, 20, 0.5),
+                    0 0 115px rgba(229, 9, 20, 0.4),
+                    0 0 138px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.37) contrast(1.14);
+                transform: scale(1.042);
+            }
+            85% {
+                text-shadow: 
+                    0 0 24px rgba(229, 9, 20, 1),
+                    0 0 48px rgba(229, 9, 20, 0.8),
+                    0 0 72px rgba(229, 9, 20, 0.6),
+                    0 0 96px rgba(229, 9, 20, 0.5),
+                    0 0 120px rgba(229, 9, 20, 0.4),
+                    0 0 144px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.39) contrast(1.145);
+                transform: scale(1.043);
+            }
+            90% {
+                text-shadow: 
+                    0 0 24px rgba(229, 9, 20, 1),
+                    0 0 48px rgba(229, 9, 20, 0.8),
+                    0 0 72px rgba(229, 9, 20, 0.6),
+                    0 0 96px rgba(229, 9, 20, 0.5),
+                    0 0 120px rgba(229, 9, 20, 0.4),
+                    0 0 144px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.395) contrast(1.148);
+                transform: scale(1.044);
+            }
+            95% {
+                text-shadow: 
+                    0 0 24px rgba(229, 9, 20, 1),
+                    0 0 49px rgba(229, 9, 20, 0.8),
+                    0 0 74px rgba(229, 9, 20, 0.6),
+                    0 0 99px rgba(229, 9, 20, 0.5),
+                    0 0 124px rgba(229, 9, 20, 0.4),
+                    0 0 149px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.398) contrast(1.149);
+                transform: scale(1.045);
+            }
+            100% {
+                text-shadow: 
+                    0 0 25px rgba(229, 9, 20, 1),
+                    0 0 50px rgba(229, 9, 20, 0.8),
+                    0 0 75px rgba(229, 9, 20, 0.6),
+                    0 0 100px rgba(229, 9, 20, 0.5),
+                    0 0 125px rgba(229, 9, 20, 0.4),
+                    0 0 150px rgba(229, 9, 20, 0.3),
+                    2px 2px 6px rgba(0, 0, 0, 0.9);
+                filter: brightness(1.4) contrast(1.15);
+                transform: scale(1.045);
+            }
+        }
+
+        @keyframes logoGlowBuildUp {
+            0% {
+                filter: 
+                    drop-shadow(0 0 8px rgba(229, 9, 20, 0.4))
+                    drop-shadow(0 0 16px rgba(229, 9, 20, 0.3))
+                    brightness(1.1);
+                transform: scale(1);
+            }
+            5% {
+                filter: 
+                    drop-shadow(0 0 8.5px rgba(229, 9, 20, 0.42))
+                    drop-shadow(0 0 17px rgba(229, 9, 20, 0.32))
+                    brightness(1.11);
+                transform: scale(1.001);
+            }
+            10% {
+                filter: 
+                    drop-shadow(0 0 9px rgba(229, 9, 20, 0.44))
+                    drop-shadow(0 0 18px rgba(229, 9, 20, 0.34))
+                    brightness(1.12);
+                transform: scale(1.002);
+            }
+            15% {
+                filter: 
+                    drop-shadow(0 0 9.5px rgba(229, 9, 20, 0.46))
+                    drop-shadow(0 0 19px rgba(229, 9, 20, 0.36))
+                    brightness(1.13);
+                transform: scale(1.004);
+            }
+            20% {
+                filter: 
+                    drop-shadow(0 0 10px rgba(229, 9, 20, 0.48))
+                    drop-shadow(0 0 20px rgba(229, 9, 20, 0.38))
+                    brightness(1.14);
+                transform: scale(1.006);
+            }
+            25% {
+                filter: 
+                    drop-shadow(0 0 11px rgba(229, 9, 20, 0.5))
+                    drop-shadow(0 0 22px rgba(229, 9, 20, 0.4))
+                    drop-shadow(0 0 33px rgba(229, 9, 20, 0.3))
+                    brightness(1.15);
+                transform: scale(1.008);
+            }
+            30% {
+                filter: 
+                    drop-shadow(0 0 11.5px rgba(229, 9, 20, 0.52))
+                    drop-shadow(0 0 23px rgba(229, 9, 20, 0.42))
+                    drop-shadow(0 0 34.5px rgba(229, 9, 20, 0.32))
+                    brightness(1.16);
+                transform: scale(1.012);
+            }
+            35% {
+                filter: 
+                    drop-shadow(0 0 12px rgba(229, 9, 20, 0.54))
+                    drop-shadow(0 0 24px rgba(229, 9, 20, 0.44))
+                    drop-shadow(0 0 36px rgba(229, 9, 20, 0.34))
+                    brightness(1.17);
+                transform: scale(1.016);
+            }
+            40% {
+                filter: 
+                    drop-shadow(0 0 12.5px rgba(229, 9, 20, 0.56))
+                    drop-shadow(0 0 25px rgba(229, 9, 20, 0.46))
+                    drop-shadow(0 0 37.5px rgba(229, 9, 20, 0.36))
+                    brightness(1.18);
+                transform: scale(1.02);
+            }
+            45% {
+                filter: 
+                    drop-shadow(0 0 13px rgba(229, 9, 20, 0.58))
+                    drop-shadow(0 0 26px rgba(229, 9, 20, 0.48))
+                    drop-shadow(0 0 39px rgba(229, 9, 20, 0.38))
+                    brightness(1.19);
+                transform: scale(1.024);
+            }
+            50% {
+                filter: 
+                    drop-shadow(0 0 15px rgba(229, 9, 20, 0.7))
+                    drop-shadow(0 0 30px rgba(229, 9, 20, 0.5))
+                    drop-shadow(0 0 45px rgba(229, 9, 20, 0.4))
+                    brightness(1.2);
+                transform: scale(1.028);
+            }
+            55% {
+                filter: 
+                    drop-shadow(0 0 16px rgba(229, 9, 20, 0.75))
+                    drop-shadow(0 0 32px rgba(229, 9, 20, 0.55))
+                    drop-shadow(0 0 48px rgba(229, 9, 20, 0.45))
+                    drop-shadow(0 0 64px rgba(229, 9, 20, 0.35))
+                    brightness(1.21);
+                transform: scale(1.032);
+            }
+            60% {
+                filter: 
+                    drop-shadow(0 0 17px rgba(229, 9, 20, 0.8))
+                    drop-shadow(0 0 34px rgba(229, 9, 20, 0.6))
+                    drop-shadow(0 0 51px rgba(229, 9, 20, 0.5))
+                    drop-shadow(0 0 68px rgba(229, 9, 20, 0.4))
+                    brightness(1.22);
+                transform: scale(1.036);
+            }
+            65% {
+                filter: 
+                    drop-shadow(0 0 18px rgba(229, 9, 20, 0.85))
+                    drop-shadow(0 0 36px rgba(229, 9, 20, 0.65))
+                    drop-shadow(0 0 54px rgba(229, 9, 20, 0.55))
+                    drop-shadow(0 0 72px rgba(229, 9, 20, 0.45))
+                    brightness(1.23);
+                transform: scale(1.038);
+            }
+            70% {
+                filter: 
+                    drop-shadow(0 0 18.5px rgba(229, 9, 20, 0.9))
+                    drop-shadow(0 0 37px rgba(229, 9, 20, 0.7))
+                    drop-shadow(0 0 55.5px rgba(229, 9, 20, 0.6))
+                    drop-shadow(0 0 74px rgba(229, 9, 20, 0.5))
+                    brightness(1.24);
+                transform: scale(1.04);
+            }
+            75% {
+                filter: 
+                    drop-shadow(0 0 19px rgba(229, 9, 20, 0.95))
+                    drop-shadow(0 0 38px rgba(229, 9, 20, 0.75))
+                    drop-shadow(0 0 57px rgba(229, 9, 20, 0.65))
+                    drop-shadow(0 0 76px rgba(229, 9, 20, 0.55))
+                    brightness(1.25);
+                transform: scale(1.041);
+            }
+            80% {
+                filter: 
+                    drop-shadow(0 0 19.2px rgba(229, 9, 20, 0.96))
+                    drop-shadow(0 0 38.4px rgba(229, 9, 20, 0.76))
+                    drop-shadow(0 0 57.6px rgba(229, 9, 20, 0.66))
+                    drop-shadow(0 0 76.8px rgba(229, 9, 20, 0.56))
+                    brightness(1.26);
+                transform: scale(1.042);
+            }
+            85% {
+                filter: 
+                    drop-shadow(0 0 19.4px rgba(229, 9, 20, 0.97))
+                    drop-shadow(0 0 38.8px rgba(229, 9, 20, 0.77))
+                    drop-shadow(0 0 58.2px rgba(229, 9, 20, 0.67))
+                    drop-shadow(0 0 77.6px rgba(229, 9, 20, 0.57))
+                    brightness(1.27);
+                transform: scale(1.043);
+            }
+            90% {
+                filter: 
+                    drop-shadow(0 0 19.6px rgba(229, 9, 20, 0.98))
+                    drop-shadow(0 0 39.2px rgba(229, 9, 20, 0.78))
+                    drop-shadow(0 0 58.8px rgba(229, 9, 20, 0.68))
+                    drop-shadow(0 0 78.4px rgba(229, 9, 20, 0.58))
+                    brightness(1.28);
+                transform: scale(1.044);
+            }
+            95% {
+                filter: 
+                    drop-shadow(0 0 19.8px rgba(229, 9, 20, 0.99))
+                    drop-shadow(0 0 39.6px rgba(229, 9, 20, 0.79))
+                    drop-shadow(0 0 59.4px rgba(229, 9, 20, 0.69))
+                    drop-shadow(0 0 79.2px rgba(229, 9, 20, 0.59))
+                    brightness(1.29);
+                transform: scale(1.045);
+            }
+            100% {
+                filter: 
+                    drop-shadow(0 0 20px rgba(229, 9, 20, 1))
+                    drop-shadow(0 0 40px rgba(229, 9, 20, 0.8))
+                    drop-shadow(0 0 60px rgba(229, 9, 20, 0.6))
+                    drop-shadow(0 0 80px rgba(229, 9, 20, 0.4))
+                    brightness(1.3);
+                transform: scale(1.045);
+            }
+        }
+
+        .smooth-text-glow {
+            animation: textGlowBuildUp 3.5s ease-in-out forwards;
+        }
+
+        .smooth-logo-glow {
+            animation: logoGlowBuildUp 2.5s ease-in-out forwards;
+        }
+    </style>
 </head>
 <body class="bg-netflix-black text-white min-h-screen">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="fixed inset-0 bg-netflix-black z-[9999] flex flex-col items-center justify-center">
+        <!-- Logo Container -->
+        <div class="flex flex-col items-center space-y-8">
+            <!-- Logo with animation -->
+            <div id="logoContainer" class="opacity-0 transform scale-50">
+                <img src="src/assets/logo.png" alt="MovieIGuess Logo" class="w-24 h-24 lg:w-32 lg:h-32 object-contain">
+            </div>
+            
+            <!-- Typing Text Container -->
+            <div id="typingContainer" class="opacity-0">
+                <h1 class="text-4xl lg:text-6xl font-bold text-netflix-red">
+                    <span id="typedText"></span>
+                </h1>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div id="mainContent" class="opacity-0">
     <!-- Navigation -->
     <header class="navbar-glass fixed top-0 w-full z-50 transition-all duration-500" id="navbar">
         <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-16 py-4 space-y-4 lg:space-y-0">
             <!-- Logo and Desktop Navigation -->
             <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-8 w-full lg:w-auto">
-                <h1 class="text-netflix-red text-2xl lg:text-3xl font-bold cursor-pointer hover:text-red-400 transition-colors text-center lg:text-left" onclick="home()">
-                    <i class="fa-solid fa-film mr-2"></i>MovieIGuess
+                <h1 class="text-netflix-red text-2xl lg:text-3xl font-bold cursor-pointer hover:text-white transition-colors text-center lg:text-left flex items-center" onclick="home()">
+                    <img src="src/assets/logo.png" alt="MovieIGuess Logo" class="w-8 h-8 lg:w-10 lg:h-10 mr-2 object-contain">MovieIGuess
                 </h1>
                 <!-- Desktop Navigation -->
                 <nav class="hidden lg:flex space-x-6">
@@ -856,6 +1283,81 @@
     }
 </style>
 
+<!-- Professional Light Explosion Effect with Particles Styles -->
+<style>
+    /* Light particle base styles */
+    .light-particle {
+        position: absolute;
+        border-radius: 50%;
+        opacity: 0;
+        pointer-events: none;
+        z-index: 1000;
+        transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    /* Gentle phase particles */
+    .gentle-particle {
+        background: radial-gradient(circle, rgba(229, 9, 20, 0.8) 0%, rgba(229, 9, 20, 0.4) 50%, transparent 100%);
+        box-shadow: 0 0 6px rgba(229, 9, 20, 0.6);
+        transition: all 2s ease-out;
+    }
+    
+    /* Medium phase particles */
+    .medium-particle {
+        background: radial-gradient(circle, rgba(229, 9, 20, 0.9) 0%, rgba(255, 100, 100, 0.5) 50%, transparent 100%);
+        box-shadow: 0 0 8px rgba(229, 9, 20, 0.7), 0 0 12px rgba(229, 9, 20, 0.3);
+        transition: all 2.5s ease-out;
+    }
+    
+    /* Intense phase particles */
+    .intense-particle {
+        background: radial-gradient(circle, rgba(229, 9, 20, 1) 0%, rgba(255, 50, 50, 0.6) 40%, rgba(255, 200, 200, 0.3) 70%, transparent 100%);
+        box-shadow: 0 0 10px rgba(229, 9, 20, 0.8), 0 0 15px rgba(229, 9, 20, 0.4), 0 0 20px rgba(229, 9, 20, 0.2);
+        transition: all 3s ease-out;
+    }
+    
+    /* Explosion phase particles */
+    .explosion-particle {
+        background: radial-gradient(circle, rgba(255, 255, 255, 1) 0%, rgba(229, 9, 20, 0.9) 30%, rgba(255, 100, 100, 0.6) 60%, transparent 100%);
+        box-shadow: 
+            0 0 15px rgba(255, 255, 255, 0.8),
+            0 0 25px rgba(229, 9, 20, 0.8),
+            0 0 35px rgba(229, 9, 20, 0.4);
+        transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+    
+    /* Fade phase particles */
+    .fade-particle {
+        background: radial-gradient(circle, rgba(229, 9, 20, 0.7) 0%, rgba(229, 9, 20, 0.3) 50%, transparent 100%);
+        box-shadow: 0 0 8px rgba(229, 9, 20, 0.5);
+        transition: all 3s ease-out;
+    }
+    
+    /* Enhanced text explosion effect */
+    #typedText {
+        transform-origin: center;
+        transition: all 0.3s ease-out;
+    }
+    
+    /* Typing container enhancement */
+    #typingContainer {
+        position: relative;
+        overflow: visible;
+    }
+    
+    /* Final elegant glow state */
+    .completed-text {
+        text-shadow: 
+            0 0 15px rgba(229, 9, 20, 0.8),
+            0 0 30px rgba(229, 9, 20, 0.5),
+            0 0 45px rgba(229, 9, 20, 0.3),
+            0 0 60px rgba(229, 9, 20, 0.1),
+            2px 2px 4px rgba(0, 0, 0, 0.8);
+        filter: brightness(1.3) contrast(1.1);
+        transition: all 1s ease-out;
+    }
+</style>
+
 <!-- Toast Script -->
 <script src="src/toast.js"></script>
 <script>
@@ -865,6 +1367,408 @@
             title: '🚧 Coming Soon :PP',
             duration: 4000
         });
+    }
+</script>
+
+</div> <!-- End Main Content -->
+
+<!-- Loading Animation Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const loadingScreen = document.getElementById('loadingScreen');
+        const mainContent = document.getElementById('mainContent');
+        const logoContainer = document.getElementById('logoContainer');
+        const typingContainer = document.getElementById('typingContainer');
+        
+        // Check if loading has already been shown in this tab session
+        const hasLoadingBeenShown = sessionStorage.getItem('movieIGuessLoadingShown');
+        
+        if (hasLoadingBeenShown === 'true') {
+            // Skip loading animation - show main content immediately
+            loadingScreen.style.display = 'none';
+            mainContent.style.opacity = '1';
+            document.body.style.overflow = 'auto';
+            
+            // Add header logo glow effect immediately
+            addHeaderLogoGlow();
+            return;
+        }
+        
+        // Mark that loading has been shown in this session
+        sessionStorage.setItem('movieIGuessLoadingShown', 'true');
+        
+        // Prevent scrolling during loading
+        document.body.style.overflow = 'hidden';
+        
+        // Animation timeline
+        setTimeout(() => {
+            // Show logo with scale animation
+            logoContainer.style.transition = 'all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            logoContainer.style.opacity = '1';
+            logoContainer.style.transform = 'scale(1)';
+            
+            // Add logo particle effects
+            setTimeout(() => {
+                addLogoParticleEffect();
+            }, 500);
+        }, 300);
+        
+        setTimeout(() => {
+            // Show typing container
+            typingContainer.style.transition = 'opacity 0.5s ease-in-out';
+            typingContainer.style.opacity = '1';
+            
+            // Start typing animation - clean professional typing
+            var typed = new Typed('#typedText', {
+                strings: ['MovieI<span class="text-white">Guess</span>'],
+                typeSpeed: 30,
+                backSpeed: 0,
+                fadeOut: false,
+                loop: false,
+                showCursor: true,
+                cursorChar: '|',
+                onComplete: function() {
+                    // Hide cursor and add professional light explosion effect
+                    document.querySelector('.typed-cursor').style.display = 'none';
+                    addProfessionalSparkleEffect();
+                }
+            });
+        }, 1200);
+        
+        // Hide loading screen and show main content after 5 seconds
+        setTimeout(() => {
+            // Fade out loading screen
+            loadingScreen.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.transform = 'scale(1.1)';
+            
+            // Show main content
+            mainContent.style.transition = 'opacity 1s ease-in-out';
+            mainContent.style.opacity = '1';
+            
+            // Add header logo glow effect
+            addHeaderLogoGlow();
+            
+            // Re-enable scrolling
+            document.body.style.overflow = 'auto';
+            
+            // Remove loading screen from DOM after animation
+            setTimeout(() => {
+                loadingScreen.remove();
+            }, 800);
+        }, 5000);
+    });
+    
+    // Professional light explosion effect with particles - only after typing
+    function addProfessionalSparkleEffect() {
+        const container = document.getElementById('typingContainer');
+        const textElement = document.getElementById('typedText');
+        
+        // Add smooth glow animation class
+        textElement.classList.add('smooth-text-glow');
+        
+        // Create particles throughout the smooth animation
+        createSmoothParticleFlow(container);
+        
+        // Final explosion after smooth buildup
+        setTimeout(() => {
+            explodeLightEffect(textElement, container);
+        }, 3500);
+    }
+
+    // Create continuous particle flow during smooth animation
+    function createSmoothParticleFlow(container) {
+        // Create particles at different intervals for smooth flow
+        const particleIntervals = [
+            { delay: 200, count: 5, phase: 'gentle', radius: 0 },
+            { delay: 600, count: 8, phase: 'gentle', radius: 15 },
+            { delay: 1000, count: 10, phase: 'medium', radius: 25 },
+            { delay: 1400, count: 12, phase: 'medium', radius: 35 },
+            { delay: 1800, count: 15, phase: 'medium', radius: 45 },
+            { delay: 2200, count: 18, phase: 'intense', radius: 55 },
+            { delay: 2600, count: 20, phase: 'intense', radius: 65 },
+            { delay: 3000, count: 25, phase: 'intense', radius: 75 }
+        ];
+
+        particleIntervals.forEach(interval => {
+            setTimeout(() => {
+                createParticles(container, interval.count, interval.phase, interval.radius);
+            }, interval.delay);
+        });
+    }
+    
+    function explodeLightEffect(textElement, container) {
+        // Massive explosion of light
+        textElement.style.transition = 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        textElement.style.textShadow = `
+            0 0 30px rgba(229, 9, 20, 1),
+            0 0 60px rgba(255, 255, 255, 0.8),
+            0 0 90px rgba(229, 9, 20, 0.8),
+            0 0 120px rgba(255, 255, 255, 0.6),
+            0 0 150px rgba(229, 9, 20, 0.6),
+            0 0 200px rgba(255, 255, 255, 0.4),
+            0 0 250px rgba(229, 9, 20, 0.3),
+            4px 4px 8px rgba(0, 0, 0, 1)
+        `;
+        textElement.style.filter = 'brightness(1.8) contrast(1.4) saturate(1.2)';
+        textElement.style.transform = 'scale(1.05)';
+        
+        // EXPLOSION PARTICLE BURST!
+        createParticles(container, 35, 'explosion', 100);
+        
+        // Fade to elegant final state
+        setTimeout(() => {
+            fadeToFinalState(textElement, container);
+        }, 300);
+    }
+    
+    function fadeToFinalState(textElement, container) {
+        // Elegant fade to beautiful final glow
+        textElement.style.transition = 'all 1s ease-out';
+        textElement.style.textShadow = `
+            0 0 15px rgba(229, 9, 20, 0.8),
+            0 0 30px rgba(229, 9, 20, 0.5),
+            0 0 45px rgba(229, 9, 20, 0.3),
+            0 0 60px rgba(229, 9, 20, 0.1),
+            2px 2px 4px rgba(0, 0, 0, 0.8)
+        `;
+        textElement.style.filter = 'brightness(1.3) contrast(1.1)';
+        textElement.style.transform = 'scale(1)';
+        
+        // Final gentle particles
+        createParticles(container, 8, 'fade', 40);
+    }
+    
+    function createParticles(container, count, phase, maxRadius = 60) {
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                createSingleParticle(container, phase, maxRadius);
+            }, i * (phase === 'explosion' ? 20 : 80)); // Smoother particle spawning
+        }
+    }
+    
+    function createSingleParticle(container, phase, maxRadius = 60) {
+        const particle = document.createElement('div');
+        particle.className = `light-particle ${phase}-particle`;
+        
+        // Position particles in center-to-spread pattern
+        const rect = container.getBoundingClientRect();
+        const angle = Math.random() * 2 * Math.PI;
+        
+        // Start from center and gradually spread outward based on maxRadius
+        const radius = phase === 'explosion' ? 
+            maxRadius + Math.random() * 80 : 
+            Math.random() * maxRadius;
+            
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        
+        particle.style.left = x + 'px';
+        particle.style.top = y + 'px';
+        
+        // Set particle properties based on phase
+        const size = getParticleSize(phase);
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        
+        container.appendChild(particle);
+        
+        // Animate particle based on phase
+        animateParticle(particle, phase);
+        
+        // Remove particle after animation
+        const duration = getParticleDuration(phase);
+        setTimeout(() => {
+            if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+            }
+        }, duration);
+    }
+    
+    function getParticleSize(phase) {
+        switch (phase) {
+            case 'gentle': return 2 + Math.random() * 3;
+            case 'medium': return 3 + Math.random() * 4;
+            case 'intense': return 4 + Math.random() * 5;
+            case 'explosion': return 5 + Math.random() * 8;
+            case 'fade': return 2 + Math.random() * 4;
+            default: return 3;
+        }
+    }
+    
+    function getParticleDuration(phase) {
+        switch (phase) {
+            case 'gentle': return 2000;
+            case 'medium': return 2500;
+            case 'intense': return 3000;
+            case 'explosion': return 1500;
+            case 'fade': return 3000;
+            default: return 2000;
+        }
+    }
+    
+    function animateParticle(particle, phase) {
+        const randomDelay = Math.random() * 200;
+        
+        setTimeout(() => {
+            particle.style.opacity = '1';
+            
+            if (phase === 'explosion') {
+                // Explosive outward movement
+                const moveDistance = 40 + Math.random() * 60;
+                const currentX = parseFloat(particle.style.left);
+                const currentY = parseFloat(particle.style.top);
+                const angle = Math.random() * 2 * Math.PI;
+                
+                particle.style.transform = `translate(${Math.cos(angle) * moveDistance}px, ${Math.sin(angle) * moveDistance}px) scale(1.5)`;
+                
+                // Quick fade after explosion
+                setTimeout(() => {
+                    particle.style.opacity = '0';
+                    particle.style.transform += ' scale(0.5)';
+                }, 300);
+            } else {
+                // Gentle floating movement
+                const floatDistance = phase === 'intense' ? 30 : 20;
+                particle.style.transform = `translateY(-${floatDistance}px) scale(1.2)`;
+                
+                // Gradual fade
+                setTimeout(() => {
+                    particle.style.opacity = '0';
+                    particle.style.transform += ' scale(0.8)';
+                }, getParticleDuration(phase) * 0.6);
+            }
+        }, randomDelay);
+    }
+
+    // Logo particle effects and light shadow
+    function addLogoParticleEffect() {
+        const logoContainer = document.getElementById('logoContainer');
+        const logoImg = logoContainer.querySelector('img');
+        
+        // Make logo container relative for better particle positioning
+        logoContainer.style.position = 'relative';
+        
+        // Add smooth glow animation class
+        logoImg.classList.add('smooth-logo-glow');
+        
+        // Create smooth particle flow for logo
+        createSmoothLogoParticleFlow(logoContainer);
+    }
+
+    // Create continuous particle flow for logo during smooth animation
+    function createSmoothLogoParticleFlow(container) {
+        const logoParticleIntervals = [
+            { delay: 300, count: 8, phase: 'gentle' },
+            { delay: 800, count: 12, phase: 'medium' },
+            { delay: 1300, count: 16, phase: 'medium' },
+            { delay: 1800, count: 20, phase: 'intense' },
+            { delay: 2300, count: 24, phase: 'intense' }
+        ];
+
+        logoParticleIntervals.forEach(interval => {
+            setTimeout(() => {
+                createLogoParticles(container, interval.count, interval.phase);
+            }, interval.delay);
+        });
+    }
+    
+    function createLogoParticles(container, count, phase) {
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => {
+                createSingleLogoParticle(container, phase);
+            }, i * 60); // Smoother particle spawning
+        }
+    }
+    
+    function createSingleLogoParticle(container, phase) {
+        const particle = document.createElement('div');
+        particle.className = `logo-particle ${phase}-logo-particle`;
+        
+        // Position particles around the logo using transform for better performance
+        const angle = Math.random() * 2 * Math.PI;
+        const radius = 40 + Math.random() * 60;
+        const centerX = container.offsetWidth / 2;
+        const centerY = container.offsetHeight / 2;
+        
+        const x = centerX + Math.cos(angle) * radius;
+        const y = centerY + Math.sin(angle) * radius;
+        
+        particle.style.position = 'absolute';
+        particle.style.left = '50%';
+        particle.style.top = '50%';
+        particle.style.transform = `translate(-50%, -50%) translate(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px)`;
+        particle.style.pointerEvents = 'none';
+        particle.style.zIndex = '1';
+        
+        // Set particle properties with better performance
+        const size = 2 + Math.random() * 4;
+        particle.style.width = size + 'px';
+        particle.style.height = size + 'px';
+        particle.style.borderRadius = '50%';
+        particle.style.background = `radial-gradient(circle, rgba(229, 9, 20, 0.8), rgba(255, 255, 255, 0.4))`;
+        particle.style.boxShadow = `0 0 ${size * 2}px rgba(229, 9, 20, 0.6)`;
+        particle.style.opacity = '0';
+        particle.style.transition = 'all 3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        particle.style.willChange = 'transform, opacity';
+        
+        container.appendChild(particle);
+        
+        // Animate particle with smoother motion
+        setTimeout(() => {
+            particle.style.opacity = '1';
+            const floatDistance = 20 + Math.random() * 40;
+            const floatAngle = angle + (Math.random() - 0.5) * 0.5;
+            particle.style.transform = `translate(-50%, -50%) translate(${Math.cos(angle) * radius}px, ${Math.sin(angle) * radius}px) translateY(-${floatDistance}px) scale(1.5)`;
+            
+            // Fade out with smooth scaling
+            setTimeout(() => {
+                particle.style.opacity = '0';
+                particle.style.transform += ' scale(0.3)';
+            }, 2000);
+        }, Math.random() * 300);
+        
+        // Remove particle
+        setTimeout(() => {
+            if (particle.parentNode) {
+                particle.parentNode.removeChild(particle);
+            }
+        }, 3500);
+    }
+
+    // Also add subtle glow to header logo
+    function addHeaderLogoGlow() {
+        const headerLogo = document.querySelector('header img[alt="MovieIGuess Logo"]');
+        if (headerLogo) {
+            headerLogo.style.filter = `
+                drop-shadow(0 0 8px rgba(229, 9, 20, 0.4))
+                drop-shadow(0 0 16px rgba(229, 9, 20, 0.3))
+                brightness(1.1)
+            `;
+            headerLogo.style.transition = 'filter 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            headerLogo.style.willChange = 'filter';
+            
+            // Add hover effect with smoother transitions
+            headerLogo.addEventListener('mouseenter', () => {
+                headerLogo.style.filter = `
+                    drop-shadow(0 0 12px rgba(229, 9, 20, 0.6))
+                    drop-shadow(0 0 24px rgba(229, 9, 20, 0.4))
+                    drop-shadow(0 0 36px rgba(229, 9, 20, 0.3))
+                    brightness(1.2)
+                `;
+            });
+            
+            headerLogo.addEventListener('mouseleave', () => {
+                headerLogo.style.filter = `
+                    drop-shadow(0 0 8px rgba(229, 9, 20, 0.4))
+                    drop-shadow(0 0 16px rgba(229, 9, 20, 0.3))
+                    brightness(1.1)
+                `;
+            });
+        }
     }
 </script>
 
