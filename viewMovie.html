@@ -11,6 +11,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="mobile-web-app-capable" content="yes">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
     <!-- ANTI-FORCED-DARK-MODE SCRIPT - Must run before page load -->
     <script>
         // Detect and counteract forced dark mode at rendering engine level
@@ -101,6 +104,7 @@
     <link rel="stylesheet" href="netflix-style.css">
     <link rel="stylesheet" href="search.css">
     <link rel="stylesheet" href="toast.css">
+    <link rel="stylesheet" href="tv-support.css">
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
     <link rel="icon" href="src/assets/logo.png">
     <script>
@@ -1048,6 +1052,37 @@
             outline: 2px solid #E50914;
             outline-offset: 2px;
         }
+
+        /* Age Restriction Overlay Styling */
+        .age-restriction-card {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+        }
+
+        .age-restriction-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .age-restriction-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loading animation for trying alternative methods */
+        @keyframes trailerRetry {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        .trailer-retry-animation {
+            animation: trailerRetry 2s ease-in-out infinite;
+        }
     </style>
 
     <script>
@@ -1191,12 +1226,157 @@
             const trailerTitle = document.getElementById('trailerTitle');
             
             if (trailerIframe && trailerKey) {
-                // Set initial volume to 45% and quality to 1080p with additional quality parameters
-                trailerIframe.src = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&showinfo=0&enablejsapi=1&volume=45&vq=hd1080&hd=1&quality=hd1080`;
+                // Try multiple embed methods to bypass age restrictions
+                const embedUrls = [
+                    // Method 1: youtube-nocookie.com (often bypasses age restrictions)
+                    `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&rel=0&showinfo=0&enablejsapi=1&volume=45&vq=hd1080&hd=1&quality=hd1080&modestbranding=1&playsinline=1`,
+                    // Method 2: Standard YouTube with additional parameters
+                    `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&showinfo=0&enablejsapi=1&volume=45&vq=hd1080&hd=1&quality=hd1080&origin=${window.location.origin}&widget_referrer=${window.location.href}`,
+                    // Method 3: Minimal parameters
+                    `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&modestbranding=1&playsinline=1`
+                ];
+
+                let currentUrlIndex = 0;
+
+                function tryLoadTrailer(urlIndex = 0) {
+                    if (urlIndex >= embedUrls.length) {
+                        // All methods failed, show age restriction message
+                        showTrailerAgeRestrictionMessage(trailerKey, title);
+                        return;
+                    }
+
+                    console.log(`Trying trailer embed method ${urlIndex + 1}`);
+                    trailerIframe.src = embedUrls[urlIndex];
+
+                    // Set timeout to detect loading issues
+                    const loadTimeout = setTimeout(() => {
+                        console.log(`Method ${urlIndex + 1} may have failed, trying next...`);
+                        tryLoadTrailer(urlIndex + 1);
+                    }, 4000);
+
+                    // Clear timeout if iframe loads successfully
+                    trailerIframe.onload = () => {
+                        clearTimeout(loadTimeout);
+                        console.log(`Trailer loaded successfully with method ${urlIndex + 1}`);
+                    };
+
+                    trailerIframe.onerror = () => {
+                        clearTimeout(loadTimeout);
+                        console.log(`Method ${urlIndex + 1} failed, trying next...`);
+                        tryLoadTrailer(urlIndex + 1);
+                    };
+                }
+
                 if (trailerTitle) {
                     trailerTitle.textContent = title || 'Movie Trailer';
                 }
+
+                // Start trying embed methods
+                tryLoadTrailer(0);
                 openTrailerModal();
+            }
+        }
+
+        // Function to show age restriction message in trailer modal
+        function showTrailerAgeRestrictionMessage(trailerKey, title) {
+            const trailerIframe = document.getElementById('trailerIframe');
+            if (trailerIframe) {
+                trailerIframe.style.display = 'none';
+                
+                // Create age restriction message overlay
+                const trailerModal = document.getElementById('trailerModal');
+                let messageOverlay = document.getElementById('ageRestrictionOverlay');
+                
+                if (!messageOverlay) {
+                    messageOverlay = document.createElement('div');
+                    messageOverlay.id = 'ageRestrictionOverlay';
+                    messageOverlay.className = 'absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50';
+                    trailerModal.appendChild(messageOverlay);
+                }
+
+                messageOverlay.innerHTML = `
+                    <div class="text-center text-white p-8 max-w-md age-restriction-card rounded-2xl">
+                        <div class="mb-6">
+                            <i class="fa-solid fa-shield-halved text-red-500 text-6xl mb-4 drop-shadow-lg"></i>
+                            <h3 class="text-2xl font-bold mb-4 text-white">Age-Restricted Content</h3>
+                            <p class="text-gray-300 mb-2">This trailer may be age-restricted by YouTube and cannot be embedded.</p>
+                            <p class="text-sm text-gray-400">We tried multiple methods to load the content.</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button onclick="openTrailerInYouTube('${trailerKey}')" 
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center age-restriction-button">
+                                <i class="fa-brands fa-youtube mr-2 text-lg"></i>
+                                Watch on YouTube
+                            </button>
+                            
+                            <button onclick="copyTrailerURL('${trailerKey}')" 
+                                    class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center age-restriction-button">
+                                <i class="fa-solid fa-copy mr-2"></i>
+                                Copy YouTube Link
+                            </button>
+                            
+                            <button onclick="closeTrailerModal()" 
+                                    class="w-full bg-transparent border border-gray-500 hover:bg-gray-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors age-restriction-button">
+                                <i class="fa-solid fa-arrow-left mr-2"></i>
+                                Close
+                            </button>
+                        </div>
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-600">
+                            <p class="text-xs text-gray-500">
+                                <i class="fa-solid fa-info-circle mr-1"></i>
+                                Age restrictions are imposed by YouTube's content policy
+                            </p>
+                        </div>
+                    </div>
+                `;
+                messageOverlay.style.display = 'flex';
+            }
+        }
+
+        // Function to open trailer directly in YouTube
+        function openTrailerInYouTube(trailerKey) {
+            window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank');
+        }
+
+        // Function to copy trailer URL to clipboard
+        function copyTrailerURL(trailerKey) {
+            const url = `https://www.youtube.com/watch?v=${trailerKey}`;
+            navigator.clipboard.writeText(url).then(() => {
+                showSuccess('YouTube link copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = url;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showSuccess('YouTube link copied to clipboard!');
+            });
+        }
+
+        // Enhanced close trailer modal function
+        function closeTrailerModal() {
+            const trailerModal = document.getElementById('trailerModal');
+            const trailerIframe = document.getElementById('trailerIframe');
+            const messageOverlay = document.getElementById('ageRestrictionOverlay');
+            
+            if (trailerModal) {
+                trailerModal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+                
+                // Stop the video and clean up
+                if (trailerIframe) {
+                    trailerIframe.src = '';
+                    trailerIframe.style.display = 'block'; // Reset for next use
+                }
+                
+                // Remove age restriction overlay if it exists
+                if (messageOverlay) {
+                    messageOverlay.remove();
+                }
             }
         }
     </script>
@@ -1212,5 +1392,8 @@
             });
         }
     </script>
+    
+    <!-- TV Support Script -->
+    <script src="src/tv-support.js"></script>
 </body>
 </html>

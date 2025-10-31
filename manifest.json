@@ -1,0 +1,76 @@
+{
+  "name": "MovieIGuess - Stream Movies & TV Shows",
+  "short_name": "MovieIGuess",
+  "description": "Your ultimate destination for discovering and streaming amazing movies and TV shows",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#E50914",
+  "background_color": "#000000",
+  "categories": ["entertainment", "lifestyle", "movies", "tv"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "src/assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "src/assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "src/assets/tv-screenshot-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "MovieIGuess on TV - Home Screen"
+    },
+    {
+      "src": "src/assets/mobile-screenshot.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "MovieIGuess on Mobile"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "display_override": ["fullscreen", "standalone"],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "shortcuts": [
+    {
+      "name": "Home",
+      "short_name": "Home",
+      "description": "Go to the home page",
+      "url": "/",
+      "icons": [
+        {
+          "src": "src/assets/logo.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "short_name": "Search",
+      "description": "Search for movies and TV shows",
+      "url": "/?search=true",
+      "icons": [
+        {
+          "src": "src/assets/search-icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

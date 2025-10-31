@@ -11,6 +11,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="mobile-web-app-capable" content="yes">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
     <!-- ANTI-FORCED-DARK-MODE SCRIPT - Must run before page load -->
     <script>
         (function() {
@@ -79,6 +82,7 @@
     <link rel="stylesheet" href="search.css">
     <link rel="stylesheet" href="watch.css">
     <link rel="stylesheet" href="toast.css">
+    <link rel="stylesheet" href="tv-support.css">
     <link rel="icon" href="src/assets/logo.png">
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
     <script>
@@ -647,5 +651,8 @@
             });
         }
     </script>
+    
+    <!-- TV Support Script -->
+    <script src="src/tv-support.js"></script>
 </body>
 </html>

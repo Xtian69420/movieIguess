@@ -11,6 +11,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="mobile-web-app-capable" content="yes">
     
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
     <!-- ANTI-FORCED-DARK-MODE SCRIPT - Must run before page load -->
     <script>
         // Detect and counteract forced dark mode at rendering engine level
@@ -133,6 +136,7 @@
     <link rel="stylesheet" href="netflix-style.css">
     <link rel="stylesheet" href="search.css">
     <link rel="stylesheet" href="toast.css">
+    <link rel="stylesheet" href="tv-support.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
     <link rel="icon" href="src/assets/logo.png">
@@ -739,6 +743,83 @@
         .smooth-logo-glow {
             animation: logoGlowBuildUp 2.5s ease-in-out forwards;
         }
+
+        /* Age Restriction Overlay Styling */
+        #trailerErrorOverlay {
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+
+        .age-restriction-card {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .age-restriction-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(229, 9, 20, 0.1), transparent);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            50% { left: 0%; }
+            100% { left: 100%; }
+        }
+
+        .age-restriction-button {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .age-restriction-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        .age-restriction-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s;
+        }
+
+        .age-restriction-button:hover::before {
+            left: 100%;
+        }
+
+        .age-restriction-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loading animation for trying alternative methods */
+        @keyframes trailerRetry {
+            0% { opacity: 0.5; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 0.5; transform: scale(0.95); }
+        }
+
+        .trailer-retry-animation {
+            animation: trailerRetry 2s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="bg-netflix-black text-white min-h-screen">
@@ -1211,51 +1292,237 @@
             const muteBtnDesktop = document.getElementById('muteBtnDesktop');
             
             if (modalBackdrop) {
-                // Replace backdrop image with YouTube iframe (no controls, autoplay, muted initially)
+                // Create iframe with age-restriction bypass methods
+                createTrailerIframe(currentMovieTrailer.key, modalBackdrop);
+        }
+
+        // Function to create trailer iframe with age-restriction bypass methods
+        function createTrailerIframe(trailerKey, modalBackdrop) {
+            const embedOptions = [
+                // Method 1: youtube-nocookie.com (often bypasses age restrictions)
+                {
+                    url: `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1&cc_load_policy=0&playsinline=1&widget_referrer=https%3A%2F%2Fwww.netflix.com`,
+                    name: 'YouTube NoCache'
+                },
+                // Method 2: Standard YouTube with additional bypass parameters for 16+ content
+                {
+                    url: `https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1&cc_load_policy=0&playsinline=1&widget_referrer=https%3A%2F%2Fwww.netflix.com&origin=https%3A%2F%2Fwww.netflix.com&host=https%3A%2F%2Fwww.netflix.com`,
+                    name: 'YouTube Standard'
+                },
+                // Method 3: Embedded with minimal restrictions and age bypass
+                {
+                    url: `https://www.youtube.com/embed/${trailerKey}?autoplay=1&mute=1&rel=0&modestbranding=1&playsinline=1&start=1`,
+                    name: 'YouTube Minimal'
+                },
+                // Method 4: Additional bypass attempt for mature content (16+)
+                {
+                    url: `https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=1&rel=0&start=1&end=120&modestbranding=1&cc_load_policy=0`,
+                    name: 'YouTube NoCache Minimal'
+                }
+            ];
+
+            let currentMethodIndex = 0;
+            
+            function tryEmbedMethod(methodIndex = 0) {
+                if (methodIndex >= embedOptions.length) {
+                    // All methods failed, show error message
+                    showAgeRestrictionMessage(modalBackdrop, trailerKey);
+                    return;
+                }
+
+                const method = embedOptions[methodIndex];
+                console.log(`🎬 Trying embed method ${methodIndex + 1}/4: ${method.name} for trailer: ${trailerKey}`);
+                
+                // Show loading overlay for methods after the first
+                if (methodIndex > 0) {
+                    const existingBackdrop = document.getElementById('modalBackdrop');
+                    if (existingBackdrop) {
+                        const overlay = existingBackdrop.querySelector('#trailerErrorOverlay');
+                        if (overlay) {
+                            overlay.classList.remove('hidden');
+                        }
+                    }
+                }
+
                 modalBackdrop.outerHTML = `
                     <div id="modalBackdrop" class="w-full h-full relative overflow-hidden">
                         <iframe 
                             id="trailerIframe"
-                            src="https://www.youtube.com/embed/${currentMovieTrailer.key}?autoplay=1&mute=1&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0&disablekb=1&enablejsapi=1&cc_load_policy=0&playsinline=1&widget_referrer=https%3A%2F%2Fwww.netflix.com"
+                            src="${method.url}"
                             class="absolute inset-0 w-full h-full"
                             style="width: 170%; height: 170%; left: -35%; top: -35%; object-fit: cover;"
                             allowfullscreen
-                            allow="autoplay; encrypted-media">
+                            allow="autoplay; encrypted-media"
+                            onload="handleIframeLoad(this)"
+                            onerror="handleIframeError(${methodIndex + 1})">
                         </iframe>
+                        <div id="trailerErrorOverlay" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center hidden">
+                            <div class="text-white text-center p-6 age-restriction-card rounded-xl trailer-retry-animation">
+                                <i class="fa-solid fa-shield-halved text-yellow-400 text-4xl mb-3"></i>
+                                <h4 class="text-lg font-semibold mb-2">Loading Trailer...</h4>
+                                <p class="text-sm mb-2 text-gray-300">Trying method ${methodIndex + 1} of ${embedOptions.length}</p>
+                                <p class="text-xs mb-3 text-gray-400">Attempting to bypass age restrictions (16+)</p>
+                                <div class="flex items-center justify-center space-x-1">
+                                    <div class="w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+                                    <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay: 0.2s"></div>
+                                    <div class="w-2 h-2 bg-red-500 rounded-full animate-ping" style="animation-delay: 0.4s"></div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 `;
-                
-                // Update mobile buttons
-                if (playTrailerBtn) {
-                    playTrailerBtn.innerHTML = `
-                        <i class="fa-solid fa-stop mr-1 lg:mr-2 text-xs lg:text-sm"></i>
-                        <span class="hidden sm:inline">Stop Trailer</span>
-                        <span class="sm:hidden">Stop</span>
-                    `;
-                    playTrailerBtn.onclick = stopTrailer;
-                }
-                
-                // Update desktop buttons
-                if (playTrailerBtnDesktop) {
-                    playTrailerBtnDesktop.innerHTML = `
-                        <i class="fa-solid fa-stop mr-2 text-sm"></i>
-                        Stop Trailer
-                    `;
-                    playTrailerBtnDesktop.onclick = stopTrailer;
-                }
-                
-                // Show mute buttons
-                if (muteBtn) {
-                    muteBtn.classList.remove('hidden');
-                    muteBtn.classList.add('flex');
-                    muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark text-xs lg:text-sm"></i>';
-                }
-                
-                if (muteBtnDesktop) {
-                    muteBtnDesktop.classList.remove('hidden');
-                    muteBtnDesktop.classList.add('flex');
-                    muteBtnDesktop.innerHTML = '<i class="fa-solid fa-volume-xmark text-sm"></i>';
-                }
+
+                // Store current method for error handling
+                window.currentTrailerMethodIndex = methodIndex;
+                window.tryNextTrailerMethod = () => tryEmbedMethod(methodIndex + 1);
+
+                // Set timeout to detect if iframe fails to load properly
+                setTimeout(() => {
+                    const iframe = document.getElementById('trailerIframe');
+                    if (iframe) {
+                        // Check if iframe is accessible and not blocked
+                        try {
+                            // This will throw an error if the iframe is blocked
+                            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                            if (!iframeDoc || iframeDoc.documentElement.innerHTML === '') {
+                                console.log('Iframe appears to be blocked or empty, trying next method');
+                                tryEmbedMethod(methodIndex + 1);
+                            }
+                        } catch (e) {
+                            // Cross-origin restrictions mean the video might be loading
+                            console.log('Cross-origin detected (this is normal for YouTube embeds)');
+                        }
+                    }
+                }, 3000);
+            }
+
+            // Start with the first method
+            tryEmbedMethod(0);
+            
+            // Update button states
+            updateTrailerButtons();
+        }
+
+        // Function to handle iframe load success
+        function handleIframeLoad(iframe) {
+            console.log('Iframe loaded successfully');
+            const errorOverlay = document.getElementById('trailerErrorOverlay');
+            if (errorOverlay) {
+                errorOverlay.classList.add('hidden');
+            }
+        }
+
+        // Function to handle iframe errors
+        function handleIframeError(nextMethodIndex) {
+            console.log('Iframe failed to load, trying next method');
+            if (window.tryNextTrailerMethod) {
+                window.tryNextTrailerMethod();
+            }
+        }
+
+        // Function to show age restriction message with options
+        function showAgeRestrictionMessage(modalBackdrop, trailerKey) {
+            modalBackdrop.outerHTML = `
+                <div id="modalBackdrop" class="w-full h-full relative overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                    <div class="text-center text-white p-8 max-w-md age-restriction-card rounded-2xl">
+                        <div class="mb-6">
+                            <i class="fa-solid fa-shield-halved text-red-500 text-6xl mb-4 drop-shadow-lg"></i>
+                            <h3 class="text-2xl font-bold mb-4 text-white">Age-Restricted Content</h3>
+                            <p class="text-gray-300 mb-2">This trailer is age-restricted (16+ or 18+) by YouTube and cannot be embedded.</p>
+                            <p class="text-sm text-gray-400">We tried 4 different bypass methods to load the content.</p>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <button onclick="openYouTubeDirectly('${trailerKey}')" 
+                                    class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center age-restriction-button">
+                                <i class="fa-brands fa-youtube mr-2 text-lg"></i>
+                                Watch on YouTube
+                            </button>
+                            
+                            <button onclick="copyTrailerLink('${trailerKey}')" 
+                                    class="w-full bg-gray-600 hover:bg-gray-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors flex items-center justify-center age-restriction-button">
+                                <i class="fa-solid fa-copy mr-2"></i>
+                                Copy YouTube Link
+                            </button>
+                            
+                            <button onclick="stopTrailer()" 
+                                    class="w-full bg-transparent border border-gray-500 hover:bg-gray-700 text-white py-2 px-6 rounded-lg font-semibold transition-colors age-restriction-button">
+                                <i class="fa-solid fa-arrow-left mr-2"></i>
+                                Go Back
+                            </button>
+                        </div>
+                        
+                        <div class="mt-6 pt-4 border-t border-gray-600">
+                            <p class="text-xs text-gray-500">
+                                <i class="fa-solid fa-info-circle mr-1"></i>
+                                Age restrictions are imposed by YouTube for mature content (16+/18+)
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Function to open YouTube directly in new tab
+        function openYouTubeDirectly(trailerKey) {
+            window.open(`https://www.youtube.com/watch?v=${trailerKey}`, '_blank');
+        }
+
+        // Function to copy YouTube link to clipboard
+        function copyTrailerLink(trailerKey) {
+            const link = `https://www.youtube.com/watch?v=${trailerKey}`;
+            navigator.clipboard.writeText(link).then(() => {
+                showDevToast('YouTube link copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = link;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showDevToast('YouTube link copied to clipboard!');
+            });
+        }
+
+        // Function to update trailer button states
+        function updateTrailerButtons() {
+            const playTrailerBtn = document.getElementById('playTrailerBtn');
+            const playTrailerBtnDesktop = document.getElementById('playTrailerBtnDesktop');
+            const muteBtn = document.getElementById('muteBtn');
+            const muteBtnDesktop = document.getElementById('muteBtnDesktop');
+            
+            // Update mobile buttons
+            if (playTrailerBtn) {
+                playTrailerBtn.innerHTML = `
+                    <i class="fa-solid fa-stop mr-1 lg:mr-2 text-xs lg:text-sm"></i>
+                    <span class="hidden sm:inline">Stop Trailer</span>
+                    <span class="sm:hidden">Stop</span>
+                `;
+                playTrailerBtn.onclick = stopTrailer;
+            }
+            
+            // Update desktop buttons
+            if (playTrailerBtnDesktop) {
+                playTrailerBtnDesktop.innerHTML = `
+                    <i class="fa-solid fa-stop mr-2 text-sm"></i>
+                    Stop Trailer
+                `;
+                playTrailerBtnDesktop.onclick = stopTrailer;
+            }
+            
+            // Show mute buttons
+            if (muteBtn) {
+                muteBtn.classList.remove('hidden');
+                muteBtn.classList.add('flex');
+                muteBtn.innerHTML = '<i class="fa-solid fa-volume-xmark text-xs lg:text-sm"></i>';
+            }
+            
+            if (muteBtnDesktop) {
+                muteBtnDesktop.classList.remove('hidden');
+                muteBtnDesktop.classList.add('flex');
+                muteBtnDesktop.innerHTML = '<i class="fa-solid fa-volume-xmark text-sm"></i>';
+            }
             }
         }
 
@@ -2061,6 +2328,70 @@
             });
         }
     }
+</script>
+
+<!-- TV Support Script -->
+<script src="src/tv-support.js"></script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+    // Register service worker for PWA functionality
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js')
+                .then((registration) => {
+                    console.log('✅ ServiceWorker registered successfully:', registration.scope);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        const newWorker = registration.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('🔄 New content available, refresh to update');
+                                // Show update notification to user
+                                if (typeof showInfo === 'function') {
+                                    showInfo('New version available! Refresh to update.', {
+                                        title: '🔄 Update Available',
+                                        duration: 8000
+                                    });
+                                }
+                            }
+                        });
+                    });
+                })
+                .catch((error) => {
+                    console.log('❌ ServiceWorker registration failed:', error);
+                });
+        });
+    }
+    
+    // PWA install prompt
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later
+        deferredPrompt = e;
+        
+        // Show install button or notification
+        console.log('📱 PWA install prompt available');
+        
+        // You can show a custom install button here
+        if (typeof showInfo === 'function') {
+            showInfo('Install MovieIGuess app for the best TV experience!', {
+                title: '📺 Install App',
+                duration: 6000
+            });
+        }
+    });
+    
+    // Track PWA install
+    window.addEventListener('appinstalled', (evt) => {
+        console.log('📱 MovieIGuess PWA was installed');
+        if (typeof showSuccess === 'function') {
+            showSuccess('MovieIGuess app installed successfully!');
+        }
+    });
 </script>
 
 </body>
