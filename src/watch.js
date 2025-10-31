@@ -81,26 +81,61 @@ async function WatchMovie(movieId) {
 
         // Set page and hero backgrounds
         let heroStyleAttr = '';
+        
+        // Use backdrop for page background
         if (movie.backdrop_path) {
-            const bgUrl = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
-            document.querySelector('.background').style.backgroundImage = `url(${bgUrl})`;
-            heroStyleAttr = `style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.85) 100%), url(${bgUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;"`;
+            const backdropUrl = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
+            document.querySelector('.background').style.backgroundImage = `url(${backdropUrl})`;
+        }
+        
+        // Use poster for hero background with professional styling
+        if (movie.poster_path) {
+            const posterUrl = `https://image.tmdb.org/t/p/w780${movie.poster_path}`;
+            heroStyleAttr = `style="
+                background: 
+                    linear-gradient(135deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.9) 100%),
+                    linear-gradient(45deg, rgba(229,9,20,0.05) 0%, transparent 50%),
+                    url(${posterUrl});
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-attachment: local;
+                border-radius: 16px;
+                border: 1px solid rgba(229,9,20,0.2);
+                box-shadow: 
+                    0 20px 40px rgba(0,0,0,0.6),
+                    0 0 0 1px rgba(255,255,255,0.1),
+                    inset 0 1px 0 rgba(255,255,255,0.1);
+                backdrop-filter: blur(1px);
+                position: relative;
+                overflow: hidden;
+            "`;
+        } else {
+            // Fallback with professional gradient
+            heroStyleAttr = `style="
+                background: linear-gradient(135deg, rgba(20,20,20,0.95) 0%, rgba(0,0,0,0.9) 100%);
+                border-radius: 16px;
+                border: 1px solid rgba(229,9,20,0.3);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            "`;
         }
 
         hideLoading();
         document.querySelector('.container').innerHTML = `
             <div class="watch-hero" ${heroStyleAttr}>
-                <div class="p-8">
-                    <h1 class="watch-title">${movie.title}</h1>
-                    ${movie.tagline ? `<p class="watch-tagline">${movie.tagline}</p>` : ''}
-                    
-                    <div class="flex items-center space-x-6 mb-6">
-                        <div class="flex items-center text-yellow-400">
-                            <i class="fa-solid fa-star mr-2"></i>
-                            <span class="text-white font-semibold">${rating}</span>
+                <div class="p-8 flex items-end justify-end min-h-[280px]">
+                    <div class="text-right max-w-2xl">
+                        <h1 class="watch-title">${movie.title}</h1>
+                        ${movie.tagline ? `<p class="watch-tagline text-right">${movie.tagline}</p>` : ''}
+                        
+                        <div class="flex items-center justify-end space-x-6 mb-6">
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fa-solid fa-star mr-2"></i>
+                                <span class="text-white font-semibold">${rating}</span>
+                            </div>
+                            <span class="text-gray-300">${releaseYear}</span>
+                            ${movie.runtime ? `<span class="text-gray-300">${movie.runtime} min</span>` : ''}
                         </div>
-                        <span class="text-gray-300">${releaseYear}</span>
-                        ${movie.runtime ? `<span class="text-gray-300">${movie.runtime} min</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -200,10 +235,43 @@ async function WatchTV(seriesId) {
 
         // Set page and hero backgrounds
         let heroStyleAttr = '';
+        
+        // Use backdrop for page background
         if (series.backdrop_path) {
-            const bgUrl = `https://image.tmdb.org/t/p/original${series.backdrop_path}`;
-            document.querySelector('.background').style.backgroundImage = `url(${bgUrl})`;
-            heroStyleAttr = `style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.85) 100%), url(${bgUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;"`;
+            const backdropUrl = `https://image.tmdb.org/t/p/original${series.backdrop_path}`;
+            document.querySelector('.background').style.backgroundImage = `url(${backdropUrl})`;
+        }
+        
+        // Use poster for hero background with professional styling
+        if (series.poster_path) {
+            const posterUrl = `https://image.tmdb.org/t/p/w780${series.poster_path}`;
+            heroStyleAttr = `style="
+                background: 
+                    linear-gradient(135deg, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.75) 40%, rgba(0,0,0,0.9) 100%),
+                    linear-gradient(45deg, rgba(229,9,20,0.05) 0%, transparent 50%),
+                    url(${posterUrl});
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
+                background-attachment: local;
+                border-radius: 16px;
+                border: 1px solid rgba(229,9,20,0.2);
+                box-shadow: 
+                    0 20px 40px rgba(0,0,0,0.6),
+                    0 0 0 1px rgba(255,255,255,0.1),
+                    inset 0 1px 0 rgba(255,255,255,0.1);
+                backdrop-filter: blur(1px);
+                position: relative;
+                overflow: hidden;
+            "`;
+        } else {
+            // Fallback with professional gradient
+            heroStyleAttr = `style="
+                background: linear-gradient(135deg, rgba(20,20,20,0.95) 0%, rgba(0,0,0,0.9) 100%);
+                border-radius: 16px;
+                border: 1px solid rgba(229,9,20,0.3);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            "`;
         }
 
         let seasonButtonsHTML = "";
@@ -216,18 +284,20 @@ async function WatchTV(seriesId) {
         hideLoading();
         document.querySelector('.container').innerHTML = `
             <div class="watch-hero" ${heroStyleAttr}>
-                <div class="p-8">
-                    <h1 class="watch-title">${series.name}</h1>
-                    ${series.tagline ? `<p class="watch-tagline">${series.tagline}</p>` : ''}
-                    
-                    <div class="flex items-center space-x-6 mb-6">
-                        <div class="flex items-center text-yellow-400">
-                            <i class="fa-solid fa-star mr-2"></i>
-                            <span class="text-white font-semibold">${rating}</span>
+                <div class="p-8 flex items-end justify-end min-h-[280px]">
+                    <div class="text-right max-w-2xl">
+                        <h1 class="watch-title">${series.name}</h1>
+                        ${series.tagline ? `<p class="watch-tagline text-right">${series.tagline}</p>` : ''}
+                        
+                        <div class="flex items-center justify-end space-x-6 mb-6">
+                            <div class="flex items-center text-yellow-400">
+                                <i class="fa-solid fa-star mr-2"></i>
+                                <span class="text-white font-semibold">${rating}</span>
+                            </div>
+                            <span class="text-gray-300">${firstAirYear}</span>
+                            <span class="text-gray-300">${series.number_of_seasons} Season${series.number_of_seasons !== 1 ? 's' : ''}</span>
+                            <span class="text-gray-300">${series.number_of_episodes} Episodes</span>
                         </div>
-                        <span class="text-gray-300">${firstAirYear}</span>
-                        <span class="text-gray-300">${series.number_of_seasons} Season${series.number_of_seasons !== 1 ? 's' : ''}</span>
-                        <span class="text-gray-300">${series.number_of_episodes} Episodes</span>
                     </div>
                 </div>
             </div>

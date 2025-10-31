@@ -1453,6 +1453,59 @@ body {
         gap: 1rem;
         margin: 1rem auto;
         padding: 0 0.5rem;
+        position: relative;
+    }
+    
+    /* Add smooth gradient transition between video and description */
+    .video-sidebar-layout::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(0, 0, 0, 0.1) 20%,
+            rgba(0, 0, 0, 0.3) 50%,
+            rgba(0, 0, 0, 0.6) 80%,
+            rgba(0, 0, 0, 0.9) 100%
+        );
+        pointer-events: none;
+        z-index: 10;
+        border-radius: 0 0 16px 16px;
+    }
+    
+    /* Ensure video section has proper background */
+    .video-section {
+        background: linear-gradient(
+            135deg,
+            rgba(20, 20, 20, 0.95) 0%,
+            rgba(0, 0, 0, 0.9) 100%
+        );
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    /* Movie details section with smooth integration */
+    .movie-details {
+        margin-top: -30px; /* Overlap with gradient */
+        padding-top: 50px !important;
+        position: relative;
+        z-index: 5;
+        background: linear-gradient(
+            180deg,
+            transparent 0%,
+            rgba(26, 26, 26, 0.3) 20%,
+            rgba(26, 26, 26, 0.8) 40%,
+            rgba(26, 26, 26, 0.95) 100%
+        );
+        backdrop-filter: blur(10px);
+        border-radius: 16px 16px 0 0;
     }
     
     .tv-sidebar {

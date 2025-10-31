@@ -959,14 +959,14 @@
                                     </span>
                                     <span id="modalYear" class="text-gray-300"></span>
                                     <span id="modalRuntime" class="text-gray-300"></span>
-                                    <div class="flex items-center space-x-2 ml-2 lg:hidden">
-                                        <button id="playTrailerBtn" onclick="playTrailer()" class="bg-netflix-red hover:bg-red-700 text-white px-3 py-2 lg:px-4 lg:py-2 rounded-lg font-semibold transition-colors flex items-center text-xs lg:text-base">
-                                            <i class="fa-solid fa-play mr-1 lg:mr-2 text-xs lg:text-sm"></i>
-                                            <span class="hidden sm:inline">Play Trailer</span>
-                                            <span class="sm:hidden">Play Trailer</span>
+                                    <!-- Mobile Play Trailer button - inline with metadata -->
+                                    <div class="flex items-center space-x-2 lg:hidden">
+                                        <button id="playTrailerBtn" onclick="playTrailer()" class="bg-netflix-red hover:bg-red-700 text-white px-3 py-1.5 rounded font-semibold transition-colors flex items-center text-xs whitespace-nowrap">
+                                            <i class="fa-solid fa-play mr-1 text-xs"></i>
+                                            <span>Play Trailer</span>
                                         </button>
-                                        <button id="muteBtn" onclick="toggleMute()" class="w-8 h-8 lg:w-10 lg:h-10 bg-gray-900/70 hover:bg-gray-800/70 text-white rounded-full font-semibold transition-colors flex items-center justify-center border-2 border-white/20 hidden">
-                                            <i class="fa-solid fa-volume-xmark text-xs lg:text-sm"></i>
+                                        <button id="muteBtn" onclick="toggleMute()" class="w-7 h-7 bg-gray-900/70 hover:bg-gray-800/70 text-white rounded-full font-semibold transition-colors flex items-center justify-center border-2 border-white/20 hidden">
+                                            <i class="fa-solid fa-volume-xmark text-xs"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -1529,42 +1529,6 @@
 
     /* Mobile Modal Button Improvements - Under 500px */
     @media (max-width: 500px) {
-        /* Modal button container */
-        .modal-content .flex.space-x-4 {
-            flex-direction: column;
-            gap: 12px;
-            align-items: stretch;
-        }
-        
-        /* Modal buttons */
-        .modal-content .netflix-button {
-            width: 100%;
-            padding: 14px 20px;
-            font-size: 14px;
-            justify-content: center;
-            text-align: center;
-            margin: 0 !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-        }
-        
-        /* Button icons */
-        .modal-content .netflix-button i {
-            margin-right: 8px;
-            margin-left: 0;
-        }
-        
-        /* Remove any default margins on mobile buttons */
-        .modal-content .netflix-button {
-            margin: 0;
-        }
-        
-        /* Override TailwindCSS space-x margins on mobile */
-        .modal-content .flex.space-x-4 > * {
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-        }
-        
         /* Modal content padding adjustments */
         .modal-content .p-6.lg\\:p-8 {
             padding: 16px;
@@ -1582,11 +1546,16 @@
             margin: 0 auto;
         }
         
-        /* Action buttons section */
+        /* Action buttons section at bottom only */
         .modal-content .flex.space-x-4.pt-4 {
             padding-top: 20px;
             margin-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Keep header buttons inline with metadata */
+        .modal-content .flex.items-center.flex-wrap .flex.items-center.space-x-2 {
+            margin-left: 0;
         }
     }
 </style>
