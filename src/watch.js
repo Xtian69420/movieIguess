@@ -20,15 +20,42 @@ const servers = [
 ];
 
 if (type === "movie" && movieId) {
+    console.log("Loading movie with ID:", movieId);
     WatchMovie(movieId);
 } else if (type === "tv" && seriesId) {
+    console.log("Loading TV series with ID:", seriesId);
     WatchTV(seriesId);
+} else if (type === "tv" && movieId && !seriesId) {
+    console.warn("TV show detected but using movieId parameter. Attempting to load as TV series.");
+    WatchTV(movieId);
 } else {
-    document.querySelector('.container').innerHTML = `<p>Error: Invalid or missing ID.</p>`;
+    console.error("Invalid parameters - Type:", type, "MovieID:", movieId, "SeriesID:", seriesId);
+    showError();
+}
+
+// Helper functions for loading states
+function showLoading() {
+    document.getElementById('loading').classList.remove('hidden');
+    document.querySelector('.container').classList.add('hidden');
+    document.getElementById('error').classList.add('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loading').classList.add('hidden');
+    document.querySelector('.container').classList.remove('hidden');
+}
+
+function showError() {
+    document.getElementById('loading').classList.add('hidden');
+    document.querySelector('.container').classList.add('hidden');
+    document.getElementById('error').classList.remove('hidden');
 }
 
 async function WatchMovie(movieId) {
     console.log("Fetching Movie:", movieId);
+    
+    // Show loading and hide container initially
+    showLoading();
 
     let embedUrl;
 
@@ -48,40 +75,118 @@ async function WatchMovie(movieId) {
 
         const movie = await response.json();
         const genres = movie.genres?.map(genre => genre.name).join(', ') || 'N/A';
-        const homepage = movie.homepage ? `<a href="${movie.homepage}" target="_blank">${movie.homepage}</a>` : "No official website";
+        const homepage = movie.homepage ? `<a href="${movie.homepage}" target="_blank" rel="noopener">${movie.homepage}</a>` : "No official website";
+        const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'N/A';
+        const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
 
+        // Set page and hero backgrounds
+        let heroStyleAttr = '';
+        if (movie.backdrop_path) {
+            const bgUrl = `https://image.tmdb.org/t/p/original${movie.backdrop_path}`;
+            document.querySelector('.background').style.backgroundImage = `url(${bgUrl})`;
+            heroStyleAttr = `style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.85) 100%), url(${bgUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;"`;
+        }
+
+        hideLoading();
         document.querySelector('.container').innerHTML = `
-            <h1>${movie.title}</h1>
-            <p><em>${movie.tagline || "No tagline available"}</em></p>
-            <div class="video-container">
-                <iframe id="video-player" src="${embedUrl}" width="100%" height="100%" frameborder="0" allowfullscreen scrolling="no"></iframe>
+            <div class="watch-hero" ${heroStyleAttr}>
+                <div class="p-8">
+                    <h1 class="watch-title">${movie.title}</h1>
+                    ${movie.tagline ? `<p class="watch-tagline">${movie.tagline}</p>` : ''}
+                    
+                    <div class="flex items-center space-x-6 mb-6">
+                        <div class="flex items-center text-yellow-400">
+                            <i class="fa-solid fa-star mr-2"></i>
+                            <span class="text-white font-semibold">${rating}</span>
+                        </div>
+                        <span class="text-gray-300">${releaseYear}</span>
+                        ${movie.runtime ? `<span class="text-gray-300">${movie.runtime} min</span>` : ''}
+                    </div>
+                </div>
             </div>
-            <div class="server-selection">
-                <h3>Choose a Server:</h3>
-                ${servers.map((server, index) => `
-                    <button class="${server.url === currentServerUrl ? 'active' : ''}" 
-                            onclick="changeServer('${server.url}', 'movie/${movieId}', ${index}, 'movie')">
-                        ${server.name}
-                    </button>
-                `).join(' ')}                
+            
+            <!-- Video and Sidebar Layout for Movies -->
+            <div class="video-sidebar-layout movie-content-wrapper">
+                <div class="video-section">
+                    <div class="video-container">
+                        <iframe id="video-player" src="${embedUrl}" allowfullscreen></iframe>
+                    </div>
+                    
+                    <div class="server-selection">
+                        <h3>Choose Server</h3>
+                        <div class="server-grid">
+                            ${servers.map((server, index) => `
+                                <button class="server-btn ${server.url === currentServerUrl ? 'active' : ''}" 
+                                        onclick="changeServer('${server.url}', 'movie/${movieId}', ${index}, 'movie')">
+                                    ${server.name}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Similar Movies Sidebar -->
+                <div class="tv-sidebar movie-sidebar desktop-only">
+                    <div class="sidebar-header">
+                        <h3>🎬 Similar Movies</h3>
+                    </div>
+                    <div id="similar-movies-sidebar" class="episodes-sidebar">
+                        <div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.7);">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-netflix-red mx-auto mb-2"></div>
+                            <p>Loading similar movies...</p>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
             <div class="movie-details">
-                <p><strong>Overview:</strong> ${movie.overview || "No overview available."}</p>
-                <p><strong>Release Date:</strong> ${movie.release_date || "N/A"}</p>
-                <p><strong>Rating:</strong> ${movie.vote_average} / 10 (${movie.vote_count} votes)</p>
-                <p><strong>Genres:</strong> ${genres}</p>
-                <p><strong>Runtime:</strong> ${movie.runtime} minutes</p>
-                <p><strong>Homepage:</strong> ${homepage}</p>
+                <div class="details-grid">
+                    <div>
+                        <div class="detail-item">
+                            <div class="detail-label">Overview</div>
+                            <div class="detail-value">${movie.overview || "No overview available."}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Genres</div>
+                            <div class="detail-value">${genres}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Release Date</div>
+                            <div class="detail-value">${movie.release_date || "N/A"}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="detail-item">
+                            <div class="detail-label">Rating</div>
+                            <div class="detail-value">${rating} / 10 (${movie.vote_count?.toLocaleString() || 0} votes)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Runtime</div>
+                            <div class="detail-value">${movie.runtime ? `${movie.runtime} minutes` : 'N/A'}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Homepage</div>
+                            <div class="detail-value">${homepage}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
+        
+        // Fetch and display similar movies
+        fetchSimilarMovies(movieId);
     } catch (error) {
         console.error("Error fetching movie:", error);
-        document.querySelector('.container').innerHTML = `<p>Error loading movie details.</p>`;
+        hideLoading();
+        showError();
     }
 }
 
 async function WatchTV(seriesId) {
     console.log("Fetching TV Series:", seriesId);
+    
+    // Show loading and hide container initially
+    showLoading();
 
     try {
         const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}?api_key=${API_KEY}`);
@@ -89,49 +194,202 @@ async function WatchTV(seriesId) {
 
         const series = await response.json();
         const genres = series.genres?.map(genre => genre.name).join(', ') || 'N/A';
-        const homepage = series.homepage ? `<a href="${series.homepage}" target="_blank">${series.homepage}</a>` : "No official website";
+        const homepage = series.homepage ? `<a href="${series.homepage}" target="_blank" rel="noopener">${series.homepage}</a>` : "No official website";
+        const firstAirYear = series.first_air_date ? new Date(series.first_air_date).getFullYear() : 'N/A';
+        const rating = series.vote_average ? series.vote_average.toFixed(1) : 'N/A';
+
+        // Set page and hero backgrounds
+        let heroStyleAttr = '';
+        if (series.backdrop_path) {
+            const bgUrl = `https://image.tmdb.org/t/p/original${series.backdrop_path}`;
+            document.querySelector('.background').style.backgroundImage = `url(${bgUrl})`;
+            heroStyleAttr = `style="background-image: linear-gradient(135deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.85) 100%), url(${bgUrl}); background-size: cover; background-position: center; background-repeat: no-repeat;"`;
+        }
 
         let seasonButtonsHTML = "";
         series.seasons.forEach(season => {
             if (season.season_number !== 0) {
-                seasonButtonsHTML += `<button id="season-${season.season_number}" onclick="loadSeason(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
+                seasonButtonsHTML += `<button class="season-btn" id="season-${season.season_number}" onclick="loadSeason(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
             }
         });
 
+        hideLoading();
         document.querySelector('.container').innerHTML = `
-            <h1>${series.name}</h1>
-            <p><em>${series.tagline || "No tagline available"}</em></p>
-            <div class="video-container">
-                <iframe id="video-player" width="100%" height="100%" frameborder="0" allowfullscreen scrolling="no"></iframe>
+            <div class="watch-hero" ${heroStyleAttr}>
+                <div class="p-8">
+                    <h1 class="watch-title">${series.name}</h1>
+                    ${series.tagline ? `<p class="watch-tagline">${series.tagline}</p>` : ''}
+                    
+                    <div class="flex items-center space-x-6 mb-6">
+                        <div class="flex items-center text-yellow-400">
+                            <i class="fa-solid fa-star mr-2"></i>
+                            <span class="text-white font-semibold">${rating}</span>
+                        </div>
+                        <span class="text-gray-300">${firstAirYear}</span>
+                        <span class="text-gray-300">${series.number_of_seasons} Season${series.number_of_seasons !== 1 ? 's' : ''}</span>
+                        <span class="text-gray-300">${series.number_of_episodes} Episodes</span>
+                    </div>
+                </div>
             </div>
-            <div class="server-selection">
-                <h3>Choose a Server:</h3>
-                ${servers.map((server, index) => `<button class="${index === 0 ? 'active' : ''}" onclick="changeServer('${server.url}', 'tv/${seriesId}', ${index}, 'tv')">${server.name}</button>`).join(' ')}
+
+            <!-- Mobile Season Selection -->
+            <div class="season-selection mobile-only">
+                <h3>📺 Select Season</h3>
+                <div class="season-grid">
+                    ${seasonButtonsHTML}
+                </div>
             </div>
+
+            <div id="episode-selection" class="episode-selection mobile-only hidden">
+                <h3>🎬 Select Episode</h3>
+                <div id="episode-grid" class="episode-grid">
+                    <!-- Episodes will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Video and Sidebar Layout -->
+            <div class="video-sidebar-layout">
+                <div class="video-section">
+                    <div class="video-container" id="video-container" style="display: none;">
+                        <iframe id="video-player" allowfullscreen></iframe>
+                    </div>
+
+                    <div class="server-selection" id="server-selection" style="display: none;">
+                        <h3>Choose Server</h3>
+                        <div class="server-grid">
+                            ${servers.map((server, index) => `
+                                <button class="server-btn ${server.url === currentServerUrl ? 'active' : ''}" 
+                                        onclick="changeServer('${server.url}', 'tv/${seriesId}', ${index}, 'tv')">
+                                    ${server.name}
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Sidebar - Right of Video -->
+                <div class="tv-sidebar desktop-only">
+                    <div class="sidebar-header">
+                        <h3>📺 Seasons & Episodes</h3>
+                    </div>
+                    
+                    <div class="season-dropdown">
+                        <label for="season-selector">Select Season:</label>
+                        <div class="dropdown-wrapper">
+                            <select id="season-selector" onchange="loadSeasonSidebar(${seriesId}, this.value)">
+                                <option value="">Choose a season...</option>
+                                ${series.seasons.filter(season => season.season_number !== 0).map(season => 
+                                    `<option value="${season.season_number}">Season ${season.season_number} (${season.episode_count} episodes)</option>`
+                                ).join('')}
+                            </select>
+                            <div class="dropdown-arrow">▼</div>
+                        </div>
+                    </div>
+
+                    <div id="episodes-sidebar" class="episodes-sidebar">
+                        <p class="select-season-text">👆 Select a season above to view episodes</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="movie-details">
-                <p><strong>Overview:</strong> ${series.overview || "No overview available."}</p>
-                <p><strong>First Air Date:</strong> ${series.first_air_date || "N/A"}</p>
-                <p><strong>Last Air Date:</strong> ${series.last_air_date || "N/A"}</p>
-                <p><strong>Rating:</strong> ${series.vote_average} / 10 (${series.vote_count} votes)</p>
-                <p><strong>Genres:</strong> ${genres}</p>
-                <p><strong>Seasons:</strong> ${series.number_of_seasons}, Episodes: ${series.number_of_episodes}</p>
-                <p><strong>Homepage:</strong> ${homepage}</p>
+                <div class="details-grid">
+                    <div>
+                        <div class="detail-item">
+                            <div class="detail-label">Overview</div>
+                            <div class="detail-value">${series.overview || "No overview available."}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Genres</div>
+                            <div class="detail-value">${genres}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">First Air Date</div>
+                            <div class="detail-value">${series.first_air_date || "N/A"}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${series.status || "N/A"}</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="detail-item">
+                            <div class="detail-label">Rating</div>
+                            <div class="detail-value">${rating} / 10 (${series.vote_count?.toLocaleString() || 0} votes)</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Seasons</div>
+                            <div class="detail-value">${series.number_of_seasons} Season${series.number_of_seasons !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Episodes</div>
+                            <div class="detail-value">${series.number_of_episodes} Total Episodes</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-label">Homepage</div>
+                            <div class="detail-value">${homepage}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="season-buttons">
-                <h3>Select a Season:</h3>
-                ${seasonButtonsHTML}
-            </div>
-            <div class="episode-buttons"></div>
         `;
-
-        const firstSeason = series.seasons.find(season => season.season_number !== 0);
-        if (firstSeason) {
-            loadSeason(seriesId, firstSeason.season_number);
-        }
-
     } catch (error) {
-        console.error("Error fetching TV show:", error);
-        document.querySelector('.container').innerHTML = `<p>Error loading TV show details.</p>`;
+        console.error("Error fetching TV series:", error);
+        hideLoading();
+        showError();
+    }
+}
+
+async function loadSeasonSidebar(seriesId, seasonNumber) {
+    if (!seasonNumber) return;
+    
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}?api_key=${API_KEY}`);
+        if (!response.ok) throw new Error(`Failed to fetch season data`);
+
+        const season = await response.json();
+        const episodesList = season.episodes.map(episode => {
+            const title = episode.name.length > 25 ? episode.name.substring(0, 22) + '...' : episode.name;
+            const overview = episode.overview ? 
+                (episode.overview.length > 45 ? episode.overview.substring(0, 42) + '...' : episode.overview) : 
+                'No description available';
+            const airDate = episode.air_date ? new Date(episode.air_date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric' 
+            }) : '';
+            const runtime = episode.runtime ? `${episode.runtime}m` : '';
+            
+            return `
+                <div class="episode-card-sidebar" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})">
+                    <div class="episode-card-header">
+                        <div class="episode-badge">E${episode.episode_number}</div>
+                        <div class="episode-meta-top">
+                            ${airDate ? `<span class="air-date">${airDate}</span>` : ''}
+                            ${runtime ? `<span class="runtime">${runtime}</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="episode-card-content">
+                        <h4 class="episode-card-title">${title}</h4>
+                        <p class="episode-card-desc">${overview}</p>
+                        <div class="episode-card-footer">
+                            <div class="episode-rating">
+                                <i class="fa-solid fa-star"></i>
+                                <span>${episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A'}</span>
+                            </div>
+                            <div class="play-indicator">
+                                <i class="fa-solid fa-play"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.getElementById('episodes-sidebar').innerHTML = episodesList;
+
+    } catch (err) {
+        console.error("Error loading season for sidebar:", err);
+        document.getElementById('episodes-sidebar').innerHTML = `<p class="error-text">Failed to load episodes</p>`;
     }
 }
 
@@ -153,37 +411,64 @@ async function changeServer(serverUrl, contentPath, serverIndex, contentType) {
 }
 
 async function loadSeason(seriesId, seasonNumber, event = null) {
+    if (event) {
+        // Update season button states
+        const seasonButtons = document.querySelectorAll('.season-btn');
+        seasonButtons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
     try {
         const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}?api_key=${API_KEY}`);
-        if (!response.ok) throw new Error(`Failed to load season ${seasonNumber}`);
+        if (!response.ok) throw new Error(`Failed to fetch season data`);
 
-        const seasonData = await response.json();
-        let episodesHTML = "";
+        const season = await response.json();
+        const episodeButtons = season.episodes.map(episode => {
+            const runtime = episode.runtime ? `${episode.runtime}min` : '';
+            const rating = episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A';
+            const airDate = episode.air_date ? new Date(episode.air_date).toLocaleDateString() : '';
+            
+            return `
+                <div class="episode-card" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})">
+                    <div class="episode-number">E${episode.episode_number}</div>
+                    <div class="episode-info">
+                        <h4 class="episode-title">${episode.name}</h4>
+                        <p class="episode-overview">${episode.overview || 'No description available'}</p>
+                        <div class="episode-meta">
+                            ${airDate ? `<span>📅 ${airDate}</span>` : ''}
+                            ${runtime ? `<span>⏱️ ${runtime}</span>` : ''}
+                            ${rating !== 'N/A' ? `<span>⭐ ${rating}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
 
-        seasonData.episodes.forEach(episode => {
-            episodesHTML += `<button id="episode-${episode.episode_number}" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})">Episode ${episode.episode_number}</button>`;
-        });
-
-        document.querySelector('.episode-buttons').innerHTML = `
-            <h3>Select an Episode:</h3>
-            ${episodesHTML}
-        `;
-
-        if (seasonData.episodes.length > 0) {
-            watchEpisode(seriesId, seasonNumber, seasonData.episodes[0].episode_number);
-        }
-
-        document.querySelectorAll('.season-buttons button').forEach(btn => btn.classList.remove('active'));
-        if (event?.target) event.target.classList.add('active');
+        // Show episode selection
+        const episodeSelection = document.getElementById('episode-selection');
+        const episodeGrid = document.getElementById('episode-grid');
+        
+        episodeGrid.innerHTML = episodeButtons;
+        episodeSelection.classList.remove('hidden');
+        
+        // Scroll to episode selection
+        episodeSelection.scrollIntoView({ behavior: 'smooth' });
 
     } catch (err) {
-        console.error(err);
-        document.querySelector('.episode-buttons').innerHTML = `<p>Failed to load episodes for Season ${seasonNumber}.</p>`;
+        console.error("Error loading season:", err);
+        showError();
     }
 }
 
 async function watchEpisode(seriesId, seasonNumber, episodeNumber) {
     console.log(`Watching TV Series ${seriesId}, Season ${seasonNumber}, Episode ${episodeNumber}`);
+
+    // Show video container and server selection
+    const videoContainer = document.getElementById('video-container');
+    const serverSelection = document.getElementById('server-selection');
+    
+    videoContainer.style.display = 'block';
+    serverSelection.style.display = 'block';
 
     let embedUrl;
 
@@ -193,21 +478,87 @@ async function watchEpisode(seriesId, seasonNumber, episodeNumber) {
         embedUrl = `https://111movies.com/tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
     } else if (currentServerUrl === 'https://www.vidsrc.wtf/api/3/') {
         embedUrl = `https://www.vidsrc.wtf/api/3/tv/?id=${seriesId}&s=${seasonNumber}&e=${episodeNumber}`;
-    }
-    else {
+    } else {
         embedUrl = `${currentServerUrl}tv/${seriesId}/${seasonNumber}/${episodeNumber}`;
     }
 
     const player = document.getElementById('video-player');
     if (player) player.src = embedUrl;
 
-    const titleElement = document.querySelector('h1');
+    // Update page title
+    const titleElement = document.querySelector('.watch-title');
     if (titleElement) {
         const baseTitle = titleElement.innerText.split(' -')[0];
         titleElement.innerText = `${baseTitle} - Episode ${episodeNumber}`;
     }
 
-    document.querySelectorAll('.episode-buttons button').forEach(btn => btn.classList.remove('active'));
-    const selectedButton = document.getElementById(`episode-${episodeNumber}`);
-    if (selectedButton) selectedButton.classList.add('active');
+    // Scroll to video
+    videoContainer.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Fetch and display similar movies for the sidebar
+async function fetchSimilarMovies(movieId) {
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}/similar?api_key=${API_KEY}&language=en-US&page=1`);
+        if (!response.ok) throw new Error('Failed to fetch similar movies');
+
+        const data = await response.json();
+        displaySimilarMovies(data.results.slice(0, 10));
+    } catch (error) {
+        console.error('Error fetching similar movies:', error);
+        const container = document.getElementById('similar-movies-sidebar');
+        if (container) {
+            container.innerHTML = '<p style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">Unable to load similar movies</p>';
+        }
+    }
+}
+
+function displaySimilarMovies(movies) {
+    const container = document.getElementById('similar-movies-sidebar');
+    if (!container) return;
+
+    if (movies.length === 0) {
+        container.innerHTML = '<p style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.5);">No similar movies found</p>';
+        return;
+    }
+
+    const moviesHTML = movies.map(movie => {
+        const title = movie.title.length > 25 ? movie.title.substring(0, 22) + '...' : movie.title;
+        const overview = movie.overview ? 
+            (movie.overview.length > 45 ? movie.overview.substring(0, 42) + '...' : movie.overview) : 
+            'No description available';
+        const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : '';
+        const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
+        const posterPath = movie.poster_path ? 
+            `https://image.tmdb.org/t/p/w300${movie.poster_path}` : 
+            'https://via.placeholder.com/300x450?text=No+Image';
+        
+        return `
+            <div class="episode-card-sidebar" onclick="window.location.href='WatchMovie.html?movieId=${movie.id}&type=movie'" style="cursor: pointer;">
+                <div class="episode-card-header">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <img src="${posterPath}" alt="${movie.title}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        <div style="flex: 1;">
+                            <h4 class="episode-card-title" style="margin-bottom: 0.25rem;">${title}</h4>
+                            ${releaseYear ? `<span class="air-date" style="font-size: 0.7rem; color: rgba(255,255,255,0.6);">${releaseYear}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+                <div class="episode-card-content">
+                    <p class="episode-card-desc">${overview}</p>
+                    <div class="episode-card-footer">
+                        <div class="episode-rating">
+                            <i class="fa-solid fa-star"></i>
+                            <span>${rating}</span>
+                        </div>
+                        <div class="play-indicator">
+                            <i class="fa-solid fa-play"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = moviesHTML;
 }

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toast Demo - MovieIGuess</title>
+    <link rel="stylesheet" href="toast.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        
+        .demo-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 40px;
+            color: #e50914;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            color: white;
+        }
+        
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+        }
+        
+        .btn-error {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+        }
+        
+        .btn-clear {
+            background: linear-gradient(135deg, #6b7280, #4b5563);
+        }
+        
+        .code-example {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            margin-top: 40px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="demo-container">
+        <h1>🎬 Toast Notification Demo</h1>
+        
+        <div class="button-grid">
+            <button class="demo-btn btn-success" onclick="showSuccess('Movie added to watchlist!', { title: 'Success' })">
+                Success Toast
+            </button>
+            
+            <button class="demo-btn btn-error" onclick="showError('Failed to load movie details. Please try again.', { title: 'Error' })">
+                Error Toast
+            </button>
+            
+            <button class="demo-btn btn-warning" onclick="showWarning('This movie may contain adult content.', { title: 'Warning' })">
+                Warning Toast
+            </button>
+            
+            <button class="demo-btn btn-info" onclick="showInfo('New movies added to the database!', { title: 'Info' })">
+                Info Toast
+            </button>
+            
+            <button class="demo-btn btn-clear" onclick="Toast.removeAll()">
+                Clear All Toasts
+            </button>
+        </div>
+        
+        <div class="button-grid">
+            <button class="demo-btn btn-success" onclick="showSuccess('Quick success message!')">
+                Simple Success
+            </button>
+            
+            <button class="demo-btn btn-error" onclick="showError('Something went wrong!', { duration: 8000, clickToDismiss: false })">
+                Long Error (8s)
+            </button>
+            
+            <button class="demo-btn btn-warning" onclick="showWarning('Custom styled warning', { className: 'toast-large' })">
+                Large Warning
+            </button>
+            
+            <button class="demo-btn btn-info" onclick="showInfo('No progress bar', { showProgress: false })">
+                No Progress Bar
+            </button>
+        </div>
+
+        <div class="code-example">
+            <h3>Usage Examples:</h3>
+            <pre>
+// Simple usage
+showSuccess('Movie saved successfully!');
+showError('Failed to load data');
+showWarning('Check your connection');
+showInfo('Welcome to MovieIGuess!');
+
+// Advanced usage with options
+showSuccess('Movie added!', {
+    title: 'Success',
+    duration: 5000,
+    className: 'toast-large',
+    showProgress: false,
+    clickToDismiss: true
+});
+
+// Using the Toast instance directly
+Toast.show('Custom message', 'success', 3000, {
+    title: 'Custom Title'
+});
+
+// Remove all toasts
+Toast.removeAll();
+            </pre>
+        </div>
+    </div>
+
+    <script src="src/toast.js"></script>
+</body>
+</html>

@@ -3,30 +3,438 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Happy Watching</title>
+    <title>MovieIGuess - Happy Watching</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="netflix-style.css">
+    <link rel="stylesheet" href="search.css">
     <link rel="stylesheet" href="watch.css">
+    <link rel="stylesheet" href="toast.css">
     <link rel="icon" href="src/icon.svg">
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="search.css">
-</head>
-<body>
-    <div class="background"></div>
-    <header class="nav">
-        <p class="title" onclick="home()"><i class="fa-solid fa-film"></i> Movie, I guess?</p>
-        <input type="text" placeholder="Search a movie/series">
-        <i class="fa-solid fa-magnifying-glass"></i>
-    </header>
-    <div class="container"></div>   
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'netflix-red': '#E50914',
+                        'netflix-black': '#000000',
+                        'netflix-dark': '#141414',
+                        'netflix-gray': '#333333',
+                    }
+                }
+            }
+        }
+    </script>
     
-    <footer>
-        <p class="title">Movie, I guess?</p>
-        <div class="contanctInfos">
-            <i class="fa-brands fa-instagram" onclick="ins()"></i>
-            <i class="fa-brands fa-linkedin-in" onclick="lin()"></i>
-            <i class="fa-brands fa-github" onclick="git()"></i>
+    <style>
+        /* Professional Watch Page Styling */
+        .watch-hero {
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .watch-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .watch-tagline {
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .server-selection {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .server-selection h3 {
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .server-selection h3::before {
+            content: "🎬";
+            margin-right: 0.5rem;
+        }
+        
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        
+        .server-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .server-btn:hover {
+            background: rgba(229, 9, 20, 0.2);
+            border-color: rgba(229, 9, 20, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .server-btn.active {
+            background: linear-gradient(135deg, #E50914, #B8070F);
+            border-color: #E50914;
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.3);
+        }
+        
+        .movie-details {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .detail-item {
+            margin-bottom: 1rem;
+        }
+        
+        .detail-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            font-size: 0.875rem;
+            letter-spacing: 0.05em;
+        }
+        
+        .detail-value {
+            color: #ffffff;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        .detail-value a {
+            color: #E50914;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .detail-value a:hover {
+            color: #ff1e2d;
+        }
+        
+        .season-selection {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .season-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 1rem;
+        }
+        
+        .season-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .season-btn:hover {
+            background: rgba(229, 9, 20, 0.2);
+            border-color: rgba(229, 9, 20, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .season-btn.active {
+            background: linear-gradient(135deg, #E50914, #B8070F);
+            border-color: #E50914;
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.3);
+        }
+        
+        .episode-selection {
+            background: rgba(26, 26, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .episode-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-top: 1rem;
+        }
+        
+        .episode-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 13px;
+            text-align: center;
+        }
+        
+        .episode-btn:hover {
+            background: rgba(229, 9, 20, 0.2);
+            border-color: rgba(229, 9, 20, 0.5);
+            transform: translateY(-1px);
+        }
+        
+        .episode-btn.active {
+            background: linear-gradient(135deg, #E50914, #B8070F);
+            border-color: #E50914;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+        }
+        
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .watch-title {
+                font-size: 2rem;
+            }
+            
+            .server-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+            
+            .season-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            }
+            
+            .episode-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+            
+            .server-selection,
+            .movie-details,
+            .season-selection,
+            .episode-selection {
+                padding: 1.5rem;
+            }
+        }
+        
+        /* Loading Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .container:not(.hidden) {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-netflix-black text-white min-h-screen">
+    <!-- Background Backdrop -->
+    <div class="background fixed inset-0 bg-cover bg-center bg-no-repeat"></div>
+    <div class="fixed inset-0 bg-netflix-black/70"></div>
+    
+    <!-- Navigation -->
+    <header class="navbar-glass fixed top-0 w-full z-50 transition-all duration-500" id="navbar">
+        <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-16 py-4 space-y-4 lg:space-y-0">
+            <!-- Logo and Desktop Navigation -->
+            <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-8 w-full lg:w-auto">
+                <h1 class="text-netflix-red text-2xl lg:text-3xl font-bold cursor-pointer hover:text-red-400 transition-colors text-center lg:text-left" onclick="home()">
+                    <i class="fa-solid fa-film mr-2 text-netflix-red"></i>MovieIGuess
+                </h1>
+                <!-- Desktop Navigation -->
+                <nav class="hidden lg:flex space-x-6">
+                    <a href="index.html" class="text-white hover:text-gray-300 transition-colors">Home</a>
+                    <a href="#" class="text-white hover:text-gray-300 transition-colors" onclick="showDevToast('Movie List')">Movies</a>
+                    <a href="#" class="text-white hover:text-gray-300 transition-colors" onclick="showDevToast('TV Show List')">TV Shows</a>
+                    <a href="#" class="text-white hover:text-gray-300 transition-colors" onclick="showDevToast('My List')">My List</a>
+                </nav>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="flex items-center space-x-4 w-full lg:w-auto justify-center lg:justify-end">
+                <div class="relative w-full max-w-md lg:w-64">
+                    <input 
+                        type="text" 
+                        placeholder="Search a movie/series"
+                        class="search-input text-white placeholder-gray-400 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-netflix-red focus:border-transparent transition-all"
+                    >
+                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs cursor-pointer hover:text-white transition-colors"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="relative z-10 pt-24 min-h-screen">
+        <!-- Loading State -->
+        <div id="loading" class="flex items-center justify-center min-h-screen">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-netflix-red"></div>
+        </div>
+        
+        <!-- Movie/TV Content Container -->
+        <div class="container hidden max-w-7xl mx-auto px-4 lg:px-8 pb-20">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+        
+        <!-- Error State -->
+        <div id="error" class="hidden flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <i class="fa-solid fa-exclamation-triangle text-6xl text-netflix-red mb-4"></i>
+                <h2 class="text-2xl font-bold text-white mb-2">Something went wrong</h2>
+                <p class="text-gray-400 mb-6">Unable to load the content. Please try again later.</p>
+                <button onclick="window.location.reload()" class="bg-netflix-red text-white px-6 py-3 rounded-lg hover:bg-red-700 transition-colors">
+                    Try Again
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="search-modal-overlay hidden">
+        <div class="search-modal-card">
+            <!-- Close Button -->
+            <button id="searchCloseBtn" class="modal-back-button">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            
+            <!-- Search Header -->
+            <div class="search-header">
+                <h2 id="searchResultsTitle">Search Results</h2>
+                <div class="search-filters">
+                    <button class="filter-btn active" data-type="all">All</button>
+                    <button class="filter-btn" data-type="movie">Movies</button>
+                    <button class="filter-btn" data-type="tv">TV Shows</button>
+                    <button class="filter-btn" data-type="person">People</button>
+                </div>
+            </div>
+            
+            <!-- Search Results Container -->
+            <div id="searchResultsContainer" class="search-results-container">
+                <div class="loading">Loading...</div>
+            </div>
+            
+            <!-- Pagination Container -->
+            <div id="searchPaginationContainer" class="pagination-container"></div>
+        </div>
+    </div>   
+    
+    <!-- Footer -->
+    <footer class="relative z-10 bg-netflix-dark mt-20 py-16">
+        <div class="px-4 lg:px-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-netflix-red text-2xl font-bold mb-4">MovieIGuess</h3>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Your ultimate destination for discovering amazing movies and TV shows. 
+                        Stream, watch, and enjoy entertainment like never before.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('Movie List')">Movie List</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('TV Show List')">TV Show List</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('My List')">My List</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Connect With Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" onclick="ins()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-instagram text-2xl"></i>
+                        </a>
+                        <a href="#" onclick="lin()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-linkedin-in text-2xl"></i>
+                        </a>
+                        <a href="#" onclick="git()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-github text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2024 MovieIGuess. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
         </div>
     </footer>
     <script>
+        // Navbar glassmorphism scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
         function ins(){window.open('https://www.instagram.com/unkown-user/', '_blank');}
         function lin(){window.open('https://www.linkedin.com/in/christian-signo-070733323/', '_blank')}
         function git(){window.open('https://github.com/Xtian69420', '_blank')}
@@ -38,6 +446,18 @@
     <script src="src/watch.js"></script>
     <script src="https://theajack.github.io/disable-devtool/cordClip"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="src/search.js"></script>    
+    <script src="src/search.js"></script>
+    
+    <!-- Toast Script -->
+    <script src="src/toast.js"></script>
+    <script>
+        // Development toast function
+        function showDevToast(feature) {
+            showInfo(`${feature} feature is currently in development. Stay tuned for updates!`, {
+                title: '🚧 Coming Soon :PP',
+                duration: 5000
+            });
+        }
+    </script>
 </body>
 </html>

@@ -3,54 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="style.css">
+    <title>MovieIGuess - Discover Amazing Movies & TV Shows</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="netflix-style.css">
+    <link rel="stylesheet" href="search.css">
+    <link rel="stylesheet" href="toast.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
     <link rel="icon" href="src/icon.svg">
-    <link rel="stylesheet" href="search.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'netflix-red': '#E50914',
+                        'netflix-black': '#000000',
+                        'netflix-dark': '#141414',
+                        'netflix-gray': '#333333',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <header class="nav">
-        <p class="title" onclick="home()"><i class="fa-solid fa-film"></i> Movie, I guess?</p>
-        <input type="text" placeholder="Search a movie/series">
-        <i class="fa-solid fa-magnifying-glass"></i>
+<body class="bg-netflix-black text-white min-h-screen">
+    <!-- Navigation -->
+    <header class="navbar-glass fixed top-0 w-full z-50 transition-all duration-500" id="navbar">
+        <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-16 py-4 space-y-4 lg:space-y-0">
+            <!-- Logo and Desktop Navigation -->
+            <div class="flex flex-col lg:flex-row items-center space-y-4 lg:space-y-0 lg:space-x-8 w-full lg:w-auto">
+                <h1 class="text-netflix-red text-2xl lg:text-3xl font-bold cursor-pointer hover:text-red-400 transition-colors text-center lg:text-left" onclick="home()">
+                    <i class="fa-solid fa-film mr-2"></i>MovieIGuess
+                </h1>
+                <!-- Desktop Navigation -->
+                <nav class="hidden lg:flex space-x-6">
+                    <a href="#" class="text-white hover:text-gray-300 transition-colors">Home</a>
+                    <a href="#" class="text-white hover:text-gray-300 transition-colors" onclick="showDevToast('Movie List')">Movies</a>
+                    <a href="#" class="text-white hover:text-gray-300 transition-colors" onclick="showDevToast('TV Show List')">TV Shows</a>
+                    <a href="#" class="text-white hover:text-gray-300 transition-colors" onclick="showDevToast('My List')">My List</a>
+                </nav>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="flex items-center space-x-4 w-full lg:w-auto justify-center lg:justify-end">
+                <div class="relative w-full max-w-md lg:w-64">
+                    <input 
+                        type="text" 
+                        placeholder="Search a movie/series"
+                        class="search-input text-white placeholder-gray-400 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-netflix-red focus:border-transparent transition-all"
+                    >
+                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-white transition-colors"></i>
+                </div>
+            </div>
+        </div>
     </header>
 
-
-    <div class="backdrop-container">
-        <div class="backdrop-slider"></div>
+    <!-- Hero Section -->
+    <div class="relative pt-16">
+        <div class="backdrop-container relative h-[60vh] lg:h-[80vh] overflow-hidden">
+            <div class="backdrop-slider w-full h-full bg-cover bg-center bg-no-repeat"></div>
+            <!-- Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-netflix-black via-transparent to-transparent"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-netflix-black/80 via-transparent to-transparent"></div>
+            
+            <!-- Hero Content -->
+            <div class="absolute bottom-0 left-0 p-8 lg:p-16 max-w-2xl">
+                <div id="hero-loading" class="animate-pulse">
+                    <div class="h-12 bg-gray-600 rounded mb-4 w-3/4"></div>
+                    <div class="h-6 bg-gray-600 rounded mb-6 w-full"></div>
+                    <div class="flex space-x-4">
+                        <div class="h-12 bg-gray-600 rounded w-32"></div>
+                        <div class="h-12 bg-gray-600 rounded w-32"></div>
+                    </div>
+                </div>
+                <div id="hero-content" class="hidden">
+                    <h1 id="hero-title" class="text-4xl lg:text-6xl font-bold mb-4 leading-tight">Discover Amazing Movies</h1>
+                    <p id="hero-overview" class="text-lg lg:text-xl text-gray-300 mb-6 leading-relaxed">
+                        Explore thousands of movies and TV shows. Find your next favorite film today.
+                    </p>
+                    <div class="flex items-center mb-6 space-x-6">
+                        <div id="hero-rating" class="flex items-center text-yellow-400">
+                            <i class="fa-solid fa-star mr-2"></i>
+                            <span class="text-white text-lg font-semibold">0.0</span>
+                        </div>
+                        <div id="hero-year" class="text-gray-300 text-lg">
+                            2024
+                        </div>
+                        <div id="hero-runtime" class="text-gray-300 text-lg">
+                            <!-- Runtime will be added here -->
+                        </div>
+                    </div>
+                    <div class="flex space-x-4">
+                        <button id="hero-play-btn" class="netflix-button bg-white text-black px-8 py-3 rounded font-semibold hover:bg-gray-200 transition-colors flex items-center">
+                            <i class="fa-solid fa-play mr-2"></i>
+                            Play
+                        </button>
+                        <button id="hero-info-btn" class="netflix-button bg-gray-600/70 text-white px-8 py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center">
+                            <i class="fa-solid fa-info-circle mr-2"></i>
+                            More Info
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <p class="textCategory">Movies <i class="fa-solid fa-fire"></i></p>
-    <div class="scroll-wrapper" id="s1">
-        <div class="movie-container"></div>
-    </div>
+    <!-- Content Sections -->
+    <div class="px-4 lg:px-16 space-y-12 pb-20">
+        <!-- Trending Movies -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl lg:text-3xl font-bold flex items-center">
+                    <i class="fa-solid fa-fire text-netflix-red mr-3"></i>
+                    Trending Movies
+                </h2>
+                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold">
+                    See All <i class="fa-solid fa-chevron-right ml-1"></i>
+                </button>
+            </div>
+            <div class="scroll-wrapper overflow-hidden">
+                <div class="movie-container flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
+                    <!-- Movies will be populated here -->
+                </div>
+            </div>
+        </section>
 
-    <p class="textCategory">TV <i class="fa-solid fa-fire"></i></p>
-    <div class="scroll-wrapper" id="s2">
-        <div class="series-container"></div>
-    </div>
+        <!-- Popular TV Shows -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl lg:text-3xl font-bold flex items-center">
+                    <i class="fa-solid fa-tv text-netflix-red mr-3"></i>
+                    Popular TV Shows
+                </h2>
+                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold">
+                    See All <i class="fa-solid fa-chevron-right ml-1"></i>
+                </button>
+            </div>
+            <div class="scroll-wrapper overflow-hidden">
+                <div class="series-container flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
+                    <!-- TV Shows will be populated here -->
+                </div>
+            </div>
+        </section>
 
-    <p class="textCategory">16+ <i class="fa-solid fa-fire"></i></p>
-    <div class="scroll-wrapper" id="s3">
-        <div class="anime-container"></div>
+        <!-- Top Rated -->
+        <section>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl lg:text-3xl font-bold flex items-center">
+                    <i class="fa-solid fa-star text-netflix-red mr-3"></i>
+                    16+
+                </h2>
+                <button class="text-netflix-red hover:text-red-400 transition-colors font-semibold">
+                    See All <i class="fa-solid fa-chevron-right ml-1"></i>
+                </button>
+            </div>
+            <div class="scroll-wrapper overflow-hidden">
+                <div class="anime-container flex space-x-4 overflow-x-auto scrollbar-hide pb-4">
+                    <!-- Top rated content will be populated here -->
+                </div>
+            </div>
+        </section>
     </div>
     
-    <footer>
-        <p class="title">Movie, I guess?</p>
-        <div class="contanctInfos">
-            <i class="fa-brands fa-instagram" onclick="ins()"></i>
-            <i class="fa-brands fa-linkedin-in" onclick="lin()"></i>
-            <i class="fa-brands fa-github" onclick="git()"></i>
+    <!-- Search Modal -->
+    <div id="searchModal" class="search-modal-overlay hidden">
+        <div class="search-modal-card">
+            <!-- Search Header -->
+            <div class="search-header">
+                <!-- Close Button -->
+                <button id="searchCloseBtn" class="absolute top-4 right-4 z-10 bg-black bg-opacity-50 rounded-full w-12 h-12 flex items-center justify-center hover:bg-opacity-75 transition-all">
+                    <i class="fa-solid fa-times text-white text-lg"></i>
+                </button>
+                
+                <h2 id="searchResultsTitle">Search Results</h2>
+                <div class="search-filters">
+                    <button class="filter-btn active" data-type="all">All</button>
+                    <button class="filter-btn" data-type="movie">Movies</button>
+                    <button class="filter-btn" data-type="tv">TV Shows</button>
+                    <button class="filter-btn" data-type="person">People</button>
+                </div>
+            </div>
+            
+            <!-- Search Results Container -->
+            <div id="searchResultsContainer" class="search-results-container">
+                <div class="loading">Loading...</div>
+            </div>
+            
+            <!-- Pagination Container -->
+            <div id="searchPaginationContainer" class="pagination-container"></div>
+        </div>
+    </div>
+    
+    <!-- Movie Info Modal -->
+    <div id="movieModal" class="fixed inset-0 z-50 hidden">
+        <!-- Modal Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="modal-content bg-netflix-dark rounded-lg max-w-4xl w-full max-h-[90vh] relative flex flex-col">
+                <!-- Close Button -->
+                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75 transition-all">
+                    <i class="fa-solid fa-times text-white text-lg"></i>
+                </button>
+                
+                <!-- Modal Header with Backdrop -->
+                <div class="relative h-64 lg:h-80 overflow-hidden rounded-t-lg flex-shrink-0">
+                    <img id="modalBackdrop" src="" alt="" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-netflix-dark via-transparent to-transparent"></div>
+                    
+                    <!-- Movie Info Overlay -->
+                    <div class="absolute bottom-0 left-0 right-0 p-6 lg:p-8">
+                        <h2 id="modalTitle" class="text-3xl lg:text-4xl font-bold text-white mb-2"></h2>
+                        <div class="flex items-center space-x-4 text-sm lg:text-base">
+                            <span id="modalRating" class="flex items-center text-yellow-400">
+                                <i class="fa-solid fa-star mr-1"></i>
+                                <span class="text-white">0.0</span>
+                            </span>
+                            <span id="modalYear" class="text-gray-300"></span>
+                            <span id="modalRuntime" class="text-gray-300"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Modal Body - Scrollable Content -->
+                <div class="flex-1 overflow-y-auto modal-scrollable-content">
+                    <div class="p-6 lg:p-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- Movie Poster -->
+                        <div class="lg:col-span-1">
+                            <img id="modalPoster" src="" alt="" class="w-full rounded-lg shadow-lg">
+                        </div>
+                        
+                        <!-- Movie Details -->
+                        <div class="lg:col-span-2 space-y-6">
+                            <!-- Overview -->
+                            <div>
+                                <h3 class="text-xl font-semibold text-white mb-3">Overview</h3>
+                                <p id="modalOverview" class="text-gray-300 leading-relaxed"></p>
+                            </div>
+                            
+                            <!-- Additional Info -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white mb-2">Details</h4>
+                                    <div class="space-y-2 text-gray-300">
+                                        <p><span class="text-white font-medium">Release Date:</span> <span id="modalReleaseDate"></span></p>
+                                        <p><span class="text-white font-medium">Genres:</span> <span id="modalGenres"></span></p>
+                                        <p><span class="text-white font-medium">Runtime:</span> <span id="modalRuntimeDetail"></span></p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-semibold text-white mb-2">Additional Info</h4>
+                                    <div class="space-y-2 text-gray-300">
+                                        <p><span class="text-white font-medium">Rating:</span> <span id="modalRatingDetail"></span></p>
+                                        <p><span class="text-white font-medium">Vote Count:</span> <span id="modalVoteCount"></span></p>
+                                        <p><span class="text-white font-medium">Language:</span> <span id="modalLanguage"></span></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="flex space-x-4 pt-4">
+                                <button id="modalPlayBtn" class="netflix-button bg-netflix-red text-white px-8 py-3 rounded font-semibold hover:bg-red-700 transition-colors flex items-center">
+                                    <i class="fa-solid fa-play mr-2"></i>
+                                    Watch Now
+                                </button>
+                                <button class="netflix-button bg-gray-600 text-white px-8 py-3 rounded font-semibold hover:bg-gray-500 transition-colors flex items-center">
+                                    <i class="fa-solid fa-plus mr-2"></i>
+                                    Add to List
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer class="bg-netflix-dark mt-20 py-16">
+        <div class="px-4 lg:px-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-netflix-red text-2xl font-bold mb-4">MovieIGuess</h3>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Your ultimate destination for discovering amazing movies and TV shows. 
+                        Stream, watch, and enjoy entertainment like never before.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('Movie List')">Movies</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('TV Show List')">TV Shows</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('My List')">My List</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors">Browse</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Connect With Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" onclick="ins()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-instagram text-2xl"></i>
+                        </a>
+                        <a href="#" onclick="lin()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-linkedin-in text-2xl"></i>
+                        </a>
+                        <a href="#" onclick="git()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-github text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2024 MovieIGuess. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
         </div>
     </footer>
 
+    <script src="./src/loading.js"></script>
     <script src="./src/home.js"></script>
     <script src="src/search.js"></script>
     
     <script>
-        //for footer
+        // Footer functions
         function ins(){window.open('https://www.instagram.com/unkown-user/', '_blank');}
         function lin(){window.open('https://www.linkedin.com/in/christian-signo-070733323/', '_blank')}
         function git(){window.open('https://github.com/Xtian69420', '_blank')}
@@ -58,6 +339,76 @@
         function home(){
             window.location.href="index.html";
         }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth horizontal scrolling for movie containers
+        function setupHorizontalScroll() {
+            const containers = document.querySelectorAll('.movie-container, .series-container, .anime-container');
+            
+            containers.forEach(container => {
+                container.addEventListener('wheel', (e) => {
+                    if (e.deltaY !== 0) {
+                        e.preventDefault();
+                        container.scrollLeft += e.deltaY * 2;
+                    }
+                });
+
+                // Touch scrolling for mobile
+                let isDown = false;
+                let startX;
+                let scrollLeft;
+
+                container.addEventListener('mousedown', (e) => {
+                    isDown = true;
+                    container.style.cursor = 'grabbing';
+                    startX = e.pageX - container.offsetLeft;
+                    scrollLeft = container.scrollLeft;
+                });
+
+                container.addEventListener('mouseleave', () => {
+                    isDown = false;
+                    container.style.cursor = 'grab';
+                });
+
+                container.addEventListener('mouseup', () => {
+                    isDown = false;
+                    container.style.cursor = 'grab';
+                });
+
+                container.addEventListener('mousemove', (e) => {
+                    if (!isDown) return;
+                    e.preventDefault();
+                    const x = e.pageX - container.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    container.scrollLeft = scrollLeft - walk;
+                });
+
+                // Touch events for mobile
+                container.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].pageX - container.offsetLeft;
+                    scrollLeft = container.scrollLeft;
+                });
+
+                container.addEventListener('touchmove', (e) => {
+                    if (!startX) return;
+                    const x = e.touches[0].pageX - container.offsetLeft;
+                    const walk = (x - startX) * 2;
+                    container.scrollLeft = scrollLeft - walk;
+                });
+            });
+        }
+
+        // Initialize after DOM is loaded
+        document.addEventListener('DOMContentLoaded', setupHorizontalScroll);
     </script>
 
 <script>
@@ -94,59 +445,211 @@
 
 <script>
     //for category
-    const scrollWrapper1 = document.querySelector('#s1');
-    const scrollWrapper2 = document.querySelector('#s2');
-    const scrollWrapper3 = document.querySelector('#s3');
-    const movieContainer = document.querySelector('.movie-container');
-    const tvContainer = document.querySelector('.series-container');
-    const animeContainer = document.querySelector('.anime-container');
+    const scrollWrapper1 = document.querySelector('.movie-container');
+    const scrollWrapper2 = document.querySelector('.series-container');
+    const scrollWrapper3 = document.querySelector('.anime-container');
 
-    scrollWrapper1.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0) {
-            e.preventDefault();
-            movieContainer.scrollLeft += e.deltaY;
-        }
-    });
-    scrollWrapper2.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0) {
-            e.preventDefault();
-            tvContainer.scrollLeft += e.deltaY;
-        }
-    });
-    scrollWrapper3.addEventListener('wheel', (e) => {
-        if (e.deltaY !== 0) {
-            e.preventDefault();
-            animeContainer.scrollLeft += e.deltaY;
-        }
-    });
+    // Enhanced scroll functionality will be handled in the main script above
+</script>
 
-    function enableTouchScroll(container) {
-        let isTouchDown = false;
-        let startTouchX;
-        let scrollTouchLeft;
-
-        container.addEventListener('touchstart', (e) => {
-            isTouchDown = true;
-            startTouchX = e.touches[0].pageX - container.offsetLeft;
-            scrollTouchLeft = container.scrollLeft;
-        });
-
-        container.addEventListener('touchend', () => {
-            isTouchDown = false;
-        });
-
-        container.addEventListener('touchmove', (e) => {
-            if (!isTouchDown) return;
-            e.preventDefault();
-            const x = e.touches[0].pageX - container.offsetLeft;
-            const scroll = (x - startTouchX) * 2;
-            container.scrollLeft = scrollTouchLeft - scroll;
-        });
+<style>
+    /* Custom scrollbar styles */
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* Custom movie card hover effects */
+    .movie-card, .series-card, .anime-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .movie-card:hover, .series-card:hover, .anime-card:hover {
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+        z-index: 10;
     }
 
-    enableTouchScroll(movieContainer);
-    enableTouchScroll(tvContainer);
-    enableTouchScroll(animeContainer);
+    /* Smooth backdrop transitions */
+    .backdrop-slider {
+        transition: opacity 1s ease-in-out;
+    }
+
+    /* Custom gradient overlay */
+    .hero-gradient {
+        background: linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.8) 0%,
+            rgba(0, 0, 0, 0.4) 50%,
+            rgba(0, 0, 0, 0.1) 100%
+        );
+    }
+
+    /* Hero loading animation */
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+
+    /* Hero content transitions */
+    #hero-content {
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Enhanced button hover effects */
+    .netflix-button {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .netflix-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .netflix-button:hover::before {
+        left: 100%;
+    }
+
+    /* Mobile navigation improvements */
+    @media (max-width: 1024px) {
+        .navbar-glass {
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+        
+        #navbar {
+            background: rgba(0, 0, 0, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+        
+        .search-input {
+            font-size: 16px; /* Prevents zoom on iOS */
+        }
+    }
+
+    /* Modal improvements */
+    .modal-content {
+        animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    /* Prevent body scroll when modal is open */
+    .modal-open {
+        overflow: hidden;
+    }
+
+    /* Mobile Modal Button Improvements - Under 500px */
+    @media (max-width: 500px) {
+        /* Modal button container */
+        .modal-content .flex.space-x-4 {
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+        }
+        
+        /* Modal buttons */
+        .modal-content .netflix-button {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 14px;
+            justify-content: center;
+            text-align: center;
+            margin: 0 !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Button icons */
+        .modal-content .netflix-button i {
+            margin-right: 8px;
+            margin-left: 0;
+        }
+        
+        /* Remove any default margins on mobile buttons */
+        .modal-content .netflix-button {
+            margin: 0;
+        }
+        
+        /* Override TailwindCSS space-x margins on mobile */
+        .modal-content .flex.space-x-4 > * {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        
+        /* Modal content padding adjustments */
+        .modal-content .p-6.lg\\:p-8 {
+            padding: 16px;
+        }
+        
+        /* Modal grid layout for mobile */
+        .modal-content .grid.grid-cols-1.lg\\:grid-cols-3 {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        /* Modal poster size adjustment */
+        .modal-content .lg\\:col-span-1 img {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        
+        /* Action buttons section */
+        .modal-content .flex.space-x-4.pt-4 {
+            padding-top: 20px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    }
+</style>
+
+<!-- Toast Script -->
+<script src="src/toast.js"></script>
+<script>
+    // Development toast function
+    function showDevToast(feature) {
+        showInfo(`${feature} feature is currently in development. Stay tuned for updates! :PP`, {
+            title: '🚧 Coming Soon :PP',
+            duration: 4000
+        });
+    }
 </script>
 
 </body>

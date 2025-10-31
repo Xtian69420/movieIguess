@@ -71,15 +71,18 @@ input{
 }
 
 .movie-card:hover .movie-poster {
-    transform: scale(1.05);
-    transition: transform 0.2s ease-in-out;
+    transform: scale(1.0); /* Remove individual scaling since card scales as whole */
+    transition: transform 0.3s ease-in-out;
 }
 
 .movie-poster {
     width: 100%;
-    height: auto;
+    height: 400px; /* Fixed height for background */
     position: relative;
     z-index: 1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .movie-card {
@@ -130,15 +133,18 @@ input{
 }
 
 .series-card:hover .series-poster {
-    transform: scale(1.05);
-    transition: transform 0.2s ease-in-out;
+    transform: scale(1.0); /* Remove individual scaling since card scales as whole */
+    transition: transform 0.3s ease-in-out;
 }
 
 .series-poster {
     width: 100%;
-    height: auto;
+    height: 400px; /* Fixed height for background */
     position: relative;
     z-index: 1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .series-card {
@@ -181,15 +187,18 @@ input{
 }
 
 .anime-card:hover .anime-poster {
-    transform: scale(1.05);
-    transition: transform 0.2s ease-in-out;
+    transform: scale(1.0); /* Remove individual scaling since card scales as whole */
+    transition: transform 0.3s ease-in-out;
 }
 
 .anime-poster {
     width: 100%;
-    height: auto;
+    height: 400px; /* Fixed height for background */
     position: relative;
     z-index: 1;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .anime-card {
@@ -296,16 +305,29 @@ i{
 .anime-container{
     display: flex;
     flex-wrap: nowrap;           
-    overflow: hidden;            
+    overflow-x: auto;
+    overflow-y: hidden;            
     gap: 20px;
-    -webkit-overflow-scrolling: touch;      
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+/* Hide webkit scrollbar */
+.movie-container::-webkit-scrollbar,
+.series-container::-webkit-scrollbar,
+.anime-container::-webkit-scrollbar {
+    display: none;
 }
 
 .movie-card,
 .series-card,
 .anime-card {
     flex: 0 0 auto;
-    width: 300px;                
+    width: 300px;
+    scroll-snap-align: start;
 }
 
 

@@ -3,28 +3,296 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Watch</title>
-    <link rel="stylesheet" href="view.css">
+    <title>MovieIGuess - Watch Movies & TV Shows</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="netflix-style.css">
+    <link rel="stylesheet" href="search.css">
+    <link rel="stylesheet" href="toast.css">
     <script src="https://kit.fontawesome.com/22dc8d85a3.js" crossorigin="anonymous"></script>
     <link rel="icon" href="src/icon.svg">
-    <link rel="stylesheet" href="search.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'netflix-red': '#E50914',
+                        'netflix-black': '#000000',
+                        'netflix-dark': '#141414',
+                        'netflix-gray': '#333333',
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-    <div class="background"></div>
-    <header class="nav">
-        <p class="title" onclick="home()"><i class="fa-solid fa-film"></i> Movie, I guess?</p>
-        <input type="text" placeholder="Search a movie/series">
-        <i class="fa-solid fa-magnifying-glass"></i>
+<body class="bg-netflix-black text-white min-h-screen">
+    <!-- Background Backdrop -->
+    <div class="background fixed inset-0 bg-cover bg-center bg-no-repeat"></div>
+    <div class="fixed inset-0 bg-netflix-black/70"></div>
+    
+    <!-- Navigation -->
+    <header class="navbar-glass fixed top-0 w-full z-50 transition-all duration-500" id="navbar">
+        <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-16 py-4 space-y-4 lg:space-y-0">
+            <!-- Logo -->
+            <div class="flex items-center space-x-8">
+                <h1 class="text-netflix-red text-2xl lg:text-3xl font-bold cursor-pointer hover:text-red-400 transition-colors text-center lg:text-left" onclick="home()">
+                    <i class="fa-solid fa-film mr-2"></i>MovieIGuess
+                </h1>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="flex items-center space-x-4 w-full lg:w-auto justify-center lg:justify-end">
+                <div class="relative w-full max-w-md lg:w-64">
+                    <input 
+                        type="text" 
+                        placeholder="Search a movie/series"
+                        class="search-input text-white placeholder-gray-400 rounded-md px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-netflix-red focus:border-transparent transition-all"
+                    >
+                    <i class="fa-solid fa-magnifying-glass absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 cursor-pointer hover:text-white transition-colors"></i>
+                </div>
+            </div>
+        </div>
     </header>
-    <main>
-        <div class="container"></div>
+
+    <!-- Main Content -->
+    <main class="relative z-10 pt-20">
+        <!-- Movie Details Container -->
+        <div class="container mx-auto px-4 lg:px-16 py-8 max-w-7xl">
+            <!-- Loading State -->
+            <div id="loading" class="flex justify-center items-center min-h-[60vh]">
+                <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-netflix-red"></div>
+            </div>
+
+            <!-- Movie Content -->
+            <div id="movieContent" class="hidden">
+                <!-- Hero Section with Backdrop -->
+                <div class="relative mb-8 lg:mb-12 rounded-lg overflow-hidden">
+                    <div class="relative h-[40vh] sm:h-[50vh] lg:h-[70vh]">
+                        <img id="backdropImage" src="" alt="" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-gradient-to-t from-netflix-black via-netflix-black/20 to-transparent"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-netflix-black/90 via-netflix-black/40 to-netflix-black/20"></div>
+                        
+                        <!-- Movie Info Overlay -->
+                        <div class="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-12">
+                            <div class="max-w-4xl">
+                                <h1 id="movieTitle" class="text-2xl sm:text-3xl lg:text-6xl font-bold mb-2 sm:mb-4 leading-tight"></h1>
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">
+                                    <div id="movieRating" class="flex items-center text-yellow-400">
+                                        <i class="fa-solid fa-star mr-1 sm:mr-2"></i>
+                                        <span class="text-white font-semibold">0.0</span>
+                                    </div>
+                                    <span id="movieYear" class="text-gray-300"></span>
+                                    <span id="movieRuntime" class="text-gray-300"></span>
+                                    <span id="movieGenres" class="text-gray-300 hidden sm:inline"></span>
+                                </div>
+                                <p id="movieOverview" class="text-sm sm:text-base lg:text-lg text-gray-300 mb-4 sm:mb-6 lg:mb-8 max-w-3xl leading-relaxed line-clamp-3 sm:line-clamp-none"></p>
+                                
+                                <!-- Action Buttons -->
+                                <div class="flex flex-wrap gap-2 sm:gap-4">
+                                    <button id="playButton" class="netflix-button bg-white text-black px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-200 transition-colors flex items-center text-sm sm:text-base">
+                                        <i class="fa-solid fa-play mr-1 sm:mr-2"></i>
+                                        Play
+                                    </button>
+                                    <button class="netflix-button bg-gray-600/70 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center text-sm sm:text-base" onclick="showDevToast('My List')">
+                                        <i class="fa-solid fa-plus mr-1 sm:mr-2"></i>
+                                        <span class="hidden sm:inline">My List</span>
+                                        <span class="sm:hidden">List</span>
+                                    </button>
+                                    <button class="netflix-button bg-gray-600/70 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center text-sm sm:text-base">
+                                        <i class="fa-solid fa-share mr-1 sm:mr-2"></i>
+                                        Share
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Information Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-12 mb-8 lg:mb-12">
+                    <!-- Quick Info Card -->
+                    <div class="lg:col-span-1 order-2 lg:order-1">
+                        <div class="lg:sticky lg:top-24">
+                            <!-- Quick Info Card -->
+                            <div class="bg-netflix-gray/50 rounded-lg p-4 sm:p-6 backdrop-blur-sm">
+                                <h3 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4 text-white">Movie Information</h3>
+                                <div class="grid grid-cols-2 lg:grid-cols-1 gap-2 lg:gap-3 text-sm lg:text-base text-gray-300">
+                                    <div class="flex flex-col lg:flex-row lg:justify-between">
+                                        <span class="text-gray-400">Release Date:</span>
+                                        <span id="releaseDate" class="text-white"></span>
+                                    </div>
+                                    <div class="flex flex-col lg:flex-row lg:justify-between">
+                                        <span class="text-gray-400">Runtime:</span>
+                                        <span id="runtimeDetail" class="text-white"></span>
+                                    </div>
+                                    <div class="flex flex-col lg:flex-row lg:justify-between">
+                                        <span class="text-gray-400">Rating:</span>
+                                        <span id="ratingDetail" class="text-white"></span>
+                                    </div>
+                                    <div class="flex flex-col lg:flex-row lg:justify-between">
+                                        <span class="text-gray-400">Vote Count:</span>
+                                        <span id="voteCount" class="text-white"></span>
+                                    </div>
+                                    <div class="flex flex-col lg:flex-row lg:justify-between">
+                                        <span class="text-gray-400">Language:</span>
+                                        <span id="language" class="text-white"></span>
+                                    </div>
+                                    <div class="flex flex-col lg:flex-row lg:justify-between">
+                                        <span class="text-gray-400">Budget:</span>
+                                        <span id="budget" class="text-white"></span>
+                                    </div>
+                                    <div class="flex flex-col lg:flex-row lg:justify-between">
+                                        <span class="text-gray-400">Revenue:</span>
+                                        <span id="revenue" class="text-white"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content Area -->
+                    <div class="lg:col-span-2 order-1 lg:order-2">
+                        <!-- Detailed Overview -->
+                        <div class="mb-6 lg:mb-8">
+                            <h2 class="text-xl lg:text-2xl font-bold mb-3 lg:mb-4 text-white">Synopsis</h2>
+                            <p id="detailedOverview" class="text-gray-300 leading-relaxed text-base lg:text-lg"></p>
+                        </div>
+
+                        <!-- Genres -->
+                        <div class="mb-6 lg:mb-8">
+                            <h3 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4 text-white">Genres</h3>
+                            <div id="genresList" class="flex flex-wrap gap-2"></div>
+                        </div>
+
+                        <!-- Production Companies -->
+                        <div class="mb-6 lg:mb-8">
+                            <h3 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4 text-white">Production Companies</h3>
+                            <div id="productionCompanies" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                        </div>
+
+                        <!-- Cast & Crew (if available) -->
+                        <div class="mb-6 lg:mb-8">
+                            <h3 class="text-lg lg:text-xl font-semibold mb-3 lg:mb-4 text-white">Cast & Crew</h3>
+                            <div id="castContainer" class="text-gray-300">
+                                <p>Cast information will be loaded here...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Similar Content Section -->
+                <div class="mb-8 lg:mb-12">
+                    <div class="flex items-center justify-between mb-4 lg:mb-6">
+                        <h2 class="text-xl lg:text-2xl xl:text-3xl font-bold flex items-center text-white">
+                            <i class="fa-solid fa-film text-netflix-red mr-2 lg:mr-3"></i>
+                            Similar
+                        </h2>
+                    </div>
+                    
+                    <!-- Tabs for Movies and TV Shows -->
+                    <div class="flex space-x-1 mb-4 bg-netflix-gray/30 rounded-lg p-1 w-fit">
+                        <button id="moviesTab" class="tab-button active px-4 py-2 rounded-md font-medium text-sm transition-all">
+                            Movies
+                        </button>
+                        <button id="tvTab" class="tab-button px-4 py-2 rounded-md font-medium text-sm transition-all">
+                            TV Shows
+                        </button>
+                    </div>
+                    
+                    <!-- Content containers -->
+                    <div class="overflow-hidden">
+                        <div id="similarMovies" class="similar-content active similar-movies-grid">
+                            <!-- Similar movies will be populated here -->
+                        </div>
+                        <div id="similarTVShows" class="similar-content hidden similar-movies-grid">
+                            <!-- Similar TV shows will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="errorState" class="hidden text-center py-20">
+                <i class="fa-solid fa-exclamation-triangle text-6xl text-netflix-red mb-4"></i>
+                <h2 class="text-2xl font-bold mb-4 text-white">Movie Not Found</h2>
+                <p class="text-gray-400 mb-8">Sorry, we couldn't find the movie you're looking for.</p>
+                <button onclick="window.location.href='index.html'" class="netflix-button bg-netflix-red text-white px-8 py-3 rounded font-semibold hover:bg-red-700 transition-colors">
+                    Back to Home
+                </button>
+            </div>
+        </div>
     </main>
-    <footer>
-        <p class="title">Movie, I guess?</p>
-        <div class="contanctInfos">
-            <i class="fa-brands fa-instagram" onclick="ins()"></i>
-            <i class="fa-brands fa-linkedin-in" onclick="lin()"></i>
-            <i class="fa-brands fa-github" onclick="git()"></i>
+
+    <!-- Search Modal -->
+    <div id="searchModal" class="search-modal-overlay hidden">
+        <div class="search-modal-card">
+            <!-- Close Button -->
+            <button id="searchCloseBtn" class="modal-back-button">
+                <i class="fa-solid fa-times"></i>
+            </button>
+            
+            <!-- Search Header -->
+            <div class="search-header">
+                <h2 id="searchResultsTitle">Search Results</h2>
+                <div class="search-filters">
+                    <button class="filter-btn active" data-type="all">All</button>
+                    <button class="filter-btn" data-type="movie">Movies</button>
+                    <button class="filter-btn" data-type="tv">TV Shows</button>
+                    <button class="filter-btn" data-type="person">People</button>
+                </div>
+            </div>
+            
+            <!-- Search Results Container -->
+            <div id="searchResultsContainer" class="search-results-container">
+                <div class="loading">Loading...</div>
+            </div>
+            
+            <!-- Pagination Container -->
+            <div id="searchPaginationContainer" class="pagination-container"></div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="relative z-10 bg-netflix-dark mt-20 py-16">
+        <div class="px-4 lg:px-16">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <h3 class="text-netflix-red text-2xl font-bold mb-4">MovieIGuess</h3>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Your ultimate destination for discovering amazing movies and TV shows. 
+                        Stream, watch, and enjoy entertainment like never before.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="index.html" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('Movie List')">Movies</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('TV Show List')">TV Shows</a></li>
+                        <li><a href="#" class="hover:text-white transition-colors" onclick="showDevToast('My List')">My List</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-white font-semibold mb-4">Connect With Us</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" onclick="ins()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-instagram text-2xl"></i>
+                        </a>
+                        <a href="#" onclick="lin()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-linkedin-in text-2xl"></i>
+                        </a>
+                        <a href="#" onclick="git()" class="text-gray-400 hover:text-netflix-red transition-colors">
+                            <i class="fa-brands fa-github text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-12 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2024 MovieIGuess. All rights reserved. | Privacy Policy | Terms of Service</p>
+            </div>
         </div>
     </footer>
     <script>
@@ -37,6 +305,391 @@
     </script>
     <script src="src/view.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="src/search.js"></script> <!-- Your custom script -->
+    <script src="src/search.js"></script>
+
+    <style>
+        /* Custom scrollbar styles */
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Professional button effects */
+        .netflix-button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .netflix-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .netflix-button:hover::before {
+            left: 100%;
+        }
+
+        .netflix-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.3);
+        }
+
+        /* Genre tags styling */
+        .genre-tag {
+            background: linear-gradient(135deg, #E50914, #B81D24);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(229, 9, 20, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .genre-tag:hover {
+            background: linear-gradient(135deg, #B81D24, #E50914);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.4);
+        }
+
+        /* Production company cards */
+        .production-card {
+            background: rgba(51, 51, 51, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .production-card:hover {
+            background: rgba(51, 51, 51, 0.5);
+            border-color: rgba(229, 9, 20, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .production-card img {
+            max-height: 60px;
+            max-width: 100%;
+            object-fit: contain;
+            margin: 0 auto 8px;
+            filter: brightness(0.8);
+            transition: filter 0.3s ease;
+        }
+
+        .production-card:hover img {
+            filter: brightness(1);
+        }
+
+        /* Similar content tabs */
+        .tab-button {
+            color: #9ca3af;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .tab-button.active {
+            background: #E50914;
+            color: white;
+        }
+        
+        .tab-button:hover:not(.active) {
+            color: white;
+            background: rgba(229, 9, 20, 0.3);
+        }
+        
+        .similar-content {
+            transition: opacity 0.3s ease;
+        }
+        
+        .similar-content.hidden {
+            display: none !important;
+        }
+        
+        .similar-content.active {
+            display: flex !important;
+        }
+
+        /* Similar movies grid container */
+        .similar-movies-grid {
+            display: flex;
+            gap: 1.5rem;
+            padding: 2rem 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* Internet Explorer 10+ */
+        }
+
+        /* Hide scrollbar for webkit browsers */
+        .similar-movies-grid::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Similar movies cards */
+        .similar-movie-card {
+            min-width: 200px;
+            width: 200px;
+            height: 380px;
+            background: rgba(20, 20, 20, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .similar-movie-card:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            border-color: rgba(229, 9, 20, 0.3);
+        }
+
+        .similar-movie-poster {
+            width: 100%;
+            height: 280px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .similar-movie-card:hover .similar-movie-poster {
+            transform: scale(1.1);
+        }
+
+        .similar-movie-info {
+            padding: 12px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(20, 20, 20, 0.95);
+            position: relative;
+            z-index: 2;
+        }
+
+        .similar-movie-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: white;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            height: 2.6rem;
+        }
+
+        .similar-movie-rating {
+            font-size: 12px;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        /* Loading animation */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        /* Backdrop image effects */
+        #backdropImage {
+            transition: transform 0.3s ease;
+        }
+
+        .backdrop-container:hover #backdropImage {
+            transform: scale(1.02);
+        }
+
+        /* Info card glass effect */
+        .info-card {
+            background: rgba(20, 20, 20, 0.7);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Smooth scroll for similar movies */
+        #similarMovies {
+            scroll-behavior: smooth;
+        }
+
+        /* Better centering and scroll handling */
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .similar-content {
+            justify-content: flex-start;
+            align-items: flex-start;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        
+        /* Ensure cards don't get cut off */
+        .similar-content::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .similar-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        
+        .similar-content::-webkit-scrollbar-thumb {
+            background: #E50914;
+            border-radius: 3px;
+        }
+        
+        .similar-content::-webkit-scrollbar-thumb:hover {
+            background: #B81D24;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .netflix-button {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            
+            .genre-tag {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .similar-movie-card {
+                min-width: 140px;
+                width: 140px;
+                flex-shrink: 0;
+            }
+            
+            .similar-movie-card img {
+                height: 200px;
+            }
+            
+            .similar-movie-info {
+                padding: 8px;
+            }
+            
+            .similar-movie-title {
+                font-size: 12px;
+                line-height: 1.2;
+            }
+            
+            .similar-movie-rating {
+                font-size: 11px;
+            }
+            
+            /* Better mobile hero section */
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            /* Mobile info card improvements */
+            .production-card {
+                padding: 12px;
+            }
+            
+            .production-card img {
+                max-height: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .netflix-button {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            
+            .similar-movie-card {
+                min-width: 120px;
+                width: 120px;
+            }
+            
+            .similar-movie-card img {
+                height: 170px;
+            }
+            
+            .container {
+                padding-left: 0.75rem;
+                padding-right: 0.75rem;
+            }
+        }
+
+        /* Line clamp utility for mobile overview */
+        .line-clamp-3 {
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+        }
+
+        /* Custom focus states for accessibility */
+        .netflix-button:focus,
+        .genre-tag:focus,
+        .similar-movie-card:focus {
+            outline: 2px solid #E50914;
+            outline-offset: 2px;
+        }
+    </style>
+
+    <script>
+        // Navbar glassmorphism scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        function home() {
+            window.location.href = "index.html";
+        }
+    </script>
+
+    <!-- Toast Script -->
+    <script src="src/toast.js"></script>
+    <script>
+        // Development toast function
+        function showDevToast(feature) {
+            showInfo(`${feature} feature is currently in development. Stay tuned for updates!`, {
+                title: '🚧 Coming Soon',
+                duration: 4000
+            });
+        }
+    </script>
 </body>
 </html>

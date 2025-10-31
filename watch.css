@@ -349,39 +349,169 @@ body {
 }
 
 
-/* Basic Button Styling */
-.server-selection button {
-    background-color: #640101; /* Green color */
+/* Professional Server Selection */
+.server-selection {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.server-selection::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.05) 0%, rgba(102, 126, 234, 0.03) 100%);
+    border-radius: 20px;
+    z-index: 1;
+}
+
+.server-selection > * {
+    position: relative;
+    z-index: 2;
+}
+
+.server-selection h3 {
     color: white;
-    border: none;
-    padding: 10px 20px;
-    margin: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    border-radius: 5px; /* Rounded corners */
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
     text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    letter-spacing: 0.02em;
 }
 
-.server-selection button:hover {
-    background-color: #8e0303;
-    transform: scale(1.05);
+.server-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    align-items: center;
 }
 
-.server-selection button.active {
-    background-color: #230000; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.server-btn {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: white;
+    padding: 0.875rem 1.25rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
-.server-selection button:focus {
-    outline: none; 
-    border: 2px solid #333;
+.server-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.15) 0%, rgba(102, 126, 234, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 12px;
 }
 
-@media (max-width: 600px) {
-    .server-selection button {
-        width: 100%;
-        margin: 10px 0;
+.server-btn:hover::before {
+    opacity: 1;
+}
+
+.server-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    border-color: rgba(229, 9, 20, 0.4);
+    box-shadow: 0 8px 25px rgba(229, 9, 20, 0.2);
+}
+
+.server-btn.active {
+    background: linear-gradient(135deg, #E50914 0%, #B8070F 100%);
+    border-color: rgba(229, 9, 20, 0.6);
+    box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+    transform: translateY(-1px);
+}
+
+.server-btn.active::before {
+    opacity: 0;
+}
+
+.server-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.2);
+}
+
+/* Touch optimizations for server buttons */
+@media (hover: none) and (pointer: coarse) {
+    .server-btn:hover {
+        transform: none;
+    }
+    
+    .server-btn:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* Responsive Server Selection */
+@media (max-width: 768px) {
+    .server-selection {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    
+    .server-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .server-btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        min-height: 44px;
+    }
+    
+    .server-selection h3 {
+        font-size: 1.3rem;
+        margin-bottom: 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .server-selection {
+        padding: 1rem;
+        margin: 1rem 0;
+    }
+    
+    .server-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    
+    .server-btn {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.85rem;
+        min-height: 42px;
+    }
+    
+    .server-selection h3 {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
     }
 }
 
@@ -462,4 +592,1011 @@ body {
     }
 .video-container iframe {
     overflow: hidden;
+}
+
+/* TV Series Layout - Enhanced */
+.video-sidebar-layout {
+    display: flex !important;
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+    align-items: flex-start;
+    min-height: 400px;
+}
+
+.video-section {
+    flex: 1;
+    min-width: 0;
+    max-width: calc(100% - 420px);
+}
+
+/* Desktop Sidebar - Right of Video - Enhanced */
+.tv-sidebar {
+    width: 380px !important;
+    min-width: 380px;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(30px);
+    border-radius: 24px;
+    padding: 2rem;
+    height: fit-content;
+    border: 2px solid rgba(229, 9, 20, 0.2);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    position: relative;
+}
+
+.tv-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.05) 0%, rgba(0, 0, 0, 0.1) 100%);
+    border-radius: 24px;
+    z-index: 1;
+}
+
+.tv-sidebar > * {
+    position: relative;
+    z-index: 2;
+}
+
+.sidebar-header h3 {
+    color: white;
+    font-size: 1.3rem;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Enhanced Dropdown Styling */
+.season-dropdown {
+    margin-bottom: 2rem;
+}
+
+.season-dropdown label {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-wrapper {
+    position: relative;
+}
+
+.dropdown-wrapper select {
+    width: 100%;
+    padding: 1.2rem 3rem 1.2rem 1.2rem;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.15) 0%, rgba(255, 255, 255, 0.08) 100%);
+    border: 2px solid rgba(229, 9, 20, 0.3);
+    border-radius: 16px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    box-shadow: 0 4px 15px rgba(229, 9, 20, 0.1);
+    min-height: 50px; /* Better touch targets */
+}
+
+.dropdown-wrapper select:hover {
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.25) 0%, rgba(255, 255, 255, 0.12) 100%);
+    border-color: rgba(229, 9, 20, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(229, 9, 20, 0.2);
+}
+
+.dropdown-wrapper select:focus {
+    outline: none;
+    border-color: #E50914;
+    box-shadow: 0 0 0 4px rgba(229, 9, 20, 0.2);
+    transform: translateY(-2px);
+}
+
+.dropdown-arrow {
+    position: absolute;
+    right: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.8);
+    pointer-events: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.dropdown-wrapper select:focus + .dropdown-arrow {
+    transform: translateY(-50%) rotate(180deg);
+    color: #E50914;
+}
+
+.dropdown-wrapper select option {
+    background: #1a1a1a;
+    color: white;
+    padding: 1.2rem;
+    border: none;
+    font-weight: 500;
+}
+
+/* Responsive Dropdown */
+@media (max-width: 768px) {
+    .dropdown-wrapper select {
+        padding: 1rem 2.5rem 1rem 1rem;
+        font-size: 0.9rem;
+        min-height: 48px;
+    }
+    
+    .season-dropdown label {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dropdown-wrapper select {
+        padding: 0.8rem 2rem 0.8rem 0.8rem;
+        font-size: 0.85rem;
+        min-height: 44px;
+    }
+    
+    .dropdown-arrow {
+        right: 0.8rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Episodes Sidebar */
+.episodes-sidebar {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.episodes-sidebar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.episodes-sidebar::-webkit-scrollbar-track {
+    background: rgba(20, 20, 20, 0.5);
+    border-radius: 4px;
+}
+
+.episodes-sidebar::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #E50914 0%, #B8070F 100%);
+    border-radius: 4px;
+}
+
+.episodes-sidebar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #FF1E2D 0%, #C8081F 100%);
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+}
+
+/* Professional Episode Cards */
+.episode-card-sidebar {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 120px; /* Better touch targets */
+}
+
+.episode-card-sidebar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.15) 0%, rgba(102, 126, 234, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 16px;
+}
+
+.episode-card-sidebar:hover::before {
+    opacity: 1;
+}
+
+.episode-card-sidebar:hover {
+    border-color: rgba(229, 9, 20, 0.4);
+    box-shadow: 0 12px 35px rgba(229, 9, 20, 0.25);
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .episode-card-sidebar:hover {
+        transform: none;
+    }
+    
+    .episode-card-sidebar:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* Responsive Episode Cards */
+@media (max-width: 1024px) {
+    .episode-card-sidebar {
+        padding: 1rem;
+        min-height: 100px;
+    }
+}
+
+@media (max-width: 768px) {
+    .episode-card-sidebar {
+        padding: 0.75rem;
+        min-height: 80px;
+        margin-bottom: 0.75rem;
+    }
+    
+    .episode-card-title {
+        font-size: 0.85rem !important;
+    }
+    
+    .episode-card-desc {
+        font-size: 0.75rem !important;
+    }
+    
+    .episode-badge {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.7rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .episode-card-sidebar {
+        padding: 0.5rem;
+        min-height: 70px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .episode-card-title {
+        font-size: 0.8rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+    
+    .episode-card-desc {
+        font-size: 0.7rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    .episode-badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.65rem;
+    }
+    
+    .air-date, .runtime {
+        font-size: 0.6rem;
+        padding: 0.15rem 0.3rem;
+    }
+}
+
+/* Episode Selection Base Styles */
+.episode-selection {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 2rem 0;
+    max-height: 500px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #E50914 rgba(20, 20, 20, 0.5);
+}
+
+.episode-selection::-webkit-scrollbar {
+    width: 10px;
+}
+
+.episode-selection::-webkit-scrollbar-track {
+    background: rgba(20, 20, 20, 0.5);
+    border-radius: 10px;
+}
+
+.episode-selection::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #E50914 0%, #B8070F 100%);
+    border-radius: 10px;
+    transition: background 0.3s ease;
+}
+
+.episode-selection::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(135deg, #FF1E2D 0%, #C8081F 100%);
+    box-shadow: 0 0 10px rgba(229, 9, 20, 0.5);
+}
+
+.episode-selection h3 {
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.episode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+/* Professional Mobile Episode Cards */
+.episode-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    min-height: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.episode-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(229, 9, 20, 0.15) 0%, rgba(102, 126, 234, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    border-radius: 16px;
+}
+
+.episode-card:hover::before {
+    opacity: 1;
+}
+
+.episode-card:hover {
+    border-color: rgba(229, 9, 20, 0.4);
+    box-shadow: 0 8px 25px rgba(229, 9, 20, 0.2);
+}
+
+.episode-number {
+    background: linear-gradient(135deg, #E50914 0%, #B8070F 100%);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+    text-align: center;
+    position: relative;
+    z-index: 2;
+    align-self: flex-start;
+    width: fit-content;
+}
+
+.episode-info {
+    flex: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.episode-title {
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.episode-overview {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.episode-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.episode-meta span {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Touch optimizations for mobile episode cards */
+@media (hover: none) and (pointer: coarse) {
+    .episode-card:hover {
+        transform: none;
+    }
+    
+    .episode-card:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* Responsive episode cards */
+@media (max-width: 768px) {
+    .episode-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+    
+    .episode-card {
+        padding: 1rem;
+        min-height: 160px;
+        gap: 0.75rem;
+    }
+    
+    .episode-number {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.85rem;
+    }
+    
+    .episode-title {
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+    
+    .episode-overview {
+        font-size: 0.85rem;
+        margin-bottom: 0.75rem;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+    }
+    
+    .episode-meta span {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.45rem;
+    }
+    
+    .episode-selection {
+        padding: 1.5rem;
+        max-height: 450px;
+    }
+}
+
+@media (max-width: 480px) {
+    .episode-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    
+    .episode-card {
+        padding: 1rem;
+        min-height: 140px;
+        gap: 0.75rem;
+        flex-direction: row;
+        align-items: flex-start;
+    }
+    
+    .episode-number {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.9rem;
+        align-self: flex-start;
+        min-width: 50px;
+        flex-shrink: 0;
+    }
+    
+    .episode-info {
+        width: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 100%;
+        min-height: 100px;
+    }
+    
+    .episode-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+    
+    .episode-overview {
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        flex-grow: 1;
+    }
+    
+    .episode-meta {
+        margin-top: auto;
+        gap: 0.4rem;
+    }
+    
+    .episode-meta span {
+        font-size: 0.75rem;
+        padding: 0.3rem 0.5rem;
+    }
+    
+    .episode-selection {
+        padding: 1rem;
+        max-height: 400px;
+    }
+}
+
+.episode-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    position: relative;
+    z-index: 2;
+}
+
+.episode-badge {
+    background: linear-gradient(135deg, #E50914 0%, #B8070F 100%);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+}
+
+.episode-meta-top {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
+}
+
+.air-date, .runtime {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+}
+
+.episode-card-content {
+    position: relative;
+    z-index: 2;
+}
+
+.episode-card-title {
+    color: white;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    letter-spacing: 0.02em;
+}
+
+.episode-card-desc {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin-bottom: 0.75rem;
+    text-align: justify;
+}
+
+.episode-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.episode-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #ffd700;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.episode-rating i {
+    font-size: 0.7rem;
+}
+
+.play-indicator {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.play-indicator i {
+    color: white;
+    font-size: 0.7rem;
+    margin-left: 1px;
+}
+
+.episode-card-sidebar:hover .play-indicator {
+    background: rgba(229, 9, 20, 0.8);
+}
+
+/* Legacy episode styles for backward compatibility */
+.episode-item {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.episode-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.episode-item:hover::before {
+    opacity: 1;
+}
+
+.episode-item:hover {
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.2);
+}
+
+.episode-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.episode-num {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.episode-rating {
+    color: #ffd700;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.episode-title {
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+    position: relative;
+    z-index: 1;
+}
+
+.episode-desc {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+    line-height: 1.4;
+    position: relative;
+    z-index: 1;
+}
+
+.select-season-text {
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+    font-style: italic;
+    margin-top: 2rem;
+    font-size: 0.9rem;
+}
+
+.error-text {
+    color: #ff6b6b;
+    text-align: center;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+/* Enhanced Responsive Design - Mobile First */
+.desktop-only {
+    display: block !important;
+}
+
+.mobile-only {
+    display: none !important;
+}
+
+/* Tablet Layout (768px - 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .video-sidebar-layout {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1.5rem;
+        margin: 1.5rem auto;
+    }
+    
+    .tv-sidebar {
+        display: block !important;
+        width: 100% !important;
+        max-width: 700px !important;
+        margin: 0 auto !important;
+        padding: 1.5rem;
+    }
+    
+    .video-section {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    .mobile-only {
+        display: none !important;
+    }
+    
+    .desktop-only {
+        display: block !important;
+    }
+    
+    /* Tablet episode cards */
+    .episode-card-sidebar {
+        padding: 1rem;
+    }
+    
+    .episodes-sidebar {
+        max-height: 400px;
+    }
+    
+    /* Override any conflicting season selection styles */
+    .season-selection.mobile-only {
+        display: none !important;
+    }
+    
+    .episode-selection.mobile-only {
+        display: none !important;
+    }
+}
+
+/* Desktop Layout (1025px+) */
+@media (min-width: 1025px) {
+    .video-sidebar-layout {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: flex-start !important;
+    }
+    
+    .tv-sidebar {
+        display: block !important;
+        width: 380px !important;
+        min-width: 380px !important;
+        margin: 0 !important;
+    }
+    
+    .video-section {
+        flex: 1 !important;
+        max-width: calc(100% - 420px) !important;
+    }
+    
+    .mobile-only {
+        display: none !important;
+    }
+    
+    .desktop-only {
+        display: block !important;
+    }
+    
+    /* Override any conflicting season selection styles */
+    .season-selection.mobile-only {
+        display: none !important;
+    }
+    
+    .episode-selection.mobile-only {
+        display: none !important;
+    }
+}
+
+/* Mobile Layout (up to 768px) */
+@media (max-width: 768px) {
+    .video-sidebar-layout {
+        flex-direction: column !important;
+        gap: 1rem;
+        margin: 1rem auto;
+        padding: 0 0.5rem;
+    }
+    
+    .tv-sidebar {
+        display: none !important;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+    }
+    
+    .video-section {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* Mobile specific styles */
+    .watch-hero {
+        margin-bottom: 1rem;
+    }
+    
+    .watch-hero .p-8 {
+        padding: 1.5rem !important;
+    }
+    
+    .watch-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .season-selection, .episode-selection {
+        padding: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .season-grid {
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)) !important;
+        gap: 8px !important;
+    }
+    
+    .episode-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.75rem !important;
+    }
+    
+    .server-selection {
+        padding: 1.5rem !important;
+    }
+    
+    .server-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+        gap: 0.75rem !important;
+    }
+    
+    .movie-details {
+        padding: 1rem !important;
+    }
+    
+    .details-grid {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+}
+
+/* Small Mobile (up to 480px) */
+@media (max-width: 480px) {
+    .watch-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .season-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important;
+    }
+    
+    .episode-grid {
+        grid-template-columns: 1fr !important;
+        gap: 0.5rem !important;
+    }
+    
+    .server-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 0.5rem !important;
+    }
+    
+    .watch-hero .p-8 {
+        padding: 1rem !important;
+    }
+    
+    .season-selection, .episode-selection, .server-selection, .movie-details {
+        padding: 0.75rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+}
+/* Movie Content Wrapper - Full Width with Sidebar */
+.movie-content-wrapper {
+    width: 100%;
+}
+
+/* Show sidebar for movies with similar movies */
+.movie-content-wrapper .movie-sidebar {
+    display: block !important;
+}
+
+/* Override flex layout for movie pages */
+.movie-content-wrapper .video-sidebar-layout {
+    display: flex !important;
+    gap: 2rem;
+    max-width: 100% !important;
+}
+
+.movie-content-wrapper .video-section {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Ensure video container maintains aspect ratio */
+.movie-content-wrapper .video-container {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Similar Movies Sidebar Styling */
+.movie-sidebar .sidebar-header h3 {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+/* Mobile: Hide movie sidebar on small screens */
+@media (max-width: 1024px) {
+    .movie-content-wrapper .movie-sidebar {
+        display: none !important;
+    }
+    
+    .movie-content-wrapper .video-sidebar-layout {
+        display: block !important;
+    }
+    
+    .movie-content-wrapper .video-section {
+        width: 100%;
+    }
 }
