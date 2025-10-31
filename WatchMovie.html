@@ -28,19 +28,35 @@
     
     <style>
         /* Force browser to respect original colors - prevent auto theme changes */
+        :root {
+            color-scheme: light !important;
+            -webkit-color-scheme: light !important;
+        }
+        
         * {
-            color-scheme: normal !important;
-            -webkit-color-scheme: normal !important;
+            color-scheme: light !important;
+            -webkit-color-scheme: light !important;
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
             filter: none !important;
+            -webkit-filter: none !important;
         }
         
         html, body {
-            color-scheme: normal !important;
-            -webkit-color-scheme: normal !important;
+            color-scheme: light !important;
+            -webkit-color-scheme: light !important;
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
+        }
+        
+        /* Block dark mode media queries */
+        @media (prefers-color-scheme: dark) {
+            * {
+                color-scheme: light !important;
+                -webkit-color-scheme: light !important;
+                forced-color-adjust: none !important;
+                -webkit-forced-color-adjust: none !important;
+            }
         }
         
         /* Ensure backgrounds and colors are preserved */
@@ -50,15 +66,47 @@
         [class*="bg-"] {
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
+            filter: none !important;
+            -webkit-filter: none !important;
         }
         
         /* Prevent text color modifications */
         .text-white,
         .text-netflix-red,
         .text-red-600,
+        .text-gray-400,
+        .text-gray-300,
+        .text-gray-200,
         [class*="text-"] {
             forced-color-adjust: none !important;
             -webkit-forced-color-adjust: none !important;
+            filter: none !important;
+            -webkit-filter: none !important;
+        }
+        
+        /* Lock all light colors and prevent dark mode conversion */
+        .text-gray-400 {
+            color: #9ca3af !important;
+        }
+        
+        .text-gray-300 {
+            color: #d1d5db !important;
+        }
+        
+        .text-gray-200 {
+            color: #e5e7eb !important;
+        }
+        
+        .text-gray-100 {
+            color: #f3f4f6 !important;
+        }
+        
+        .bg-gray-800 {
+            background-color: #1f2937 !important;
+        }
+        
+        .bg-gray-900 {
+            background-color: #111827 !important;
         }
         
         /* Lock Netflix brand colors */
@@ -84,6 +132,29 @@
         
         .bg-black {
             background-color: #000000 !important;
+        }
+        
+        /* Force borders and outlines to maintain colors */
+        .border-gray-600 {
+            border-color: #4b5563 !important;
+        }
+        
+        .border-gray-700 {
+            border-color: #374151 !important;
+        }
+        
+        /* Override any browser-imposed styles */
+        input, textarea, select, button {
+            color-scheme: light !important;
+            -webkit-color-scheme: light !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+        }
+        
+        /* Prevent shadow color changes */
+        .shadow-lg, .shadow-xl, [class*="shadow-"] {
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
         }
         
         /* Professional Watch Page Styling */
