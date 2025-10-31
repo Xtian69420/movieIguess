@@ -411,37 +411,7 @@
         document.addEventListener('DOMContentLoaded', setupHorizontalScroll);
     </script>
 
-<script>
-    window.onload = () => {
-        if ('geolocation' in navigator) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const location = `${position.coords.latitude},${position.coords.longitude}`;
-
-                    fetch('https://movieiguessserver.onrender.com/views/addViews', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ location: location })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        console.log('View added:', data);
-                    })
-                    .catch(error => {
-                        console.error('Fetch error adding view:', error);
-                    });
-                },
-                (error) => {
-                    console.error('Geolocation error:', error.message);
-                }
-            );
-        } else {
-            console.warn('Geolocation is not supported by this browser.');
-        }
-    };
-</script>
+<!-- Removed: legacy geolocation + external API tracking (CORS issues) -->
 
 <script>
     //for category
