@@ -27,6 +27,65 @@
     </script>
     
     <style>
+        /* Force browser to respect original colors - prevent auto theme changes */
+        * {
+            color-scheme: normal !important;
+            -webkit-color-scheme: normal !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+            filter: none !important;
+        }
+        
+        html, body {
+            color-scheme: normal !important;
+            -webkit-color-scheme: normal !important;
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+        }
+        
+        /* Ensure backgrounds and colors are preserved */
+        .bg-netflix-black,
+        .bg-netflix-dark,
+        .bg-black,
+        [class*="bg-"] {
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+        }
+        
+        /* Prevent text color modifications */
+        .text-white,
+        .text-netflix-red,
+        .text-red-600,
+        [class*="text-"] {
+            forced-color-adjust: none !important;
+            -webkit-forced-color-adjust: none !important;
+        }
+        
+        /* Lock Netflix brand colors */
+        .text-netflix-red {
+            color: #E50914 !important;
+        }
+        
+        .bg-netflix-red {
+            background-color: #E50914 !important;
+        }
+        
+        .bg-netflix-black {
+            background-color: #000000 !important;
+        }
+        
+        .bg-netflix-dark {
+            background-color: #141414 !important;
+        }
+        
+        .text-white {
+            color: #ffffff !important;
+        }
+        
+        .bg-black {
+            background-color: #000000 !important;
+        }
+        
         /* Professional Watch Page Styling */
         .watch-hero {
             background: linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(0, 0, 0, 0.8) 100%);
