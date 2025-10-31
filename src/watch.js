@@ -12,6 +12,7 @@ let currentServerUrl = 'https://player.videasy.net/embed/';
 
 const servers = [
     { name: 'Netflix', url: 'https://player.videasy.net/embed/' },
+    { name: 'VidRock', url: 'https://vidrock.net/' },
     { name: 'Vidsrc-1', url: 'https://www.vidsrc.wtf/api/1/' },
     { name: 'Vidsrc-2', url: 'https://vidsrc.wtf/api/2/' },
     { name: 'Premium', url: 'https://111movies.com/' },
@@ -21,7 +22,6 @@ const servers = [
     { name: 'Prime', url: 'https://test.autoembed.cc/embed/' },
     { name: 'Purple', url: 'https://multiembed.mov/' },
     { name: 'Prime 2', url: 'https://www.primewire.tf/embed/' },
-    { name: 'VidRock', url: 'https://vidrock.net/' },
     { name: 'Mega', url: 'https://vidrock.net/mega/' },
     { name: 'VidNest', url: 'https://vidnest.fun/' },
     { name: 'Vidzee', url: 'https://player.vidzee.wtf/embed/' }
