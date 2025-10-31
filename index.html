@@ -10,6 +10,123 @@
     <meta name="msapplication-navbutton-color" content="#000000">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- ANTI-FORCED-DARK-MODE SCRIPT - Must run before page load -->
+    <script>
+        // Detect and counteract forced dark mode at rendering engine level
+        (function() {
+            'use strict';
+            
+            // Flag to track if forced dark mode is detected
+            let forcedDarkDetected = false;
+            
+            // Create a test element to detect color inversion
+            function detectForcedDarkMode() {
+                const testDiv = document.createElement('div');
+                testDiv.style.cssText = `
+                    position: fixed !important;
+                    top: -1000px !important;
+                    left: -1000px !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    background-color: rgb(255, 255, 255) !important;
+                    color: rgb(0, 0, 0) !important;
+                    z-index: -9999 !important;
+                    pointer-events: none !important;
+                `;
+                document.documentElement.appendChild(testDiv);
+                
+                setTimeout(() => {
+                    const computed = window.getComputedStyle(testDiv);
+                    const bgColor = computed.backgroundColor;
+                    const textColor = computed.color;
+                    
+                    // If white background becomes dark or black text becomes light, forced dark mode is active
+                    if (bgColor.includes('0, 0, 0') || bgColor.includes('rgb(0') || 
+                        textColor.includes('255, 255, 255') || textColor.includes('rgb(255')) {
+                        forcedDarkDetected = true;
+                        console.log('🛡️ Forced dark mode detected - Activating countermeasures');
+                        applyAntiForcedDarkMode();
+                    }
+                    
+                    testDiv.remove();
+                }, 100);
+            }
+            
+            // Apply counter-filters to neutralize forced dark mode
+            function applyAntiForcedDarkMode() {
+                const style = document.createElement('style');
+                style.id = 'anti-forced-dark-mode';
+                style.textContent = `
+                    /* COUNTER-ATTACK: Neutralize browser forced dark mode */
+                    html {
+                        filter: invert(1) hue-rotate(180deg) !important;
+                        -webkit-filter: invert(1) hue-rotate(180deg) !important;
+                    }
+                    
+                    /* Re-invert images, videos, and logos to restore original colors */
+                    img, video, svg, picture, canvas,
+                    .logo, [class*="logo"], #logo,
+                    img[src*="logo"], img[alt*="logo"],
+                    img[src*="Logo"], img[alt*="Logo"] {
+                        filter: invert(1) hue-rotate(180deg) !important;
+                        -webkit-filter: invert(1) hue-rotate(180deg) !important;
+                    }
+                    
+                    /* Ensure Netflix red stays red */
+                    .text-netflix-red, .bg-netflix-red {
+                        filter: invert(1) hue-rotate(180deg) !important;
+                        -webkit-filter: invert(1) hue-rotate(180deg) !important;
+                    }
+                `;
+                document.head.appendChild(style);
+                
+                // Continuously monitor and reapply if browser tries to override
+                setInterval(checkAndReapply, 1000);
+            }
+            
+            // Continuously check if our counter-filters are still applied
+            function checkAndReapply() {
+                if (!forcedDarkDetected) return;
+                
+                const antiStyle = document.getElementById('anti-forced-dark-mode');
+                if (!antiStyle) {
+                    console.log('🔄 Reapplying anti-forced-dark-mode protection');
+                    applyAntiForcedDarkMode();
+                }
+            }
+            
+            // Run detection when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', detectForcedDarkMode);
+            } else {
+                detectForcedDarkMode();
+            }
+            
+            // Also run detection after a delay to catch late-applied forced dark mode
+            setTimeout(detectForcedDarkMode, 500);
+            setTimeout(detectForcedDarkMode, 1500);
+            
+            // Monitor for dynamic style changes
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                        setTimeout(detectForcedDarkMode, 100);
+                    }
+                });
+            });
+            
+            // Start observing
+            if (document.documentElement) {
+                observer.observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['style', 'class']
+                });
+            }
+            
+        })();
+    </script>
+    
     <title>MovieIGuess - Discover Amazing Movies & TV Shows</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>

@@ -10,6 +10,48 @@
     <meta name="msapplication-navbutton-color" content="#000000">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="mobile-web-app-capable" content="yes">
+    
+    <!-- ANTI-FORCED-DARK-MODE SCRIPT -->
+    <script>
+        (function() {
+            'use strict';
+            let forcedDarkDetected = false;
+            
+            function detectForcedDarkMode() {
+                const testDiv = document.createElement('div');
+                testDiv.style.cssText = `
+                    position: fixed !important;
+                    top: -1000px !important;
+                    width: 1px !important;
+                    height: 1px !important;
+                    background-color: rgb(255, 255, 255) !important;
+                    z-index: -9999 !important;
+                `;
+                document.documentElement.appendChild(testDiv);
+                
+                setTimeout(() => {
+                    const computed = window.getComputedStyle(testDiv);
+                    if (computed.backgroundColor.includes('0, 0, 0')) {
+                        forcedDarkDetected = true;
+                        const style = document.createElement('style');
+                        style.textContent = `
+                            html { filter: invert(1) hue-rotate(180deg) !important; }
+                            img, video, svg { filter: invert(1) hue-rotate(180deg) !important; }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                    testDiv.remove();
+                }, 100);
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', detectForcedDarkMode);
+            } else {
+                detectForcedDarkMode();
+            }
+        })();
+    </script>
+    
     <title>Toast Demo - MovieIGuess</title>
     <link rel="icon" href="src/assets/logo.png">
     <link rel="stylesheet" href="toast.css">
