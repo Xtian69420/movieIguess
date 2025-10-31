@@ -98,7 +98,7 @@
                                         <span class="hidden sm:inline">My List</span>
                                         <span class="sm:hidden">List</span>
                                     </button>
-                                    <button class="netflix-button bg-gray-600/70 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center text-sm sm:text-base">
+                                    <button onclick="openShareModal()" class="netflix-button bg-gray-600/70 text-white px-4 sm:px-6 lg:px-8 py-2 sm:py-3 rounded font-semibold hover:bg-gray-600 transition-colors flex items-center text-sm sm:text-base">
                                         <i class="fa-solid fa-share mr-1 sm:mr-2"></i>
                                         Share
                                     </button>
@@ -222,6 +222,53 @@
             </div>
         </div>
     </main>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="fixed inset-0 z-50 hidden">
+        <!-- Modal Backdrop -->
+        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onclick="closeShareModal()"></div>
+        
+        <!-- Modal Content -->
+        <div class="fixed inset-0 flex items-center justify-center p-4">
+            <div class="share-modal-content bg-black bg-opacity-90 backdrop-filter backdrop-blur-lg rounded-lg max-w-md w-full mx-4 relative border border-gray-600">
+                <!-- Close Button -->
+                <button onclick="closeShareModal()" class="absolute top-4 right-4 z-10 bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75 transition-all">
+                    <i class="fa-solid fa-times text-white text-lg"></i>
+                </button>
+                
+                <!-- Modal Header -->
+                <div class="p-6 pb-4">
+                    <h2 class="text-xl font-bold text-white mb-4 flex items-center">
+                        <i class="fa-solid fa-share mr-2 text-netflix-red"></i>
+                        Share this movie
+                    </h2>
+                    
+                    <!-- URL Display -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Movie Link</label>
+                        <div class="flex">
+                            <input 
+                                id="shareUrl" 
+                                type="text" 
+                                readonly 
+                                class="flex-1 bg-gray-800 bg-opacity-50 border border-gray-600 rounded-l-lg px-3 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-netflix-red focus:border-transparent"
+                                value=""
+                            >
+                            <button 
+                                onclick="copyToClipboard()" 
+                                id="copyButton"
+                                class="bg-netflix-red hover:bg-red-700 text-white px-4 py-2 rounded-r-lg transition-colors flex items-center justify-center min-w-[80px]"
+                            >
+                                <i class="fa-solid fa-copy mr-1"></i>
+                                Copy
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">Share this link with others to let them discover this movie</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Search Modal -->
     <div id="searchModal" class="search-modal-overlay hidden">
@@ -655,6 +702,35 @@
             line-clamp: 3;
         }
 
+        /* Share Modal Styles */
+        #shareModal {
+            display: none;
+        }
+        
+        #shareModal:not(.hidden) {
+            display: flex !important;
+        }
+        
+        .share-modal-content {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
         /* Custom focus states for accessibility */
         .netflix-button:focus,
         .genre-tag:focus,
@@ -678,6 +754,88 @@
         function home() {
             window.location.href = "index.html";
         }
+
+        // Share Modal Functions
+        function openShareModal() {
+            console.log('Opening share modal'); // Debug log
+            const shareUrl = document.getElementById('shareUrl');
+            const shareModal = document.getElementById('shareModal');
+            
+            if (shareUrl && shareModal) {
+                shareUrl.value = window.location.href;
+                shareModal.classList.remove('hidden');
+                shareModal.style.display = 'block'; // Force display
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+                console.log('Modal should be visible now'); // Debug log
+            } else {
+                console.error('Modal elements not found'); // Debug log
+            }
+        }
+
+        function closeShareModal() {
+            const shareModal = document.getElementById('shareModal');
+            if (shareModal) {
+                shareModal.classList.add('hidden');
+                shareModal.style.display = 'none'; // Force hide
+                document.body.style.overflow = 'auto'; // Restore scrolling
+            }
+        }
+
+        function copyToClipboard() {
+            const shareUrl = document.getElementById('shareUrl');
+            const copyButton = document.getElementById('copyButton');
+            
+            // Select and copy the text
+            shareUrl.select();
+            shareUrl.setSelectionRange(0, 99999); // For mobile devices
+            
+            try {
+                document.execCommand('copy');
+                
+                // Visual feedback
+                const originalContent = copyButton.innerHTML;
+                copyButton.innerHTML = '<i class="fa-solid fa-check mr-1"></i>Copied!';
+                copyButton.classList.remove('bg-netflix-red', 'hover:bg-red-700');
+                copyButton.classList.add('bg-green-600', 'hover:bg-green-700');
+                
+                // Reset after 2 seconds
+                setTimeout(() => {
+                    copyButton.innerHTML = originalContent;
+                    copyButton.classList.remove('bg-green-600', 'hover:bg-green-700');
+                    copyButton.classList.add('bg-netflix-red', 'hover:bg-red-700');
+                }, 2000);
+                
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                // Fallback for modern browsers
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(shareUrl.value);
+                }
+            }
+        }
+
+        // Close modal when clicking outside (but not on modal open)
+        document.addEventListener('click', function(event) {
+            const shareModal = document.getElementById('shareModal');
+            const shareModalContent = document.querySelector('.share-modal-content');
+            
+            // Only close if modal is open and click is outside modal content
+            if (shareModal && !shareModal.classList.contains('hidden')) {
+                if (!shareModalContent.contains(event.target) && !event.target.closest('[onclick*="openShareModal"]')) {
+                    closeShareModal();
+                }
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const shareModal = document.getElementById('shareModal');
+                if (shareModal && !shareModal.classList.contains('hidden')) {
+                    closeShareModal();
+                }
+            }
+        });
     </script>
 
     <!-- Toast Script -->
