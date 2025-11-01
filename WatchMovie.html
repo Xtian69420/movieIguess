@@ -466,6 +466,19 @@
             .episode-selection {
                 padding: 1.5rem;
             }
+
+            /* Add bottom margin for video sidebar layout and movie content wrapper */
+            .video-sidebar-layout,
+            .movie-content-wrapper,
+            .movie-details {
+                margin-bottom: 2rem !important;
+            }
+
+            /* Additional spacing for main container on mobile */
+            .container {
+                margin-bottom: 3rem !important;
+                padding-bottom: 2rem !important;
+            }
         }
         
         /* Loading Animation */
@@ -531,6 +544,804 @@
 
         html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        /* Episode Selection Modal Styles */
+        .episode-select-btn {
+            background: linear-gradient(135deg, #E50914, #B8070F);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            max-width: 300px;
+            margin: 1rem auto;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+        }
+
+        .episode-select-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(229, 9, 20, 0.4);
+        }
+
+        /* CUSTOM MODAL CSS - OVERRIDES TAILWIND COMPLETELY */
+        .episode-modal {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 1rem !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            background: transparent !important;
+            margin: 0 !important;
+            transform: none !important;
+        }
+
+        /* Hidden state for modal */
+        .episode-modal.hidden {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* Modal backdrop with glassmorphism */
+        .modal-backdrop {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: rgba(0, 0, 0, 0.85) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
+            z-index: 9998 !important;
+        }
+
+        /* Modal content - FORCE VISIBILITY */
+        .modal-content {
+            background: linear-gradient(135deg, rgba(15, 15, 15, 0.98), rgba(25, 25, 25, 0.95)) !important;
+            border-radius: 20px !important;
+            border: 2px solid rgba(229, 9, 20, 0.6) !important;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.8),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            max-width: 90vw !important;
+            max-height: 85vh !important;
+            width: 100% !important;
+            min-height: 400px !important;
+            overflow: hidden !important;
+            position: relative !important;
+            z-index: 9999 !important;
+            margin: 0 auto !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            transform: none !important;
+            color: white !important;
+        }
+        
+        /* Override any Tailwind hiding */
+        .episode-modal:not(.hidden) .modal-content {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        /* Modal header styling */
+        .modal-header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 1.5rem !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important;
+            background: transparent !important;
+            color: white !important;
+        }
+
+        .modal-header h3 {
+            color: white !important;
+            margin: 0 !important;
+            font-size: 1.3rem !important;
+            font-weight: 600 !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .modal-close-btn {
+            background: none !important;
+            border: none !important;
+            color: white !important;
+            font-size: 1.5rem !important;
+            cursor: pointer !important;
+            padding: 0.5rem !important;
+            border-radius: 50% !important;
+            transition: background 0.3s ease !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .modal-close-btn:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+        }
+
+        /* Modal body styling */
+        .modal-body {
+            padding: 1.5rem !important;
+            max-height: 60vh !important;
+            overflow-y: auto !important;
+            color: white !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .season-selection-modal,
+        .episode-selection-modal {
+            display: block !important;
+            visibility: visible !important;
+            color: white !important;
+        }
+
+        .season-selection-modal h4,
+        .episode-selection-modal h4 {
+            color: white !important;
+            margin: 0 0 1rem 0 !important;
+            font-size: 1.1rem !important;
+            font-weight: 600 !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .episode-selection-modal {
+            margin-top: 2rem !important;
+        }
+
+        /* PROFESSIONAL MOBILE SEASON & EPISODE CARDS */
+        .season-grid,
+        .episode-grid {
+            display: grid !important;
+            gap: 1rem !important;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+            visibility: visible !important;
+            padding: 0.5rem 0 !important;
+        }
+
+        .season-btn,
+        .episode-btn {
+            background: linear-gradient(135deg, rgba(40, 40, 40, 0.95), rgba(30, 30, 30, 0.98)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.15) !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+            cursor: pointer !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            width: 100% !important;
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            visibility: visible !important;
+            color: white !important;
+            font-size: 0.95rem !important;
+            font-weight: 500 !important;
+            min-height: 80px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        /* Glassmorphism effect for cards */
+        .season-btn::before,
+        .episode-btn::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border-radius: 12px !important;
+            z-index: -1 !important;
+        }
+
+        .season-btn:hover,
+        .episode-btn:hover {
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.4), rgba(185, 7, 15, 0.5)) !important;
+            border-color: rgba(229, 9, 20, 0.8) !important;
+            transform: translateY(-4px) scale(1.03) !important;
+            box-shadow: 
+                0 8px 25px rgba(229, 9, 20, 0.3),
+                0 4px 15px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .season-btn.active {
+            background: linear-gradient(135deg, rgba(229, 9, 20, 0.6), rgba(185, 7, 15, 0.7)) !important;
+            border-color: #e50914 !important;
+            box-shadow: 
+                0 0 20px rgba(229, 9, 20, 0.5),
+                0 4px 15px rgba(0, 0, 0, 0.3) !important;
+            transform: scale(1.05) !important;
+        }
+
+        /* ENHANCED PROFESSIONAL EPISODE CARDS WITH FULL DETAILS */
+        .episode-btn {
+            background: linear-gradient(145deg, rgba(25, 25, 25, 0.95), rgba(15, 15, 15, 0.98)) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 16px !important;
+            padding: 0 !important;
+            cursor: pointer !important;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            width: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            justify-content: flex-start !important;
+            visibility: visible !important;
+            color: white !important;
+            min-height: 180px !important;
+            position: relative !important;
+            overflow: hidden !important;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.3),
+                0 2px 8px rgba(0, 0, 0, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+        }
+
+        /* Episode card header - NO PLAY ICON */
+        .episode-btn::before {
+            display: none !important;
+            content: none !important;
+        }
+
+        /* Episode card content container */
+        .episode-btn {
+            padding: 20px !important;
+            text-align: left !important;
+            gap: 8px !important;
+        }
+
+        /* Hover effects */
+        .episode-btn:hover {
+            background: linear-gradient(145deg, rgba(35, 35, 35, 0.98), rgba(25, 25, 25, 0.99)) !important;
+            border-color: rgba(229, 9, 20, 0.6) !important;
+            transform: translateY(-8px) scale(1.02) !important;
+            box-shadow: 
+                0 12px 40px rgba(229, 9, 20, 0.2),
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(229, 9, 20, 0.3) !important;
+        }
+
+        /* Hover effects - no play icon needed */
+        .episode-btn:hover {
+            background: linear-gradient(145deg, rgba(35, 35, 35, 0.98), rgba(25, 25, 25, 0.99)) !important;
+            border-color: rgba(229, 9, 20, 0.6) !important;
+            transform: translateY(-8px) scale(1.02) !important;
+            box-shadow: 
+                0 12px 40px rgba(229, 9, 20, 0.2),
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(229, 9, 20, 0.3) !important;
+        }
+
+        /* Selected state */
+        .episode-btn.selected {
+            background: linear-gradient(145deg, rgba(229, 9, 20, 0.15), rgba(185, 7, 15, 0.2)) !important;
+            border-color: rgba(229, 9, 20, 0.8) !important;
+            box-shadow: 
+                0 0 30px rgba(229, 9, 20, 0.4),
+                0 8px 25px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+            transform: scale(1.03) !important;
+        }
+
+        /* Episode number badge */
+        .episode-number {
+            color: #E50914 !important;
+            font-weight: 700 !important;
+            font-size: 14px !important;
+            display: inline-block !important;
+            background: rgba(229, 9, 20, 0.15) !important;
+            padding: 4px 12px !important;
+            border-radius: 20px !important;
+            margin-bottom: 8px !important;
+            border: 1px solid rgba(229, 9, 20, 0.3) !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8) !important;
+            letter-spacing: 0.5px !important;
+            align-self: flex-start !important;
+        }
+
+        /* Episode title */
+        .episode-title {
+            color: white !important;
+            font-weight: 600 !important;
+            font-size: 16px !important;
+            display: block !important;
+            line-height: 1.4 !important;
+            margin-bottom: 8px !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.8) !important;
+            letter-spacing: 0.3px !important;
+        }
+
+        /* Episode description */
+        .episode-description {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 13px !important;
+            line-height: 1.4 !important;
+            margin-bottom: 12px !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 3 !important;
+            line-clamp: 3 !important;
+            -webkit-box-orient: vertical !important;
+            font-weight: 400 !important;
+        }
+
+        /* Episode metadata container */
+        .episode-metadata {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            margin-top: auto !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+        }
+
+        /* Episode rating */
+        .episode-rating-badge {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            background: rgba(255, 193, 7, 0.15) !important;
+            color: #ffc107 !important;
+            padding: 3px 8px !important;
+            border-radius: 12px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            border: 1px solid rgba(255, 193, 7, 0.3) !important;
+        }
+
+        .episode-rating-badge i {
+            font-size: 10px !important;
+        }
+
+        /* Episode runtime badge */
+        .episode-runtime {
+            color: rgba(255, 255, 255, 0.8) !important;
+            font-size: 12px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            background: rgba(0, 0, 0, 0.6) !important;
+            padding: 3px 8px !important;
+            border-radius: 12px !important;
+            font-weight: 500 !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+        }
+
+        .episode-runtime i {
+            font-size: 10px !important;
+        }
+
+        /* Air date badge */
+        .episode-airdate {
+            color: rgba(255, 255, 255, 0.7) !important;
+            font-size: 11px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            background: rgba(0, 0, 0, 0.4) !important;
+            padding: 2px 6px !important;
+            border-radius: 8px !important;
+            font-weight: 400 !important;
+        }
+
+        .episode-airdate i {
+            font-size: 9px !important;
+        }
+
+        /* Play button pulse animation */
+        @keyframes pulse-play {
+            0%, 100% {
+                transform: scale(1.1) !important;
+                box-shadow: 0 4px 12px rgba(229, 9, 20, 0.4) !important;
+            }
+            50% {
+                transform: scale(1.2) !important;
+                box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6) !important;
+            }
+        }
+
+        /* Now playing indicator */
+        .episode-btn.playing .episode-number::after {
+            content: '♪' !important;
+            margin-left: 8px !important;
+            animation: music-note 1.5s ease-in-out infinite !important;
+            color: #fff !important;
+        }
+
+        @keyframes music-note {
+            0%, 100% { transform: translateY(0px) !important; }
+            50% { transform: translateY(-3px) !important; }
+        }
+
+        /* Active episode glow effect */
+        .episode-btn.playing {
+            animation: episode-glow 3s ease-in-out infinite !important;
+        }
+
+        @keyframes episode-glow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 30px rgba(229, 9, 20, 0.4),
+                    0 8px 25px rgba(0, 0, 0, 0.3) !important;
+            }
+            50% {
+                box-shadow: 
+                    0 0 40px rgba(229, 9, 20, 0.6),
+                    0 12px 35px rgba(0, 0, 0, 0.4) !important;
+            }
+        }
+
+        /* ENHANCED MOBILE OPTIMIZATIONS FOR DETAILED EPISODE CARDS */
+        @media (max-width: 480px) {
+            .modal-content {
+                max-width: 95vw !important;
+                max-height: 90vh !important;
+                margin: 0 !important;
+                border-radius: 20px !important;
+                border-width: 1px !important;
+            }
+            
+            .modal-header,
+            .modal-body {
+                padding: 1.2rem !important;
+            }
+            
+            .modal-header h3 {
+                font-size: 1.2rem !important;
+            }
+            
+            /* Optimize season grid for small screens */
+            .season-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.8rem !important;
+            }
+            
+            .season-btn {
+                padding: 0.8rem 0.6rem !important;
+                font-size: 0.9rem !important;
+                min-height: 70px !important;
+            }
+            
+            /* Single column for episodes on very small screens */
+            .episode-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            
+            .episode-btn {
+                min-height: 160px !important;
+                padding: 16px !important;
+            }
+            
+            .episode-btn::before {
+                top: 12px !important;
+                right: 12px !important;
+                width: 28px !important;
+                height: 28px !important;
+                font-size: 10px !important;
+            }
+            
+            .episode-title {
+                font-size: 14px !important;
+                -webkit-line-clamp: 2 !important;
+                line-clamp: 2 !important;
+            }
+            
+            .episode-description {
+                font-size: 12px !important;
+                -webkit-line-clamp: 2 !important;
+                line-clamp: 2 !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .episode-number {
+                font-size: 12px !important;
+                padding: 3px 10px !important;
+            }
+            
+            .episode-metadata {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 6px !important;
+            }
+            
+            .episode-rating-badge,
+            .episode-runtime {
+                font-size: 10px !important;
+                padding: 2px 6px !important;
+            }
+            
+            .episode-airdate {
+                font-size: 9px !important;
+                padding: 1px 4px !important;
+            }
+            
+            .episode-select-btn {
+                padding: 1rem 1.5rem !important;
+                font-size: 1rem !important;
+                border-radius: 14px !important;
+            }
+        }
+
+        /* Medium mobile screens */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .season-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 1rem !important;
+            }
+            
+            .episode-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+            
+            .episode-btn {
+                min-height: 170px !important;
+                padding: 18px !important;
+            }
+            
+            .episode-description {
+                font-size: 12px !important;
+                -webkit-line-clamp: 2 !important;
+                line-clamp: 2 !important;
+            }
+            
+            .episode-metadata {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 6px !important;
+            }
+        }
+
+        /* Larger mobile/tablet screens */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .season-grid {
+                grid-template-columns: repeat(4, 1fr) !important;
+                gap: 1rem !important;
+            }
+            
+            .episode-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1rem !important;
+            }
+            
+            .episode-btn {
+                min-height: 180px !important;
+                padding: 20px !important;
+            }
+            
+            .episode-description {
+                -webkit-line-clamp: 3 !important;
+                line-clamp: 3 !important;
+            }
+        }
+
+        /* Desktop and larger screens */
+        @media (min-width: 1025px) {
+            .episode-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 1.2rem !important;
+            }
+            
+            .episode-btn {
+                min-height: 200px !important;
+                padding: 24px !important;
+            }
+            
+            .episode-btn::before {
+                top: 20px !important;
+                right: 20px !important;
+                width: 36px !important;
+                height: 36px !important;
+                font-size: 14px !important;
+            }
+            
+            .episode-description {
+                -webkit-line-clamp: 3 !important;
+                line-clamp: 3 !important;
+            }
+        }
+        
+        /* MOBILE BUTTON CONTAINER AND CENTERING */
+        .mobile-only {
+            display: block !important;
+            visibility: visible !important;
+            width: 100% !important;
+            max-width: 600px !important;
+            margin: 1.5rem auto !important;
+            padding: 0 1rem !important;
+        }
+        
+        .episode-select-btn, #episodeModalBtn {
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d) !important;
+            border: 2px solid rgba(229, 9, 20, 0.3) !important;
+            border-radius: 16px !important;
+            padding: 1.2rem 2rem !important;
+            color: white !important;
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            visibility: visible !important;
+            box-shadow: 
+                0 8px 25px rgba(229, 9, 20, 0.2),
+                0 4px 15px rgba(0, 0, 0, 0.3) !important;
+            letter-spacing: 0.5px !important;
+            position: relative !important;
+            overflow: visible !important;
+            min-height: 70px !important;
+        }
+        
+        /* Enhanced pulsing light effect around the button */
+        .episode-select-btn::after, #episodeModalBtn::after {
+            content: '' !important;
+            position: absolute !important;
+            top: -5px !important;
+            left: -5px !important;
+            right: -5px !important;
+            bottom: -5px !important;
+            background: linear-gradient(45deg, 
+                rgba(229, 9, 20, 0.8), 
+                rgba(255, 26, 43, 0.6),
+                rgba(229, 9, 20, 0.8),
+                rgba(255, 26, 43, 0.6)
+            ) !important;
+            border-radius: 20px !important;
+            z-index: -1 !important;
+            animation: pulseGlow 2.5s ease-in-out infinite !important;
+            opacity: 0.8 !important;
+        }
+        
+        @keyframes pulseGlow {
+            0%, 100% {
+                transform: scale(1) !important;
+                opacity: 0.6 !important;
+                filter: blur(3px) !important;
+                box-shadow: 0 0 20px rgba(229, 9, 20, 0.5) !important;
+            }
+            50% {
+                transform: scale(1.08) !important;
+                opacity: 1 !important;
+                filter: blur(6px) !important;
+                box-shadow: 0 0 30px rgba(229, 9, 20, 0.8) !important;
+            }
+        }
+        
+        .episode-select-btn i {
+            color: #e50914 !important;
+            font-size: 1.2rem !important;
+            margin-right: 0.5rem !important;
+            transition: all 0.3s ease !important;
+        }
+        
+        /* Subtle hint text styling */
+        .episode-select-btn span[style*="opacity"] {
+            color: rgba(255, 255, 255, 0.6) !important;
+            text-transform: none !important;
+            transition: opacity 0.3s ease !important;
+        }
+        
+        .episode-select-btn::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, rgba(229, 9, 20, 0.1), transparent) !important;
+            transition: left 0.5s ease !important;
+            z-index: 1 !important;
+        }
+        
+        .episode-select-btn:hover::before {
+            left: 100% !important;
+        }
+        
+        .episode-select-btn:hover {
+            transform: translateY(-3px) scale(1.02) !important;
+            border-color: rgba(229, 9, 20, 0.6) !important;
+            background: linear-gradient(135deg, #2d2d2d, #1a1a1a) !important;
+            box-shadow: 
+                0 12px 35px rgba(229, 9, 20, 0.3),
+                0 6px 20px rgba(0, 0, 0, 0.4) !important;
+        }
+        
+        .episode-select-btn:hover::after {
+            animation: pulseGlowHover 1.5s ease-in-out infinite !important;
+        }
+        
+        @keyframes pulseGlowHover {
+            0%, 100% {
+                transform: scale(1.02) !important;
+                opacity: 0.8 !important;
+                filter: blur(3px) !important;
+            }
+            50% {
+                transform: scale(1.08) !important;
+                opacity: 1 !important;
+                filter: blur(6px) !important;
+            }
+        }
+        
+        .episode-select-btn:hover i {
+            color: #ff1a2b !important;
+            transform: scale(1.1) !important;
+        }
+        
+        .episode-select-btn:hover span[style*="opacity"] {
+            opacity: 0.9 !important;
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+        
+        .episode-select-btn:active {
+            transform: translateY(-1px) scale(0.98) !important;
+        }
+        
+        /* TAILWIND OVERRIDE - FORCE HIDDEN CLASS BEHAVIOR */
+        .hidden {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        /* ANTI-TAILWIND: Ensure modal is visible when NOT hidden */
+        .episode-modal:not(.hidden) {
+            display: flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+        
+        .episode-modal:not(.hidden) * {
+            visibility: visible !important;
+            opacity: 1 !important;
         }
     </style>
 </head>

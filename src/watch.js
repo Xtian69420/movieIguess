@@ -308,9 +308,13 @@ async function WatchTV(seriesId) {
         }
 
         let seasonButtonsHTML = "";
+        let seasonButtonsModalHTML = "";
         series.seasons.forEach(season => {
             if (season.season_number !== 0) {
+                // For old mobile layout (if still needed)
                 seasonButtonsHTML += `<button class="season-btn" id="season-${season.season_number}" onclick="loadSeason(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
+                // For modal
+                seasonButtonsModalHTML += `<button class="season-btn" onclick="loadSeasonModal(${seriesId}, ${season.season_number}, event)">Season ${season.season_number}</button>`;
             }
         });
 
@@ -335,18 +339,42 @@ async function WatchTV(seriesId) {
                 </div>
             </div>
 
-            <!-- Mobile Season Selection -->
-            <div class="season-selection mobile-only">
-                <h3>📺 Select Season</h3>
-                <div class="season-grid">
-                    ${seasonButtonsHTML}
-                </div>
+            <!-- Mobile Episode Selection Button -->
+            <div class="mobile-only">
+                <button id="episodeModalBtn" class="episode-select-btn" onclick="openEpisodeModal()">
+                    <i class="fa-solid fa-list mr-2"></i>
+                    Browse Episodes
+                </button>
             </div>
 
-            <div id="episode-selection" class="episode-selection mobile-only hidden">
-                <h3>🎬 Select Episode</h3>
-                <div id="episode-grid" class="episode-grid">
-                    <!-- Episodes will be loaded here -->
+            <!-- Episode Selection Modal -->
+            <div id="episodeModal" class="episode-modal hidden">
+                <div class="modal-backdrop" onclick="closeEpisodeModal()"></div>
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>📺 Select Season & Episode</h3>
+                        <button class="modal-close-btn" onclick="closeEpisodeModal()">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="modal-body">
+                        <!-- Season Selection -->
+                        <div class="season-selection-modal">
+                            <h4>Select Season</h4>
+                            <div class="season-grid">
+                                ${seasonButtonsModalHTML}
+                            </div>
+                        </div>
+
+                        <!-- Episode Selection -->
+                        <div id="episode-selection-modal" class="episode-selection-modal hidden">
+                            <h4>Select Episode</h4>
+                            <div id="episode-grid-modal" class="episode-grid">
+                                <!-- Episodes will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -440,6 +468,13 @@ async function WatchTV(seriesId) {
             </div>
         `;
         
+        // IMMEDIATELY ensure modal is hidden after DOM insertion
+        const modal = document.getElementById('episodeModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        
         // Auto-select Season 1, Episode 1
         setTimeout(() => {
             // Load Season 1 in sidebar and auto-select Episode 1
@@ -455,6 +490,12 @@ async function WatchTV(seriesId) {
                 season1Button.classList.add('active');
                 // Load Season 1 episodes for mobile
                 loadSeason(seriesId, 1);
+            }
+            
+            // Ensure modal starts hidden
+            const modal = document.getElementById('episodeModal');
+            if (modal) {
+                modal.classList.add('hidden');
             }
             
             watchEpisode(seriesId, 1, 1);
@@ -671,6 +712,28 @@ async function watchEpisode(seriesId, seasonNumber, episodeNumber) {
         }
     });
 
+    // Update playing state in modal if it's open
+    const modalEpisodeCards = document.querySelectorAll('#episode-grid-modal .episode-btn');
+    modalEpisodeCards.forEach(card => {
+        // Remove all possible states
+        card.classList.remove('playing', 'selected', 'active', 'hover', 'no-play-icon');
+        // Remove any inline styles
+        card.style.removeProperty('--show-play-icon');
+        card.style.removeProperty('--selected-episode');
+        
+        const cardEpisodeNum = card.getAttribute('data-episode');
+        if (cardEpisodeNum == episodeNumber) {
+            card.classList.add('selected');
+        }
+    });
+
+    // Update global playing episode state
+    window.currentPlayingEpisode = {
+        seriesId: seriesId,
+        seasonNumber: seasonNumber,
+        episodeNumber: episodeNumber
+    };
+
     // Update page title
     const titleElement = document.querySelector('.watch-title');
     if (titleElement) {
@@ -747,4 +810,150 @@ function displaySimilarMovies(movies) {
     }).join('');
 
     container.innerHTML = moviesHTML;
+}
+
+// Modal Functions for Mobile Episode Selection
+function openEpisodeModal() {
+    const modal = document.getElementById('episodeModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Prevent body scroll
+    }
+}
+
+function closeEpisodeModal() {
+    const modal = document.getElementById('episodeModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore body scroll
+    }
+}
+
+// Modified loadSeason function for modal
+async function loadSeasonModal(seriesId, seasonNumber, event = null) {
+    if (event) {
+        // Remove active class from all season buttons in modal
+        const seasonButtons = document.querySelectorAll('.season-selection-modal .season-btn');
+        seasonButtons.forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+    }
+
+    try {
+        const response = await fetch(`https://api.themoviedb.org/3/tv/${seriesId}/season/${seasonNumber}?api_key=${API_KEY}`);
+        if (!response.ok) throw new Error('Failed to fetch season data');
+
+        const season = await response.json();
+        const episodeContainer = document.getElementById('episode-selection-modal');
+        const episodeGrid = document.getElementById('episode-grid-modal');
+        
+        if (!episodeContainer || !episodeGrid) return;
+
+        // Show episode selection
+        episodeContainer.classList.remove('hidden');
+
+        // Generate episode buttons with enhanced styling and complete information
+        const episodesHTML = season.episodes.map((episode, index) => {
+            const description = episode.overview ? 
+                (episode.overview.length > 120 ? episode.overview.substring(0, 117) + '...' : episode.overview) : 
+                'No description available for this episode.';
+            const rating = episode.vote_average ? episode.vote_average.toFixed(1) : 'N/A';
+            const airDate = episode.air_date ? new Date(episode.air_date).toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric' 
+            }) : '';
+            const runtime = episode.runtime ? `${episode.runtime}min` : 'TBA';
+            
+            // Check if this episode is currently playing (not just selected)
+            const isCurrentlyPlaying = window.currentPlayingEpisode && 
+                window.currentPlayingEpisode.seriesId == seriesId &&
+                window.currentPlayingEpisode.seasonNumber == seasonNumber &&
+                window.currentPlayingEpisode.episodeNumber == episode.episode_number;
+            
+            return `
+                <button class="episode-btn ${isCurrentlyPlaying ? 'selected' : ''}" 
+                        data-episode="${episode.episode_number}"
+                        onclick="selectEpisodeFromModal(${seriesId}, ${seasonNumber}, ${episode.episode_number}, '${episode.name?.replace(/'/g, "\\'")}')">
+                    <span class="episode-number">E${episode.episode_number}</span>
+                    <span class="episode-title">${episode.name || `Episode ${episode.episode_number}`}</span>
+                    <span class="episode-description">${description}</span>
+                    <div class="episode-metadata">
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            ${rating !== 'N/A' ? `
+                                <div class="episode-rating-badge">
+                                    <i class="fa-solid fa-star"></i>
+                                    <span>${rating}</span>
+                                </div>
+                            ` : ''}
+                            <div class="episode-runtime">
+                                <i class="fa-solid fa-clock"></i>
+                                <span>${runtime}</span>
+                            </div>
+                        </div>
+                        ${airDate ? `
+                            <div class="episode-airdate">
+                                <i class="fa-solid fa-calendar"></i>
+                                <span>${airDate}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                </button>
+            `;
+        }).join('');
+
+        episodeGrid.innerHTML = episodesHTML;
+    } catch (err) {
+        console.error("Error loading season in modal:", err);
+    }
+}
+
+// Function to select episode from modal and close modal
+function selectEpisodeFromModal(seriesId, seasonNumber, episodeNumber, episodeName) {
+    // Update the button text to show selected episode
+    const episodeBtn = document.getElementById('episodeModalBtn');
+    if (episodeBtn) {
+        episodeBtn.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 2px;">
+                <div style="display: flex; align-items: center;">
+                    <i class="fa-solid fa-list mr-2"></i>
+                    S${seasonNumber}E${episodeNumber}
+                </div>
+                <span style="font-size: 0.75rem; opacity: 0.7; font-weight: 400; letter-spacing: 0.3px;">
+                    Tap to change episode
+                </span>
+            </div>
+        `;
+    }
+    
+    // Update episode card states in modal - remove all states first
+    const episodeCards = document.querySelectorAll('#episode-grid-modal .episode-btn');
+    episodeCards.forEach(card => {
+        // Remove all possible CSS classes
+        card.classList.remove('playing', 'selected', 'active', 'hover', 'focus', 'no-play-icon');
+        // Remove any inline styles
+        card.style.removeProperty('--show-play-icon');
+        card.style.removeProperty('--selected-episode');
+    });
+    
+    // Find and mark the selected episode as selected only - using more reliable method
+    const selectedButton = document.querySelector(`#episode-grid-modal .episode-btn[data-episode="${episodeNumber}"]`);
+    if (selectedButton) {
+        selectedButton.classList.add('selected');
+    }
+    
+    // Store currently playing episode info for state management
+    window.currentPlayingEpisode = {
+        seriesId: seriesId,
+        seasonNumber: seasonNumber,
+        episodeNumber: episodeNumber,
+        episodeName: episodeName
+    };
+    
+    // Close modal
+    closeEpisodeModal();
+    
+    // Start watching the episode
+    watchEpisode(seriesId, seasonNumber, episodeNumber);
 }
