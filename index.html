@@ -932,13 +932,13 @@
     <!-- Movie Info Modal -->
     <div id="movieModal" class="fixed inset-0 z-50 hidden">
         <!-- Modal Backdrop -->
-        <div class="fixed inset-0 bg-black bg-opacity-75 transition-opacity" onclick="closeModal()"></div>
+        <div class="modal-backdrop-blur fixed inset-0" onclick="closeModal()"></div>
         
         <!-- Modal Content -->
         <div class="fixed inset-0 flex items-center justify-center p-4">
             <div class="modal-content bg-netflix-dark rounded-lg max-w-4xl w-full max-h-[90vh] relative flex flex-col">
                 <!-- Close Button -->
-                <button onclick="closeModal()" class="absolute top-4 right-4 z-10 bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-opacity-75 transition-all">
+                <button onclick="closeModal()" class="glass-close-btn absolute top-4 right-4 z-10 rounded-full w-10 h-10 flex items-center justify-center">
                     <i class="fa-solid fa-times text-white text-lg"></i>
                 </button>
                 
@@ -989,8 +989,11 @@
                 </div>
                 
                 <!-- Modal Body - Scrollable Content -->
-                <div class="flex-1 overflow-y-auto modal-scrollable-content">
-                    <div class="p-6 lg:p-8">
+                <div class="flex-1 overflow-y-auto modal-scrollable-content relative">
+                    <!-- Gradient Fade Transition -->
+                    <div class="modal-gradient-fade absolute top-0 left-0 right-0 z-10 pointer-events-none"></div>
+                    
+                    <div class="p-6 lg:p-8 pt-16 relative z-20">
                     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <!-- Movie Poster -->
                         <div class="lg:col-span-1">
@@ -1512,6 +1515,171 @@
     /* Modal improvements */
     .modal-content {
         animation: modalFadeIn 0.3s ease-out;
+    }
+
+    /* Glassmorphism Modal Backdrop */
+    .modal-backdrop-blur {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05)) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    /* Glassmorphism Modal Content */
+    .modal-content {
+        background: linear-gradient(135deg, rgba(20, 20, 20, 0.8), rgba(10, 10, 10, 0.9)) !important;
+        backdrop-filter: blur(25px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 
+            0 25px 50px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        animation: modalGlassAppear 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    /* Glassmorphism Close Button */
+    .glass-close-btn {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1)) !important;
+        backdrop-filter: blur(15px) !important;
+        -webkit-backdrop-filter: blur(15px) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    .glass-close-btn:hover {
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.2)) !important;
+        transform: scale(1.05) !important;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* Modal Gradient Transition */
+    .modal-gradient-fade {
+        background: linear-gradient(
+            to bottom,
+            rgba(20, 20, 20, 1) 0%,
+            rgba(20, 20, 20, 0.95) 25%,
+            rgba(20, 20, 20, 0.8) 50%,
+            rgba(20, 20, 20, 0.4) 75%,
+            transparent 100%
+        ) !important;
+        height: 80px !important;
+        transition: opacity 0.3s ease-in-out !important;
+    }
+
+    /* Minimal White Scrollbar for Modal */
+    .modal-scrollable-content {
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent !important;
+    }
+
+    .modal-scrollable-content::-webkit-scrollbar {
+        width: 6px !important;
+        background: transparent !important;
+    }
+
+    .modal-scrollable-content::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+
+    .modal-scrollable-content::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-radius: 10px !important;
+        transition: background 0.3s ease !important;
+    }
+
+    .modal-scrollable-content::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    .modal-scrollable-content::-webkit-scrollbar-corner {
+        background: transparent !important;
+    }
+
+    /* Global Minimal White Scrollbar for All Pages */
+    * {
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent !important;
+    }
+
+    *::-webkit-scrollbar {
+        width: 6px !important;
+        height: 6px !important;
+        background: transparent !important;
+    }
+
+    *::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+
+    *::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-radius: 10px !important;
+        transition: background 0.3s ease !important;
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.5) !important;
+    }
+
+    *::-webkit-scrollbar-corner {
+        background: transparent !important;
+    }
+
+    /* Body and HTML specific scrollbar */
+    html, body {
+        scrollbar-width: thin !important;
+        scrollbar-color: rgba(255, 255, 255, 0.3) transparent !important;
+    }
+
+    html::-webkit-scrollbar, body::-webkit-scrollbar {
+        width: 6px !important;
+        background: transparent !important;
+    }
+
+    html::-webkit-scrollbar-track, body::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+
+    html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-radius: 10px !important;
+        transition: background 0.3s ease !important;
+    }
+
+        html::-webkit-scrollbar-thumb:hover, body::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5) !important;
+        }
+
+        /* Hide scrollbars for movie/TV card containers while keeping them scrollable */
+        .movie-container, .series-container, .anime-container, 
+        .similar-movies-container, .similar-tv-container, 
+        .trending-container, .popular-container, .top-rated-container,
+        .scrollbar-hide, .similar-movies-grid, .similar-content {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+
+        .movie-container::-webkit-scrollbar, .series-container::-webkit-scrollbar, 
+        .anime-container::-webkit-scrollbar, .similar-movies-container::-webkit-scrollbar, 
+        .similar-tv-container::-webkit-scrollbar, .trending-container::-webkit-scrollbar,
+        .popular-container::-webkit-scrollbar, .top-rated-container::-webkit-scrollbar,
+        .scrollbar-hide::-webkit-scrollbar, .similar-movies-grid::-webkit-scrollbar,
+        .similar-content::-webkit-scrollbar {
+            display: none !important;
+        }    @keyframes modalGlassAppear {
+        from {
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            backdrop-filter: blur(0px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0px);
+            backdrop-filter: blur(25px);
+        }
     }
 
     @keyframes modalFadeIn {
