@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Memorizer</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7dd3fc;--ok:#10b981;--bad:#ef4444;--muted:#94a3b8;}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#071422 0%, #071826 100%);color:#e6eef6;display:flex;justify-content:center;align-items:center;}
+    .wrap{width:95%;max-width:800px;padding:20px;background:rgba(255,255,255,0.02);border-radius:12px;box-shadow:0 6px 30px rgba(2,6,23,0.6);display:flex;flex-direction:column;align-items:center;}
+    h1{margin:0 0 8px;font-size:22px;text-align:center}
+    p.lead{text-align:center;margin:0 0 20px;color:var(--muted);font-size:14}
+    .controls{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;justify-content:center;align-items:center}
+    .chunk-indicator{background:#041226;padding:10px 16px;border-radius:12px;color:var(--accent);font-size:22px;text-align:center;font-weight:600;min-width:180px}
+    button{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:8px;color:var(--accent);cursor:pointer;font-size:14px;}
+    button.primary{background:linear-gradient(90deg,rgba(125,211,252,0.08),rgba(125,211,252,0.03));border-color:rgba(125,211,252,0.18)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px;width:100%}
+    .card{background:var(--card);padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.02);display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;min-height:86px;}
+    label{font-size:12px;color:var(--muted);margin-bottom:6px}
+    input.ans{font-size:18px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit;text-transform:lowercase;width:100%;box-sizing:border-box;}
+    .feedback{height:18px;margin-top:6px;font-size:13px}
+    .feedback.ok{color:var(--ok)}
+    .feedback.bad{color:var(--bad)}
+    .small{font-size:13px;color:var(--muted)}
+    .hint{font-size:13px;color:var(--muted);margin-top:12px;text-align:center;opacity:0;transition:opacity .5s}
+    .hint.show{opacity:1;}
+    .footer{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:12px;width:100%}
+    .progress{height:10px;background:#071226;border-radius:999px;overflow:hidden;flex:1;min-width:120px;max-width:300px}
+    .progress > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#60a5fa);width:0%}
+    .notice{background:#041226;padding:10px;border-radius:8px;margin-top:12px;color:var(--muted);font-size:13px;text-align:center;width:100%}
+    .btn-group button{margin:2px;flex:1;}
+    @media(max-width:480px){h1{font-size:18px} p.lead{font-size:13px} .chunk-indicator{font-size:18px;padding:8px 10px;min-width:auto} button{font-size:13px;padding:6px 10px} .card{min-height:auto;padding:10px} input.ans{font-size:16px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+<h1>Memorizer</h1>
+<p class="lead">Type answers for each chunk of 5. Wrong answers retry. Instant feedback!</p>
+<div class="controls">
+<div class="chunk-indicator">Items <span id="range">1–5</span></div>
+<button id="checkBtn" class="primary">Next</button>
+<button id="hintBtn">Show Hints</button>
+<button id="resetBtn">Reset</button>
+</div>
+<div id="grid" class="grid"></div>
+<div class="hint" id="hintArea"></div>
+<div class="footer">
+<div class="small" id="statusText">Progress: 0%</div>
+<div class="progress"><i id="progBar"></i></div>
+</div>
+<div class="notice" id="notice">Press Enter or tap Check. Only a/b/c/d allowed.</div>
+</div>
+<script>
+const answers = [
+  'a','b','a','c','b',  // 1–5
+  'a','d','c','a','b',  // 6–10
+  'a','b','c','d','d',  // 11–15
+  'c','c','b','a','d',  // 16–20
+  'c','c','c','a','a',  // 21–25
+  'b','d','b','b','a',  // 26–30
+  'b','d','a','c','d'   // 31–35
+];
+
+const CHUNK=5; let currentChunk=0, completed=0, wrongAnswers=[], retryMode=false;
+const grid=document.getElementById('grid');
+const range=document.getElementById('range');
+const checkBtn=document.getElementById('checkBtn');
+const hintBtn=document.getElementById('hintBtn');
+const resetBtn=document.getElementById('resetBtn');
+const hintArea=document.getElementById('hintArea');
+const progBar=document.getElementById('progBar');
+const notice=document.getElementById('notice');
+const statusText=document.getElementById('statusText');
+const totalChunks=Math.ceil(answers.length/CHUNK);
+let finalQuiz=false;
+
+function renderChunk(){
+  if(finalQuiz){ renderFinalQuiz(); return; }
+  grid.innerHTML='';
+  const start=currentChunk*CHUNK;
+  const end=Math.min(start+CHUNK,answers.length);
+  range.textContent=`${start+1}–${end}`;
+  for(let i=start;i<end;i++){
+    const card=document.createElement('div'); card.className='card';
+    const lbl=document.createElement('label'); lbl.textContent='Item '+(i+1);
+    const inp=document.createElement('input'); inp.className='ans'; inp.dataset.index=i; inp.maxLength=1; inp.placeholder='a/b/c/d';
+    const fb=document.createElement('div'); fb.className='feedback'; fb.id='f-'+i;
+    inp.addEventListener('input', e=>{
+      e.target.value=e.target.value.toLowerCase().replace(/[^abcd]/g,'');
+      if(e.target.value){
+        if(e.target.value!==answers[i]){ resetChunk(); return; }
+        fb.textContent='✔'; fb.className='feedback ok';
+        checkChunkCompletion();
+        const inputs=Array.from(document.querySelectorAll('input.ans')); const idx=inputs.indexOf(e.target);
+        if(idx<inputs.length-1) inputs[idx+1].focus();
+      } else { fb.textContent=''; fb.className='feedback'; }
+    });
+    inp.addEventListener('keydown', e=>{
+      if(e.key==='Backspace' && e.target.value===''){ const inputs=Array.from(document.querySelectorAll('input.ans')); const idx=inputs.indexOf(e.target); if(idx>0){ const prev=inputs[idx-1]; prev.focus(); prev.value=''; const fb=document.getElementById('f-'+parseInt(prev.dataset.index)); fb.textContent=''; fb.className='feedback'; e.preventDefault();} }
+    });
+    card.append(lbl,inp,fb); grid.appendChild(card);
+  }
+}
+
+function resetChunk() {
+  const start = currentChunk * CHUNK;
+  const end = Math.min(start + CHUNK, answers.length);
+  for (let i = start; i < end; i++) {
+    const inp = document.querySelector(`input[data-index='${i}']`);
+    const fb = document.getElementById('f-' + i);
+    if (inp) inp.value = '';
+    if (fb) { fb.textContent = ''; fb.className = 'feedback'; }
+  }
+  // Focus only the first input of the chunk
+  const firstInput = document.querySelector(`input[data-index='${start}']`);
+  if (firstInput) firstInput.focus();
+  notice.textContent = 'Wrong answer! Chunk reset.';
+}
+
+
+function checkChunkCompletion() {
+  const start = currentChunk * CHUNK;
+  const end = Math.min(start + CHUNK, answers.length);
+  let allCorrect = true;
+  for (let i = start; i < end; i++) {
+    const inp = document.querySelector(`input[data-index='${i}']`);
+    if (!inp || inp.value.toLowerCase() !== answers[i]) {
+      allCorrect = false;
+      break;
+    }
+  }
+
+  if (allCorrect) {
+    // Show summary + motivation instead of immediately rendering next chunk
+    showChunkSummary();
+  }
+}
+
+
+hintBtn.onclick=()=>{
+  const inputs=document.querySelectorAll('input.ans');
+  const hintList=Array.from(inputs).map(inp=>parseInt(inp.dataset.index));
+  hintArea.innerHTML='Hints: '+hintList.map(i=>i+1+': '+answers[i]).join(' | ');
+  hintArea.classList.add('show'); setTimeout(()=>hintArea.classList.remove('show'),2000);
+}
+
+resetBtn.onclick=()=>{currentChunk=0;retryMode=false;wrongAnswers=[];finalQuiz=false;renderChunk(); notice.textContent='Reset all chunks.';}
+
+function renderFinalQuiz(){
+  grid.innerHTML=''; range.textContent='Final Quiz 1–35'; notice.textContent='Click A/B/C/D for each item';
+  for(let i=0;i<answers.length;i++){
+    const card=document.createElement('div'); card.className='card';
+    const lbl=document.createElement('label'); lbl.textContent='Item '+(i+1);
+    const fb=document.createElement('div'); fb.className='feedback'; fb.id='f-'+i;
+    const btnGroup=document.createElement('div'); btnGroup.className='btn-group';
+    ['a','b','c','d'].forEach(l=>{
+      const b=document.createElement('button'); b.textContent=l.toUpperCase();
+      b.onclick=()=>{
+        if(b.disabled) return;
+        if(l===answers[i]){ fb.textContent='✔'; fb.className='feedback ok'; } else { fb.textContent='✖'; fb.className='feedback bad'; }
+        Array.from(btnGroup.children).forEach(btn=>btn.disabled=true);
+      };
+      btnGroup.appendChild(b);
+    });
+    card.append(lbl,btnGroup,fb); grid.appendChild(card);
+  }
+  const submit=document.createElement('button'); submit.textContent='Show Score'; submit.className='primary';
+  submit.onclick=()=>{
+    let score=0; document.querySelectorAll('.feedback').forEach(fb=>{ if(fb.textContent==='✔') score++; });
+    notice.textContent=`You got ${score}/${answers.length} correct!`;
+  };
+  grid.appendChild(submit);
+}
+
+function showChunkSummary() {
+  grid.innerHTML = ''; // clear current inputs
+  grid.style.justifyContent = 'center';
+  grid.style.alignItems = 'center';
+  grid.style.textAlign = 'center';
+  grid.style.display = 'flex';
+  grid.style.flexDirection = 'column';
+
+  const start = currentChunk * CHUNK;
+  const end = Math.min(start + CHUNK, answers.length);
+
+  // Summary title
+  const summaryTitle = document.createElement('h2');
+  summaryTitle.textContent = `Chunk ${currentChunk + 1} Completed!`;
+  summaryTitle.style.marginBottom = '12px';
+  summaryTitle.style.color = 'var(--accent)';
+  grid.appendChild(summaryTitle);
+
+  // Motivational message
+  const msg = document.createElement('p');
+  msg.textContent = '🎉 Awesome! You mastered this chunk! Keep going!';
+  msg.style.color = 'var(--accent)';
+  msg.style.fontSize = '18px';
+  msg.style.marginBottom = '16px';
+  grid.appendChild(msg);
+
+  // Show answers summary
+  const summaryDiv = document.createElement('div');
+  summaryDiv.style.display = 'flex';
+  summaryDiv.style.flexDirection = 'column';
+  summaryDiv.style.gap = '6px';
+  summaryDiv.style.marginBottom = '20px';
+
+  for (let i = start; i < end; i++) {
+    const div = document.createElement('div');
+    div.textContent = `Item ${i + 1}: ${answers[i].toUpperCase()}`;
+    div.style.fontSize = '16px';
+    div.style.color = 'var(--muted)';
+    summaryDiv.appendChild(div);
+  }
+  grid.appendChild(summaryDiv);
+
+  // Continue button
+  const btn = document.createElement('button');
+  btn.textContent = 'Continue';
+  btn.className = 'primary';
+  btn.style.padding = '10px 20px';
+  btn.onclick = () => {
+    // Increment completed items
+    completed += (end - start);
+    const percent = Math.floor((completed / answers.length) * 100);
+    progBar.style.width = percent + '%';
+    statusText.textContent = `Progress: ${percent}%`;
+
+    // Reset layout and go to next chunk
+    grid.style.display = 'grid';
+    grid.style.justifyContent = '';
+    grid.style.alignItems = '';
+    grid.style.textAlign = '';
+    grid.style.flexDirection = '';
+    currentChunk++;
+    if (currentChunk * CHUNK >= answers.length) finalQuiz = true;
+    renderChunk();
+  };
+  grid.appendChild(btn);
+}
+
+
+renderChunk();
+</script>
+</body>
+</html>

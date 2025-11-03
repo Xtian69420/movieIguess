@@ -1359,34 +1359,58 @@ body {
     display: none !important;
 }
 
-/* Tablet Layout (768px - 1024px) */
-@media (min-width: 769px) and (max-width: 1024px) {
+/* Tablet Layout (768px - 1023px) */
+@media (min-width: 769px) and (max-width: 1023px) {
     .video-sidebar-layout {
         display: flex !important;
         flex-direction: column !important;
         gap: 1.5rem;
         margin: 1.5rem auto;
-    }
-    
-    .tv-sidebar {
-        display: block !important;
-        width: 100% !important;
-        max-width: 700px !important;
-        margin: 0 auto !important;
-        padding: 1.5rem;
+        padding: 0 1rem;
+        max-width: 100% !important;
     }
     
     .video-section {
         width: 100% !important;
         max-width: 100% !important;
+        flex: 1 !important;
+        min-width: 0 !important;
     }
     
-    .mobile-only {
+    /* Hide the TV sidebar completely */
+    .tv-sidebar {
         display: none !important;
     }
     
-    .desktop-only {
+    /* Full width video container for tablet */
+    .video-container {
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 0 !important;
+        padding-bottom: 56.25% !important; /* 16:9 aspect ratio */
+        background: #000 !important;
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5) !important;
+        margin-bottom: 0 !important;
+    }
+    
+    .video-container iframe {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+    }
+
+    .mobile-only {
         display: block !important;
+    }
+    
+    .desktop-only {
+        display: none !important;
     }
     
     /* Tablet episode cards */
@@ -1408,8 +1432,35 @@ body {
     }
 }
 
-/* Desktop Layout (1025px+) */
-@media (min-width: 1025px) {
+/* Tablet and Mobile Full Width (up to 1023px) */
+@media (max-width: 1023px) {
+    .video-sidebar-layout {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    
+    .video-section {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+    
+    .tv-sidebar {
+        display: none !important;
+    }
+    
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+    }
+}
+
+/* Desktop Layout (1024px+) */
+@media (min-width: 1024px) {
     .video-sidebar-layout {
         display: flex !important;
         flex-direction: row !important;
