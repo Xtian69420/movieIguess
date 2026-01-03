@@ -589,10 +589,43 @@ async function changeServer(serverUrl, contentPath, serverIndex, contentType) {
     if (contentType === 'movie' && movieId) {
         WatchMovie(movieId);
     } else if (contentType === 'tv' && seriesId) {
-        const activeEpisode = document.querySelector('.episode-buttons button.active');
-        const seasonNumber = parseInt(document.querySelector('.season-buttons button.active')?.innerText.replace('Season ', '')) || 1;
-        const episodeNumber = parseInt(activeEpisode?.innerText.replace('Episode ', '')) || 1;
-        watchEpisode(seriesId, seasonNumber, episodeNumber); // Reload the episode with the new server
+        // Prefer authoritative state stored on window. Fallback to DOM or iframe parsing if not present.
+        let seasonNumber = 1;
+        let episodeNumber = 1;
+
+        if (window.currentPlayingEpisode && window.currentPlayingEpisode.seriesId == seriesId) {
+            seasonNumber = window.currentPlayingEpisode.seasonNumber;
+            episodeNumber = window.currentPlayingEpisode.episodeNumber;
+        } else {
+            // Try sidebar now-playing marker
+            const nowPlaying = document.querySelector('.episode-card-sidebar.now-playing');
+            if (nowPlaying) {
+                episodeNumber = parseInt(nowPlaying.dataset.episode) || 1;
+                const seasonSelector = document.getElementById('season-selector');
+                seasonNumber = parseInt(seasonSelector?.value) || 1;
+            } else {
+                // Try modal selected episode
+                const modalSelected = document.querySelector('#episode-grid-modal .episode-btn.selected') || document.querySelector('#episode-grid-modal .episode-btn.playing');
+                if (modalSelected) {
+                    episodeNumber = parseInt(modalSelected.getAttribute('data-episode')) || 1;
+                    seasonNumber = parseInt(modalSelected.getAttribute('data-season')) || parseInt(document.getElementById('season-selector')?.value) || 1;
+                } else {
+                    // Last resort: parse current iframe src for season & episode
+                    const player = document.getElementById('video-player');
+                    if (player && player.src) {
+                        const src = player.src;
+                        const match1 = src.match(/\/tv\/(?:\d+)\/(\d+)\/(\d+)/);
+                        const match2 = src.match(/[?&]s=(\d+).*?[?&]e=(\d+)/);
+                        const match3 = src.match(/season=(\d+).*?episode=(\d+)/);
+                        if (match1) { seasonNumber = parseInt(match1[1]); episodeNumber = parseInt(match1[2]); }
+                        else if (match2) { seasonNumber = parseInt(match2[1]); episodeNumber = parseInt(match2[2]); }
+                        else if (match3) { seasonNumber = parseInt(match3[1]); episodeNumber = parseInt(match3[2]); }
+                    }
+                }
+            }
+        }
+
+        watchEpisode(seriesId, seasonNumber, episodeNumber); // Reload the episode with the new server (preserve selection)
     }
 }
 
@@ -615,7 +648,7 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
             const airDate = episode.air_date ? new Date(episode.air_date).toLocaleDateString() : '';
             
             return `
-                <div class="episode-card" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})">
+                <div class="episode-card" data-episode="${episode.episode_number}" onclick="watchEpisode(${seriesId}, ${seasonNumber}, ${episode.episode_number})">
                     <div class="episode-number">E${episode.episode_number}</div>
                     <div class="episode-info">
                         <h4 class="episode-title">${episode.name}</h4>
@@ -637,8 +670,16 @@ async function loadSeason(seriesId, seasonNumber, event = null) {
         episodeGrid.innerHTML = episodeButtons;
         episodeSelection.classList.remove('hidden');
         
-        // Auto-highlight Episode 1 if this is Season 1
-        if (seasonNumber == 1) {
+        // If a global playing episode exists for this series & season, highlight it in the grid
+        const episodeCardsEls = episodeGrid.querySelectorAll('.episode-card');
+        episodeCardsEls.forEach(el => el.classList.remove('active'));
+        if (window.currentPlayingEpisode && window.currentPlayingEpisode.seriesId == seriesId && window.currentPlayingEpisode.seasonNumber == seasonNumber) {
+            const currentEl = episodeGrid.querySelector(`.episode-card[data-episode="${window.currentPlayingEpisode.episodeNumber}"]`);
+            if (currentEl) currentEl.classList.add('active');
+        }
+        
+        // Auto-highlight Episode 1 if this is Season 1 and no playing episode exists
+        if (seasonNumber == 1 && !(window.currentPlayingEpisode && window.currentPlayingEpisode.seriesId == seriesId)) {
             setTimeout(() => {
                 const firstEpisodeCard = episodeGrid.querySelector('.episode-card');
                 if (firstEpisodeCard) {
@@ -726,6 +767,18 @@ async function watchEpisode(seriesId, seasonNumber, episodeNumber) {
             card.classList.add('selected');
         }
     });
+
+    // Update desktop episode grid active class and season selector (so UI reflects currently playing episode)
+    const seasonSelector = document.getElementById('season-selector');
+    if (seasonSelector) seasonSelector.value = seasonNumber;
+
+    const episodeGrid = document.getElementById('episode-grid');
+    if (episodeGrid) {
+        const cards = episodeGrid.querySelectorAll('.episode-card');
+        cards.forEach(c => c.classList.remove('active'));
+        const currentCard = episodeGrid.querySelector(`.episode-card[data-episode="${episodeNumber}"]`);
+        if (currentCard) currentCard.classList.add('active');
+    }
 
     // Update global playing episode state
     window.currentPlayingEpisode = {
@@ -874,6 +927,7 @@ async function loadSeasonModal(seriesId, seasonNumber, event = null) {
             
             return `
                 <button class="episode-btn ${isCurrentlyPlaying ? 'selected' : ''}" 
+                        data-season="${seasonNumber}"
                         data-episode="${episode.episode_number}"
                         onclick="selectEpisodeFromModal(${seriesId}, ${seasonNumber}, ${episode.episode_number}, '${episode.name?.replace(/'/g, "\\'")}')">
                     <span class="episode-number">E${episode.episode_number}</span>
