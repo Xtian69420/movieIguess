@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christian Signo</title>
+    <link rel="stylesheet" href="src/styles/style.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- Use public Font Awesome CDN to avoid kit/account loading issues -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- Devicon brand icons (includes C#) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/devicons/devicon@v2.15.1/devicon.min.css">
+    <link rel="icon" type="image/svg+xml" href="src/assets/carrot-solid.svg">
+</head>
+<body>
+    <div class="container">
+        <nav>
+            <p class="links" data-target="introId">INTRO</p>
+            <p class="links" data-target="skillId">SKILLS</p>
+            <p class="links" data-target="projectsId">PROJECTS</p>
+            <p class="links" data-target="contactsId">CONTACTS</p>
+        </nav>
+
+        <div class="intro" id="introId">
+            <img id="pfp" src="src/assets/1000093981.jpg" alt="Picture">
+
+            <div class="introDesc">
+                <h1 id="h1Intro">HI, I'M CHRISTIAN SIGNO.</h1>
+                <h2 id="h2Intro"><span id="auto-type" style="color: #ffff00; font-weight: 600;"></span> DEVELOPER</h2>
+                <div class="introIconCon">
+                    <div class="iconIntroVal"><i class="fa-brands fa-js"></i></div>
+                    <div class="iconIntroVal"><i class="devicon-csharp-plain"></i></div>
+                    <div class="iconIntroVal"><i class="fa-brands fa-python"></i></div>
+                    <div class="iconIntroVal"><i class="fa-brands fa-react"></i></div>
+                    <div class="iconIntroVal"><i class="fa-brands fa-unity"></i></div>
+                </div>
+                <div class="introS1">
+                    <h3>OTHER INFO</h3>
+                    <p><i class="fa-solid fa-user"></i> 21 YEARS OF AGE</p>
+                    <p><i class="fa-solid fa-graduation-cap"></i> STUDENT, SENIOR YEAR</p>
+                    <p id="email">
+                        <i class="fa-solid fa-envelope"></i> 
+                        <span id="emailText">c.signo0612@gmail.com</span>
+                        <i class="fa-solid fa-copy" id="copyIcon" title="Copy email"></i>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="skills" id="skillId">
+            <h2>SKILLS</h2>
+            <div class="scrollContainer">
+                <button class="btnControl" id="prev"><i class="fa-solid fa-angle-left"></i></button>
+                    <div class="environment">
+                        <div class="en" id="js">
+                            <img src="src/assets/1.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="py">
+                            <img src="src/assets/2.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="jv">
+                            <img src="src/assets/3.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="c">
+                            <img src="src/assets/4.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="cs">
+                            <img src="src/assets/5.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+
+                        <div class="en" id="re">
+                            <img src="src/assets/6.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="res">
+                            <img src="src/assets/7.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="ex">
+                            <img src="src/assets/8.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="sql">
+                            <img src="src/assets/9.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="md">
+                            <img src="src/assets/10.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+
+                        <div class="en" id="ut">
+                            <img src="src/assets/11.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="ue">
+                            <img src="src/assets/12.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="godot">
+                            <img src="src/assets/13.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                        <div class="en" id="pt">
+                            <img src="src/assets/14.png" alt="">
+                            <div class="stars">
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-solid fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star-half-stroke" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                                <i class="fa-regular fa-star" style="color: #ffff00;"></i>
+                            </div>
+                        </div>
+                    </div>
+                <button class="btnControl" id="next"><i class="fa-solid fa-angle-right"></i></button>
+            </div>
+            <div class="technicalSkill">
+                <div class="ts">
+                    <div class="circ"></div>
+                    <img src="src/assets/Y1.png" alt="">
+                    <h3>Leadership</h2>
+                    <p>I have experience leading teams and guiding group dynamics to ensure productive collaboration. I have successfully managed various projects, delegating tasks and fostering strong communication. Additionally, I led organizational operations in our school, contributing to strategic planning and overall efficiency.</p>
+                </div>
+                <div class="ts">
+                    <div class="circ"></div>
+                    <img src="src/assets/Y2.png" alt="">
+                    <h3>Development</h2>
+                    <p>I have developed a wide range of platforms across various domains. My experience includes creating mobile applications, responsive websites, and API servers. Additionally, I have worked on AI and machine learning projects, as well as game development.</p>
+                </div>
+                <div class="ts">
+                    <div class="circ"></div>
+                    <img src="src/assets/Y3.png" alt="">
+                    <h3>Problem solving</h2>
+                    <p>I have handled numerous high-pressure situations and managed them effectively. I rely on strong problem-solving abilities and time management skills to stay focused and efficient. Additionally, I maintain clear communication and collaboration with team members to ensure smooth workflow under stress.</p>
+                </div>
+            </div>
+        </div>
+        <div class="projects" id="projectsId">
+            <h2>NOTABLE PROJECTS</h2>
+            
+            <h3 id="h3Projs" style="font-weight: 200; margin-top: 3%;">Select a Project:</h3>
+            <div class="projCont">
+                <div class="left">
+                    <div class="leftItems" id="1">
+                        <img src="src/assets/proj1.png" alt="">
+                        <p style="font-weight: 300;">WEB: MOVIE/SERIES</p>
+                    </div>
+                    <div class="leftItems" id="2">
+                        <img src="src/assets/proj2.png" alt="">
+                        <p style="font-weight: 300;">AI: OCR SCAN</p>
+                    </div>
+                    <div class="leftItems" id="3">
+                        <img src="src/assets/proj3.png" alt="">
+                        <p style="font-weight: 300;">RECIPE SHARING COMM.</p>
+                    </div>
+                    <div class="leftItems" id="4">
+                        <img src="src/assets/proj4.png" alt="">
+                        <p style="font-weight: 300;">THESIS: STAYCATION BOOKING</p>
+                    </div>
+                    <div class="leftItems" id="5">
+                        <img src="src/assets/proj5.png" alt="">
+                        <p style="font-weight: 300;">MOBILE: HOSPITAL DONATION.</p>
+                    </div>
+                    <div class="leftItems" id="6">
+                        <img src="src/assets/proj6.png" alt="">
+                        <p style="font-weight: 300;">WEB: AI IMAGE GENERATOR CLONE</p>
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="rightItems">
+                        <div class="up">
+                            <img id="imgId" src="src/assets/proj1.png" alt="">
+                            <div class="textsProj">
+                                <h2 id="titleId">WEB: MOVIE/SERIES</h2>
+                                <p id="descId" style="font-weight: 200;">movieIguess is a responsive movie and TV series streaming site with seamless browsing, server switching, and playback.It showcases my skills in full-stack development, UI design, and API integration.</p>
+                            </div>
+                        </div>
+                        <div class="down">
+                            <button id="linkId">VIEW PROJECT</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="contacts" id="contactsId">
+            <div class="card1">
+                 <h2 style="color: black;">HIRE ME!</h2>
+                <h3 style="font-weight: 300; color: black;">Experienced developer specializing in game, web, API, DB, and mobile app development. Let’s collaborate to turn your vision into reality.</h3>
+            </div>
+
+            <div class="concon">
+                <div class="contactItems" data-copy="+63 960 363 5263">
+                    <i class="fa-solid fa-phone" style="color: black;"></i>
+                    <p>+63 960 363 5263</p>
+                    <i class="fa-solid fa-copy copyIcon" title="Copy number"></i>
+                </div>
+                <div class="contactItems" data-copy="c.signo0612@gmail.com">
+                    <i class="fa-solid fa-envelope" style="color: black;"></i>
+                    <p>c.signo0612@gmail.com</p>
+                    <i class="fa-solid fa-copy copyIcon" title="Copy email"></i>
+                </div>
+                <div class="contactItems" onclick="lin()">
+                    <i class="fa-brands fa-linkedin" style="color: black;"></i>
+                    <p>Christian Signo</p>
+                </div>
+                <div class="contactItems" onclick="git()">
+                    <i class="fa-brands fa-github" style="color: black;"></i>
+                    <p>Xtian69420</p>
+                </div>
+            </div>
+
+            <div class="end"></div>
+        </div>
+    </div>
+    <!--External Scripts-->
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    <script src="src/scripts/index.js"></script>
+    <script src="src/scripts/projects.js"></script>
+    <script src="src/scripts/contact-redirection.js"></script>
+
+<script>
+const sectionIds = ['introId', 'skillId', 'projectsId', 'contactsId'];
+const links = document.querySelectorAll('.links');
+
+function updateHighlightOnScroll() {
+    const offset = window.innerHeight * 0.15; 
+    let currentSectionIndex = 0;
+
+    sectionIds.forEach((id, index) => {
+        const section = document.getElementById(id);
+        const sectionTop = section.getBoundingClientRect().top - offset;
+
+        if (sectionTop <= 0) {
+            currentSectionIndex = index;
+        }
+    });
+
+    links.forEach(link => link.classList.remove('highlight'));
+    links[currentSectionIndex].classList.add('highlight');
+}
+
+links.forEach((link, index) => {
+    link.addEventListener('click', () => {
+        const target = document.getElementById(sectionIds[index]);
+
+        if (target) {
+            let targetPosition = target.getBoundingClientRect().top + window.pageYOffset;
+
+            if (index !== 1) {
+                const offset = window.innerHeight * 0.15;
+                targetPosition -= offset;
+            }
+
+            window.scrollTo({
+                top: targetPosition,
+                behavior: 'smooth'
+            });
+            links.forEach(link => link.classList.remove('highlight'));
+            link.classList.add('highlight');
+        }
+    });
+});
+
+// Trigger on load and scroll
+window.addEventListener('load', updateHighlightOnScroll);
+window.addEventListener('scroll', updateHighlightOnScroll);
+</script>
+
+
+</body>
+</html>
