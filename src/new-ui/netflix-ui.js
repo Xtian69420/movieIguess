@@ -653,7 +653,7 @@ function showProfileGate(manage = false) {
 
         setActiveProfile(profile.id);
 
-        renderHome();
+        renderHome({ showLoadingVideo: true });
       });
     });
 
@@ -950,7 +950,7 @@ function openProfileEditor(profile = null) {
     if (profile) {
       showProfileGate(true);
     } else {
-      renderHome();
+      renderHome({ showLoadingVideo: true });
     }
   };
 
@@ -1691,25 +1691,41 @@ async function loadMediaExtras(item) {
    RENDER HOME
 ========================================================= */
 
-async function renderHome() {
+async function renderHome({ showLoadingVideo = false } = {}) {
   app.innerHTML = `
     <div class="home-loading">
-      <div class="loading-mark">
-        <span class="loading-line line-a"></span>
-        <span class="loading-line line-b"></span>
-        <span class="loading-line line-c"></span>
+      ${showLoadingVideo ? `
+        <video
+          class="loading-video"
+          src="src/assets/loading.mp4"
+          autoplay
+          playsinline
+          preload="auto"
+          aria-hidden="true"
+        ></video>
+      ` : ''}
 
-        <img
-          src="src/assets/logo.png"
-          alt="MovieIGuess"
-        />
-
-        <span class="loading-wordmark">
-          MovieIGuess
-        </span>
+      <div class="loading-fallback" aria-label="Loading">
+        <span class="loading-spinner"></span>
       </div>
     </div>
   `;
+
+  const loadingFallback = app.querySelector('.loading-fallback');
+  const loadingVideo = app.querySelector('.loading-video');
+  const videoFinished = loadingVideo
+    ? new Promise(resolve => {
+        const finishLoading = () => resolve();
+
+        loadingVideo.addEventListener('ended', finishLoading, { once: true });
+        loadingVideo.addEventListener('error', finishLoading, { once: true });
+        loadingVideo.addEventListener('playing', () => {
+          loadingFallback.classList.add('is-hidden');
+        }, { once: true });
+
+        loadingVideo.play().catch(finishLoading);
+      })
+    : Promise.resolve();
 
   try {
     await loadHomeData();
@@ -1717,6 +1733,7 @@ async function renderHome() {
     console.error(error);
   }
 
+  await videoFinished;
   paintHome();
 }
 
@@ -5201,8 +5218,9 @@ async function openWatch(item) {
           class="watch-frame"
           src="${iframeUrl}"
           title="${escapeHTML(title)}"
-          allow="autoplay; encrypted-media; picture-in-picture"
+          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
           allowfullscreen
+          referrerpolicy="no-referrer"
         ></iframe>
       </div>
     </section>
