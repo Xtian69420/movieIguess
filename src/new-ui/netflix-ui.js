@@ -373,6 +373,8 @@ const state = {
 
   searchOpen: false,
   searchTerm: '',
+  searchRequestId: 0,
+  searchTimer: null,
   currentView: 'home',
 
   heroRevealTimer: null,
@@ -3785,7 +3787,7 @@ function wireHomeEvents() {
   searchInput.addEventListener(
     'input',
     event =>
-      searchTitles(event.target.value)
+      scheduleSearchTitles(event.target.value)
   );
 
   app
@@ -4339,11 +4341,179 @@ function wireCards() {
    SEARCH
 ========================================================= */
 
-function searchTitles(term) {
+function scheduleSearchTitles(term) {
+  clearTimeout(state.searchTimer);
+
+  const normalized =
+    term.trim();
+
+  if (!normalized) {
+    searchTitles(term);
+    return;
+  }
+
+  state.searchTimer = setTimeout(
+    () => searchTitles(term),
+    280
+  );
+}
+
+function normalizeSearchText(value = '') {
+  return String(value)
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+}
+
+function getSearchableText(item) {
+  return normalizeSearchText(`
+    ${item.title || ''}
+    ${item.name || ''}
+    ${item.original_title || ''}
+    ${item.original_name || ''}
+    ${item.overview || ''}
+  `);
+}
+
+function getEditDistance(a, b) {
+  const previous =
+    Array.from(
+      { length: b.length + 1 },
+      (_, index) => index
+    );
+
+  for (let i = 1; i <= a.length; i += 1) {
+    let current = [i];
+
+    for (let j = 1; j <= b.length; j += 1) {
+      current[j] =
+        a[i - 1] === b[j - 1]
+          ? previous[j - 1]
+          : Math.min(
+              previous[j - 1],
+              previous[j],
+              current[j - 1]
+            ) + 1;
+    }
+
+    previous.splice(0, previous.length, ...current);
+  }
+
+  return previous[b.length];
+}
+
+function getLocalSearchScore(item, query) {
+  const title =
+    normalizeSearchText(getItemTitle(item));
+
+  const text =
+    getSearchableText(item);
+
+  const words =
+    query.split(' ').filter(Boolean);
+
+  if (!title || !words.length) {
+    return 0;
+  }
+
+  if (title === query) return 120;
+  if (title.startsWith(query)) return 100;
+  if (title.includes(query)) return 80;
+  if (words.every(word => title.includes(word))) return 65;
+  if (words.every(word => text.includes(word))) return 45;
+
+  if (
+    query.length >= 4 &&
+    getEditDistance(title, query) <= 2
+  ) {
+    return 55;
+  }
+
+  return words.reduce(
+    (score, word) =>
+      text.includes(word)
+        ? score + 10
+        : score,
+    0
+  );
+}
+
+function getUniqueSearchItems(items) {
+  return Array.from(
+    new Map(
+      items.map(item => [
+        getCacheKey(item),
+        item
+      ])
+    ).values()
+  );
+}
+
+function getLocalSearchResults(query) {
+  return getUniqueSearchItems(state.allItems)
+    .map(item => ({
+      item,
+      score:
+        getLocalSearchScore(item, query)
+    }))
+    .filter(result => result.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .map(result => result.item)
+    .slice(0, 12);
+}
+
+function mergeSearchResults(localItems, tmdbItems) {
+  return getUniqueSearchItems([
+    ...localItems,
+    ...tmdbItems
+  ]).slice(0, 36);
+}
+
+function renderSearchSkeletonRow(term) {
+  return `
+    <section class="title-row search-skeleton-row">
+
+      <div class="row-header">
+        <h2>
+          ${escapeHTML(`Searching TMDB for "${term}"`)}
+        </h2>
+      </div>
+
+      <div class="rail-container">
+
+        <div class="title-rail">
+
+          ${Array.from(
+            { length: 12 },
+            () => `
+              <article
+                class="movie-card search-skeleton-card"
+                aria-hidden="true"
+              >
+                <span class="search-skeleton-shimmer"></span>
+                <span class="search-skeleton-title"></span>
+              </article>
+            `
+          ).join('')}
+
+        </div>
+
+      </div>
+
+    </section>
+  `;
+}
+
+async function searchTitles(term) {
   destroyHoverPreview();
 
   state.searchTerm =
     term.trim().toLowerCase();
+
+  const requestId =
+    ++state.searchRequestId;
 
   const content =
     app.querySelector(
@@ -4361,55 +4531,135 @@ function searchTitles(term) {
     return;
   }
 
-  const unique =
-    [
-      ...new Map(
-        state.allItems.map(item => [
+  const query =
+    normalizeSearchText(state.searchTerm);
+
+  const localResults =
+    getLocalSearchResults(query);
+
+  if (localResults.length) {
+    content.innerHTML = renderRows([
+      {
+        title:
+          `Smart search for "${term.trim()}"`,
+        items:
+          localResults
+      }
+    ]);
+
+    wireRails();
+    wireCards();
+    populateCardLogos();
+  } else {
+    content.innerHTML =
+      renderSearchSkeletonRow(term.trim());
+  }
+
+  try {
+    const responses =
+      await Promise.all([
+        api(
+          `/search/multi?language=en-US&include_adult=false&page=1&query=${encodeURIComponent(state.searchTerm)}`
+        ),
+        api(
+          `/search/multi?language=en-US&include_adult=false&page=2&query=${encodeURIComponent(state.searchTerm)}`
+        )
+      ]);
+
+    if (
+      requestId !== state.searchRequestId ||
+      !state.searchTerm
+    ) {
+      return;
+    }
+
+    const filtered =
+      responses
+        .flatMap(response => response.results || [])
+        .flatMap(item =>
+          item.media_type === 'person'
+            ? item.known_for || []
+            : [item]
+        )
+        .filter(item =>
+          ['movie', 'tv'].includes(item.media_type) &&
+          (item.title || item.name) &&
+          (item.backdrop_path || item.poster_path) &&
+          !item.adult
+        )
+        .sort(
+          (a, b) =>
+            (b.popularity || 0) -
+            (a.popularity || 0)
+        )
+        .slice(0, 30);
+
+    const searchResults =
+      mergeSearchResults(
+        localResults,
+        filtered
+      );
+
+    const mergedItems =
+      new Map(
+        [
+          ...state.allItems,
+          ...searchResults
+        ].map(item => [
           getCacheKey(item),
           item
         ])
-      ).values()
-    ];
-
-  const filtered =
-    unique.filter(item => {
-      const text = `
-        ${item.title || ''}
-        ${item.name || ''}
-        ${item.original_title || ''}
-        ${item.original_name || ''}
-        ${item.overview || ''}
-      `.toLowerCase();
-
-      return text.includes(
-        state.searchTerm
       );
-    });
 
-  const searchRow = {
-    title:
-      `Search results for “${term}”`,
+    state.allItems =
+      Array.from(mergedItems.values());
 
-    items:
-      filtered
-  };
+    const searchRow = {
+      title:
+        `Search results for "${term.trim()}"`,
 
-  /*
-   * Temporarily append so renderCard's
-   * row index remains valid.
-   */
-  state.rows.push(searchRow);
+      items:
+        searchResults
+    };
 
-  content.innerHTML =
-    renderRows(
-      [searchRow],
-      state.rows.length - 1
+    /*
+     * Temporarily append so renderCard's
+     * row index remains valid.
+     */
+    state.rows.push(searchRow);
+
+    content.innerHTML =
+      renderRows(
+        [searchRow],
+        state.rows.length - 1
+      );
+
+    wireRails();
+    wireCards();
+    populateCardLogos();
+
+    state.rows.pop();
+  } catch (error) {
+    console.warn(
+      'TMDB search unavailable:',
+      error
     );
 
-  wireRails();
-  wireCards();
+    if (
+      requestId !== state.searchRequestId ||
+      localResults.length
+    ) {
+      return;
+    }
 
-  state.rows.pop();
+    content.innerHTML = renderRows([
+      {
+        title:
+          `No TMDB results for "${term.trim()}"`,
+        items: []
+      }
+    ]);
+  }
 }
 
 /* =========================================================

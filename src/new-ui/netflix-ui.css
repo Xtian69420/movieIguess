@@ -712,6 +712,10 @@ body::-webkit-scrollbar-thumb {
     animation: none;
   }
 
+  .search-skeleton-shimmer {
+    animation: none;
+  }
+
   .movie-card:hover,
   .movie-card:focus,
   .movie-card:hover > img,
@@ -1713,6 +1717,80 @@ body::-webkit-scrollbar-thumb {
       0 2px 5px
       rgba(0, 0, 0, 0.8)
     );
+}
+
+.search-skeleton-card {
+  pointer-events: none;
+  cursor: default;
+}
+
+.search-skeleton-card:hover,
+.search-skeleton-card:focus {
+  box-shadow: none;
+  filter: none;
+  transform: none;
+}
+
+.search-skeleton-shimmer {
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      100deg,
+      #232323 0%,
+      #303030 42%,
+      #3c3c3c 50%,
+      #303030 58%,
+      #232323 100%
+    );
+
+  background-size: 220% 100%;
+
+  animation:
+    searchSkeletonShimmer
+    1.15s
+    ease-in-out
+    infinite;
+}
+
+.search-skeleton-card::after {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.46),
+      transparent 58%
+    );
+}
+
+.search-skeleton-title {
+  position: absolute;
+  left: 10px;
+  bottom: 12px;
+  z-index: 2;
+
+  width: 46%;
+  height: 13px;
+
+  border-radius: 3px;
+
+  background:
+    rgba(255, 255, 255, 0.16);
+}
+
+@keyframes searchSkeletonShimmer {
+  from {
+    background-position: 120% 0;
+  }
+
+  to {
+    background-position: -120% 0;
+  }
 }
 
 .card-heart-indicator {
