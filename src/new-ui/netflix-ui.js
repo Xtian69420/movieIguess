@@ -1312,6 +1312,15 @@ async function loadHomeData() {
         )
       : [];
 
+  const continueWatchingItems =
+    getContinueWatchingItems([
+      ...state.top10,
+      ...selectedTitleItems,
+      ...listItems,
+      ...topPickItems,
+      ...generatedRows.flatMap(row => row.items)
+    ]);
+
   state.rows = dedupeRowsByPriority([
     ...(
       topPickItems.length
@@ -1319,6 +1328,16 @@ async function loadHomeData() {
             {
               title: 'Top Picks for You Today',
               items: topPickItems
+            }
+          ]
+        : []
+    ),
+    ...(
+      continueWatchingItems.length
+        ? [
+            {
+              title: 'Continue Watching',
+              items: continueWatchingItems
             }
           ]
         : []
@@ -2144,6 +2163,110 @@ function getWatchProgress(item) {
   return getWatchProgressMap()[getCacheKey(item)] || null;
 }
 
+function getWatchProgressItem(item) {
+  return {
+    media_type: getMediaType(item),
+    id: item.id,
+    title: item.title,
+    name: item.name,
+    original_title: item.original_title,
+    original_name: item.original_name,
+    overview: item.overview,
+    backdrop_path: item.backdrop_path,
+    poster_path: item.poster_path,
+    release_date: item.release_date,
+    first_air_date: item.first_air_date,
+    vote_average: item.vote_average,
+    popularity: item.popularity
+  };
+}
+
+function getContinueWatchingItems(candidates = []) {
+  const progressEntries =
+    Object.values(getWatchProgressMap());
+
+  const candidateItems =
+    uniqueMediaItems([
+      ...candidates,
+      ...state.allItems
+    ]);
+
+  return progressEntries
+    .filter(entry => entry?.id)
+    .sort(
+      (a, b) =>
+        (b.updatedAt || 0) -
+        (a.updatedAt || 0)
+    )
+    .map(entry => {
+      const mediaType =
+        entry.media_type || entry.type;
+
+      const key =
+        `${mediaType}-${entry.id}`;
+
+      const catalogItem =
+        candidateItems.find(item =>
+          getCacheKey(item) === key
+        );
+
+      return {
+        ...(catalogItem || {}),
+        ...entry.item,
+        id: entry.id,
+        media_type: mediaType,
+        watchSeason:
+          entry.season ||
+          entry.item?.watchSeason ||
+          1,
+        watchEpisode:
+          entry.episode ||
+          entry.item?.watchEpisode ||
+          1,
+        watchProgress: entry
+      };
+    })
+    .filter(item =>
+      item.id &&
+      (item.title || item.name) &&
+      (item.backdrop_path || item.poster_path)
+    )
+    .slice(0, 20);
+}
+
+function syncContinueWatchingRow() {
+  const items =
+    getContinueWatchingItems();
+
+  state.rows =
+    state.rows.filter(
+      row => row.title !== 'Continue Watching'
+    );
+
+  if (!items.length) return;
+
+  const topPicksIndex =
+    state.rows.findIndex(
+      row => row.title === 'Top Picks for You Today'
+    );
+
+  state.rows.splice(
+    topPicksIndex >= 0
+      ? topPicksIndex + 1
+      : 0,
+    0,
+    {
+      title: 'Continue Watching',
+      items
+    }
+  );
+
+  state.allItems = uniqueMediaItems([
+    ...state.allItems,
+    ...items
+  ]);
+}
+
 function saveWatchProgress(item, extra = {}) {
   const profileId =
     state.profile?.id;
@@ -2167,6 +2290,7 @@ function saveWatchProgress(item, extra = {}) {
     [getCacheKey(item)]: {
       media_type: getMediaType(item),
       id: item.id,
+      item: getWatchProgressItem(item),
       updatedAt: Date.now(),
       ...extra
     }
@@ -2176,6 +2300,8 @@ function saveWatchProgress(item, extra = {}) {
     WATCH_PROGRESS_KEY,
     JSON.stringify(allProgress)
   );
+
+  syncContinueWatchingRow();
 }
 
 function getSelectedWatchServer() {
@@ -5529,8 +5655,10 @@ async function openWatch(item) {
           class="watch-frame"
           src="${iframeUrl}"
           title="${escapeHTML(title)}"
-          allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+          allow="autoplay; encrypted-media; fullscreen *; picture-in-picture"
           allowfullscreen
+          webkitallowfullscreen
+          mozallowfullscreen
           referrerpolicy="no-referrer"
         ></iframe>
       </div>
