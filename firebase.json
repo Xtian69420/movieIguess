@@ -1,6 +1,23 @@
 {
   "hosting": {
     "public": ".",
+    "redirects": [
+      {
+        "source": "/legacy-index.html",
+        "destination": "https://movie-i-guess.web.app/",
+        "type": 301
+      },
+      {
+        "source": "/viewMovie.html",
+        "destination": "https://movie-i-guess.web.app/",
+        "type": 301
+      },
+      {
+        "source": "/WatchMovie.html",
+        "destination": "https://movie-i-guess.web.app/",
+        "type": 301
+      }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",

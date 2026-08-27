@@ -322,6 +322,34 @@ const WATCH_SERVERS = [
       `https://vidsrc.wtf/api/2/tv?id=${id}&s=${season}&e=${episode}`
   },
   {
+    id: 'premium',
+    name: 'Premium',
+    movie: id => `https://111movies.com/movie/${id}`,
+    tv: (id, season, episode) =>
+      `https://111movies.com/tv/${id}/${season}/${episode}`
+  },
+  {
+    id: 'vidsrc3',
+    name: 'Multi-embed',
+    movie: id => `https://www.vidsrc.wtf/api/3/movie/?id=${id}`,
+    tv: (id, season, episode) =>
+      `https://www.vidsrc.wtf/api/3/tv/?id=${id}&s=${season}&e=${episode}`
+  },
+  {
+    id: 'smashy',
+    name: 'Smashy',
+    movie: id => `https://smashyplayer.top/#mv${id}`,
+    tv: (id, season, episode) =>
+      `https://smashyplayer.top/#tv${id}s${season}e${episode}`
+  },
+  {
+    id: 'vidlinkpro',
+    name: 'VidLinkPro',
+    movie: id => `https://vidlink.pro/movie/${id}?autoplay=true&title=true`,
+    tv: (id, season, episode) =>
+      `https://vidlink.pro/tv/${id}/${season}/${episode}?autoplay=true&title=true`
+  },
+  {
     id: 'autoembed',
     name: 'Prime',
     movie: id =>
@@ -344,6 +372,27 @@ const WATCH_SERVERS = [
       `https://www.primewire.tf/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`
   },
   {
+    id: 'vidrock',
+    name: 'VidRock',
+    movie: id => `https://vidrock.net/movie/${id}`,
+    tv: (id, season, episode) =>
+      `https://vidrock.net/tv/${id}/${season}/${episode}`
+  },
+  {
+    id: 'mega',
+    name: 'Mega',
+    movie: id => `https://vidrock.net/mega/movie/${id}`,
+    tv: (id, season, episode) =>
+      `https://vidrock.net/mega/tv/${id}/${season}/${episode}`
+  },
+  {
+    id: 'vidnest',
+    name: 'VidNest',
+    movie: id => `https://vidnest.fun/movie/${id}`,
+    tv: (id, season, episode) =>
+      `https://vidnest.fun/tv/${id}/${season}/${episode}`
+  },
+  {
     id: 'vidzee',
     name: 'Vidzee',
     movie: id => `https://player.vidzee.wtf/embed/movie/${id}`,
@@ -351,6 +400,13 @@ const WATCH_SERVERS = [
       `https://player.vidzee.wtf/embed/tv/${id}/${season}/${episode}`
   }
 ];
+
+const COUNTRY_PREFERENCE_MATCHERS = {
+  KR: /k-drama|korean|korea/i,
+  JP: /japanese|japan|anime/i,
+  US: /\bus\b|united states|american/i,
+  PH: /filipino|philippines|pinoy/i
+};
 
 /* =========================================================
    STATE
@@ -459,6 +515,41 @@ function getItemYear(item) {
 
 function getCacheKey(item) {
   return `${getMediaType(item)}-${item.id}`;
+}
+
+function getItemCountries(item) {
+  return [
+    ...(Array.isArray(item?.origin_country)
+      ? item.origin_country
+      : []),
+    ...(item?.production_countries || [])
+      .map(country => country.iso_3166_1)
+  ]
+    .filter(Boolean)
+    .map(country => country.toUpperCase());
+}
+
+function isIndianBrowsingItem(item) {
+  const countries =
+    getItemCountries(item);
+
+  const language =
+    String(item?.original_language || '')
+      .toLowerCase();
+
+  const title =
+    getItemTitle(item).toLowerCase();
+
+  return (
+    countries.includes('IN') ||
+    ['hi', 'ta', 'te', 'ml', 'kn', 'bn', 'mr', 'pa', 'gu']
+      .includes(language) ||
+    /\bbollywood\b/.test(title)
+  );
+}
+
+function isBrowseAllowedItem(item) {
+  return !isIndianBrowsingItem(item);
 }
 
 function getMediaImage(
@@ -1158,7 +1249,7 @@ async function loadHomeData() {
     state.profile ||
     getProfiles()[0];
 
-  const rows = profile.kids
+  const baseRows = profile.kids
     ? [
         ...KIDS_ROWS,
 
@@ -1174,6 +1265,7 @@ async function loadHomeData() {
       ]
     : [
         ...buildPreferenceRows(profile),
+        ...buildRecommendationSourceRows(),
 
         [
           'Today\'s Top Picks for You',
@@ -1217,6 +1309,9 @@ async function loadHomeData() {
           '/discover/movie?language=en-US&include_adult=false&sort_by=popularity.desc&page=2'
         ]
       ];
+
+  const rows =
+    uniqueContentRows(baseRows);
 
   const heroPath = profile.kids
     ? '/discover/movie?language=en-US&include_adult=false&with_genres=16,10751&certification_country=US&certification.lte=PG&sort_by=popularity.desc'
@@ -1273,6 +1368,7 @@ async function loadHomeData() {
         item =>
           (item.backdrop_path || item.poster_path) &&
           !item.adult &&
+          isBrowseAllowedItem(item) &&
           (item.title || item.name)
       )
       .slice(0, 12);
@@ -1283,7 +1379,11 @@ async function loadHomeData() {
 
   state.top10 =
     (top10Response.results || [])
-      .filter(item => item.poster_path && !item.adult)
+      .filter(item =>
+        item.poster_path &&
+        !item.adult &&
+        isBrowseAllowedItem(item)
+      )
       .slice(0, 10);
 
   const generatedRows = rows.map(
@@ -1295,7 +1395,8 @@ async function loadHomeData() {
           .filter(
             item =>
               (item.backdrop_path || item.poster_path) &&
-              !item.adult
+              !item.adult &&
+              isBrowseAllowedItem(item)
           )
           .slice(0, 20)
     })
@@ -1316,9 +1417,18 @@ async function loadHomeData() {
       !catalogTitles.has(row.title)
     );
 
+  const continueWatchingItems =
+    getContinueWatchingItems([
+      ...state.top10,
+      ...selectedTitleItems,
+      ...listItems,
+      ...generatedRows.flatMap(row => row.items)
+    ]);
+
   const topPickSignals =
     uniqueMediaItems([
       ...favoriteListItems,
+      ...continueWatchingItems,
       ...listItems,
       ...selectedTitleItems
     ]);
@@ -1330,15 +1440,6 @@ async function loadHomeData() {
           nonCatalogRows
         )
       : [];
-
-  const continueWatchingItems =
-    getContinueWatchingItems([
-      ...state.top10,
-      ...selectedTitleItems,
-      ...listItems,
-      ...topPickItems,
-      ...generatedRows.flatMap(row => row.items)
-    ]);
 
   state.rows = dedupeRowsByPriority([
     ...(
@@ -1423,9 +1524,9 @@ function buildTopPickItems(signals, rows) {
     .filter(item =>
       !signalKeys.has(
         `${getMediaType(item)}-${item.id}`
-      )
-    )
-    .slice(0, 24);
+      ) &&
+      isBrowseAllowedItem(item)
+    );
 }
 
 function getWeightedSignalTags(signals) {
@@ -1439,7 +1540,11 @@ function getWeightedSignalTags(signals) {
       );
 
     const weight =
-      item.favorite ? 4 : 2;
+      item.favorite
+        ? 4
+        : item.watchProgress
+          ? 3
+          : 2;
 
     const tags =
       choice?.tags ||
@@ -1468,6 +1573,9 @@ function inferPreferenceTags(item) {
   const type =
     getMediaType(item);
 
+  const countries =
+    getItemCountries(item);
+
   const tags = [];
 
   if (genreIds.includes(16)) tags.push('anime');
@@ -1480,6 +1588,12 @@ function inferPreferenceTags(item) {
   }
   if (type === 'tv') tags.push('popular_series');
   if (type === 'movie') tags.push('popular_movies');
+
+  countries.forEach(country => {
+    if (COUNTRY_PREFERENCE_MATCHERS[country]) {
+      tags.push(`country_${country}`);
+    }
+  });
 
   return tags;
 }
@@ -1522,6 +1636,25 @@ function getRowPreferenceScore(title, weights) {
       if (
         tag === 'action_thriller' &&
         /action|thriller/i.test(title)
+      ) {
+        return score + weight;
+      }
+
+      if (tag.startsWith('country_')) {
+        const country =
+          tag.replace('country_', '');
+
+        const matcher =
+          COUNTRY_PREFERENCE_MATCHERS[country];
+
+        if (matcher?.test(title)) {
+          return score + weight;
+        }
+      }
+
+      if (
+        tag.startsWith('country_') &&
+        /international|world/i.test(title)
       ) {
         return score + weight;
       }
@@ -1621,14 +1754,37 @@ function buildPreferenceRows(profile) {
       )
     )
     .filter(Boolean)
-    .slice(0, 8)
     .flatMap(option =>
       option.rows.map(([title, path]) => [
         `${title} for ${profile.name}`,
         path
       ])
-    )
-    .slice(0, 14);
+    );
+}
+
+function uniqueContentRows(rows) {
+  const seen = new Set();
+
+  return rows.filter(([title, path]) => {
+    const key =
+      path || title.toLowerCase();
+
+    if (seen.has(key)) {
+      return false;
+    }
+
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildRecommendationSourceRows() {
+  return PREFERENCE_OPTIONS
+    .flatMap(option => option.rows)
+    .map(([title, path]) => [
+      title,
+      path
+    ]);
 }
 
 async function loadHeroTrailer() {
@@ -2053,7 +2209,9 @@ function getRowsForView(view) {
     return [
       {
         title: 'My List',
-        items: getProfileList()
+        items:
+          getProfileList()
+            .filter(isBrowseAllowedItem)
       }
     ];
   }
@@ -2211,6 +2369,10 @@ function getWatchProgressItem(item) {
     original_title: item.original_title,
     original_name: item.original_name,
     overview: item.overview,
+    genre_ids: item.genre_ids,
+    genres: item.genres,
+    origin_country: item.origin_country,
+    production_countries: item.production_countries,
     backdrop_path: item.backdrop_path,
     poster_path: item.poster_path,
     release_date: item.release_date,
@@ -2268,9 +2430,9 @@ function getContinueWatchingItems(candidates = []) {
     .filter(item =>
       item.id &&
       (item.title || item.name) &&
-      (item.backdrop_path || item.poster_path)
-    )
-    .slice(0, 20);
+      (item.backdrop_path || item.poster_path) &&
+      isBrowseAllowedItem(item)
+    );
 }
 
 function syncContinueWatchingRow() {
@@ -2334,6 +2496,36 @@ function saveWatchProgress(item, extra = {}) {
       ...extra
     }
   };
+
+  localStorage.setItem(
+    WATCH_PROGRESS_KEY,
+    JSON.stringify(allProgress)
+  );
+
+  syncContinueWatchingRow();
+}
+
+function removeWatchProgress(item) {
+  const profileId =
+    state.profile?.id;
+
+  if (!profileId || !item?.id) return;
+
+  let allProgress = {};
+
+  try {
+    allProgress =
+      JSON.parse(
+        localStorage.getItem(WATCH_PROGRESS_KEY) ||
+        '{}'
+      );
+  } catch {
+    allProgress = {};
+  }
+
+  if (!allProgress[profileId]) return;
+
+  delete allProgress[profileId][getCacheKey(item)];
 
   localStorage.setItem(
     WATCH_PROGRESS_KEY,
@@ -3087,6 +3279,10 @@ function renderCard(
       IMG_W500
     );
 
+  const isContinueWatching =
+    state.rows[rowIndex]?.title ===
+    'Continue Watching';
+
   return `
     <article
       class="movie-card"
@@ -3098,6 +3294,7 @@ function renderCard(
 
       data-media-type="${mediaType}"
       data-media-id="${item.id}"
+      data-continue-watching="${isContinueWatching ? 'true' : 'false'}"
 
       tabindex="0"
     >
@@ -3494,6 +3691,21 @@ async function openHoverPreview(
           ${heartIcon()}
         </button>
 
+        ${
+          item.watchProgress
+            ? `
+              <button
+                class="hover-circle hover-remove"
+                data-hover-remove-progress
+                aria-label="Remove from Continue Watching"
+                title="Remove from Continue Watching"
+              >
+                ${closeIcon()}
+              </button>
+            `
+            : ''
+        }
+
         <button
           class="hover-circle hover-info"
           data-hover-more
@@ -3648,6 +3860,35 @@ async function openHoverPreview(
         if (state.currentView === 'list') {
           switchContentView('list');
         }
+      }
+    );
+
+  preview
+    .querySelector('[data-hover-remove-progress]')
+    ?.addEventListener(
+      'click',
+      event => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        destroyHoverPreview();
+        removeWatchProgress(item);
+
+        const content =
+          app.querySelector('[data-content]');
+
+        if (content) {
+          content.innerHTML =
+            renderViewContent(state.currentView);
+
+          wireRails();
+          wireCards();
+          populateCardLogos();
+        }
+
+        showToast(
+          'Removed from Continue Watching'
+        );
       }
     );
 
@@ -4448,11 +4689,11 @@ function wireCards() {
         Number(card.dataset.item);
 
       const item =
+        state.rows[rowIndex]?.items[itemIndex] ||
         state.allItems.find(candidate =>
           getCacheKey(candidate) ===
           card.dataset.mediaKey
-        ) ||
-        state.rows[rowIndex]?.items[itemIndex];
+        );
 
       if (!item) return;
 
@@ -4929,7 +5170,8 @@ async function openDetails(item) {
       (similarResponse.results || [])
         .filter(
           result =>
-            result.backdrop_path
+            result.backdrop_path &&
+            isBrowseAllowedItem(result)
         )
         .slice(0, 6);
   } catch (error) {
@@ -5936,6 +6178,23 @@ function checkIcon() {
         stroke-width="2.7"
         stroke-linecap="round"
         stroke-linejoin="round"
+      />
+    </svg>
+  `;
+}
+
+function closeIcon() {
+  return `
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+    >
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.4"
+        stroke-linecap="round"
       />
     </svg>
   `;
