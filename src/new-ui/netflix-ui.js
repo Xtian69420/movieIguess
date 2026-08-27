@@ -1226,7 +1226,7 @@ async function loadHomeData() {
     ? '/discover/movie?language=en-US&include_adult=false&with_genres=16,10751&certification_country=US&certification.lte=PG&sort_by=popularity.desc&page=2'
     : '/trending/movie/day?language=en-US';
 
-  const results = await Promise.all([
+  const responses = await Promise.allSettled([
     api(heroPath),
     api(top10Path),
 
@@ -1234,6 +1234,20 @@ async function loadHomeData() {
       api(path)
     )
   ]);
+
+  const results =
+    responses.map((response, index) => {
+      if (response.status === 'fulfilled') {
+        return response.value;
+      }
+
+      console.warn(
+        `Home request ${index} unavailable:`,
+        response.reason
+      );
+
+      return { results: [] };
+    });
 
   const selectedTitleItems =
     await loadSelectedProfileTitles(profile);
@@ -1249,10 +1263,15 @@ async function loadHomeData() {
   const rowResponses = results.slice(2);
 
   state.heroItems =
-    (heroResponse.results || [])
+    uniqueMediaItems([
+      ...(heroResponse.results || []),
+      ...rowResponses.flatMap(
+        response => response.results || []
+      )
+    ])
       .filter(
         item =>
-          item.backdrop_path &&
+          (item.backdrop_path || item.poster_path) &&
           !item.adult &&
           (item.title || item.name)
       )
@@ -1275,7 +1294,7 @@ async function loadHomeData() {
         (rowResponses[index]?.results || [])
           .filter(
             item =>
-              item.backdrop_path &&
+              (item.backdrop_path || item.poster_path) &&
               !item.adult
           )
           .slice(0, 20)
@@ -1359,6 +1378,10 @@ function uniqueMediaItems(items) {
   const seen = new Set();
 
   return items.filter(item => {
+    if (!item?.id) {
+      return false;
+    }
+
     const key =
       `${getMediaType(item)}-${item.id}`;
 
@@ -1791,7 +1814,23 @@ function paintHome() {
     state.profile ||
     getProfiles()[0];
 
-  const hero = state.hero;
+  const hero =
+    state.hero ||
+    state.rows
+      .flatMap(row => row.items || [])
+      .find(item =>
+        item?.id &&
+        (item.title || item.name)
+      ) ||
+    state.top10.find(item =>
+      item?.id &&
+      (item.title || item.name)
+    ) ||
+    null;
+
+  if (hero && !state.hero) {
+    state.hero = hero;
+  }
 
   const heroTitle =
     getItemTitle(hero);
