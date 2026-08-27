@@ -16,6 +16,16 @@
         "source": "/WatchMovie.html",
         "destination": "https://movie-i-guess.web.app/",
         "type": 301
+      },
+      {
+        "source": "/movieIguess",
+        "destination": "https://movie-i-guess.web.app/",
+        "type": 301
+      },
+      {
+        "source": "/movieIguess/**",
+        "destination": "https://movie-i-guess.web.app/",
+        "type": 301
       }
     ],
     "ignore": [
