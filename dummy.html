@@ -4,15 +4,20 @@
     <meta charset="UTF-8">
     <script>
       (function() {
-        const canonicalOrigin = 'https://movie-i-guess.web.app';
-        const localHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1'];
-        const isLocalHost = localHosts.includes(window.location.hostname);
-        const isHttp = window.location.protocol.startsWith('http');
-        const isCanonicalRoot = window.location.origin === canonicalOrigin && (window.location.pathname === '/' || window.location.pathname === '');
+        function redirectToCanonical() {
+          const canonicalOrigin = 'https://movie-i-guess.web.app';
+          const localHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1'];
+          const isLocalHost = localHosts.includes(window.location.hostname);
+          const isHttp = window.location.protocol.startsWith('http');
+          const isCanonicalRoot = window.location.origin === canonicalOrigin && (window.location.pathname === '/' || window.location.pathname === '');
 
-        if (isHttp && !isLocalHost && !isCanonicalRoot) {
-          window.location.replace(canonicalOrigin + '/');
+          if (isHttp && !isLocalHost && !isCanonicalRoot) {
+            window.location.replace(canonicalOrigin + '/');
+          }
         }
+
+        redirectToCanonical();
+        window.addEventListener('pageshow', redirectToCanonical);
       })();
     </script>    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Christian Signo</title>
