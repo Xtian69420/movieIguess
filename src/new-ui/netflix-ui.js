@@ -461,6 +461,31 @@ function getCacheKey(item) {
   return `${getMediaType(item)}-${item.id}`;
 }
 
+function getMediaImage(
+  item,
+  preferred = 'backdrop',
+  backdropSize = IMG_W780
+) {
+  if (!item) return '';
+
+  if (
+    preferred === 'poster' &&
+    item.poster_path
+  ) {
+    return `${IMG_W500}${item.poster_path}`;
+  }
+
+  if (item.backdrop_path) {
+    return `${backdropSize}${item.backdrop_path}`;
+  }
+
+  if (item.poster_path) {
+    return `${IMG_W500}${item.poster_path}`;
+  }
+
+  return '';
+}
+
 function clearTimer(name) {
   if (state[name]) {
     clearTimeout(state[name]);
@@ -1757,9 +1782,11 @@ function paintHome() {
     'Discover movies, series, anime and more.';
 
   const heroBackground =
-    hero?.backdrop_path
-      ? `${IMG_ORIGINAL}${hero.backdrop_path}`
-      : 'src/assets/banner.png';
+    getMediaImage(
+      hero,
+      'backdrop',
+      IMG_ORIGINAL
+    );
 
   app.innerHTML = `
     <div class="app-shell">
@@ -1767,9 +1794,9 @@ function paintHome() {
       ${renderNavbar(profile)}
 
       <section
-        class="hero"
+        class="hero${heroBackground ? '' : ' no-art'}"
         style="
-          background-image:url('${heroBackground}')
+          ${heroBackground ? `background-image:url('${heroBackground}')` : ''}
         "
       >
 
@@ -2357,13 +2384,14 @@ function renderNavbar(profile) {
         <!-- SEARCH BOX -->
 
         <div
-          class="search-box"
+          class="search-box${state.searchOpen || state.searchTerm ? ' open' : ''}"
           data-search-box
         >
           <input
             type="search"
             data-search-input
             placeholder="Titles, people, genres"
+            value="${escapeHTML(state.searchTerm)}"
           />
         </div>
 
@@ -2769,7 +2797,10 @@ function setupHeroTrailer() {
 function scheduleHeroAdvance() {
   clearTimer('heroAdvanceTimer');
 
-  if (state.heroItems.length < 2) {
+  if (
+    state.heroItems.length < 2 ||
+    state.searchTerm
+  ) {
     return;
   }
 
@@ -2885,9 +2916,11 @@ function renderCard(
     getMediaType(item);
 
   const image =
-    item.backdrop_path
-      ? `${IMG_W500}${item.backdrop_path}`
-      : 'src/assets/home.png';
+    getMediaImage(
+      item,
+      'backdrop',
+      IMG_W500
+    );
 
   return `
     <article
@@ -2904,11 +2937,17 @@ function renderCard(
       tabindex="0"
     >
 
-      <img
-        src="${image}"
-        alt="${escapeHTML(getItemTitle(item))}"
-        loading="lazy"
-      />
+      ${
+        image
+          ? `
+            <img
+              src="${image}"
+              alt="${escapeHTML(getItemTitle(item))}"
+              loading="lazy"
+            />
+          `
+          : ''
+      }
 
       <div
         class="card-title-logo"
@@ -3195,20 +3234,26 @@ async function openHoverPreview(
     String(top);
 
   const fallbackImage =
-    item.backdrop_path
-      ? `${IMG_W780}${item.backdrop_path}`
-      : item.poster_path
-        ? `${IMG_W500}${item.poster_path}`
-        : 'src/assets/home.png';
+    getMediaImage(
+      item,
+      'backdrop',
+      IMG_W780
+    );
 
   preview.innerHTML = `
     <div class="hover-preview-media">
 
-      <img
-        class="hover-preview-fallback"
-        src="${fallbackImage}"
-        alt=""
-      />
+      ${
+        fallbackImage
+          ? `
+            <img
+              class="hover-preview-fallback"
+              src="${fallbackImage}"
+              alt=""
+            />
+          `
+          : ''
+      }
 
       <div
         class="hover-preview-video"
@@ -4010,7 +4055,10 @@ app.querySelector(
 }
 
 async function changeHero(direction) {
-  if (state.heroItems.length < 2) return;
+  if (
+    state.heroItems.length < 2 ||
+    state.searchTerm
+  ) return;
 
   const requestId =
     state.heroRequestId + 1;
@@ -4510,10 +4558,14 @@ async function searchTitles(term) {
   destroyHoverPreview();
 
   state.searchTerm =
-    term.trim().toLowerCase();
+    term.trim();
 
   const requestId =
     ++state.searchRequestId;
+
+  if (state.searchTerm) {
+    clearTimer('heroAdvanceTimer');
+  }
 
   const content =
     app.querySelector(
@@ -4527,6 +4579,7 @@ async function searchTitles(term) {
     wireRails();
     wireCards();
     populateCardLogos();
+    scheduleHeroAdvance();
 
     return;
   }
@@ -4739,9 +4792,11 @@ async function openDetails(item) {
     'Drama';
 
   const backdrop =
-    details.backdrop_path
-      ? `${IMG_ORIGINAL}${details.backdrop_path}`
-      : 'src/assets/details.png';
+    getMediaImage(
+      details,
+      'backdrop',
+      IMG_ORIGINAL
+    );
 
   const modal =
     document.createElement('div');
@@ -4753,9 +4808,9 @@ async function openDetails(item) {
     <section class="details-modal">
 
       <div
-        class="modal-hero"
+        class="modal-hero${backdrop ? '' : ' no-art'}"
         style="
-          background-image:url('${backdrop}')
+          ${backdrop ? `background-image:url('${backdrop}')` : ''}
         "
       >
 
@@ -5303,7 +5358,7 @@ function renderEpisodes(episodes, seasonNumber = 1) {
     const still =
       episode.still_path
         ? `${IMG_W500}${episode.still_path}`
-        : 'src/assets/details.png';
+        : '';
 
     return `
       <button
@@ -5317,10 +5372,16 @@ function renderEpisodes(episodes, seasonNumber = 1) {
           ${episode.episode_number}
         </span>
 
-        <img
-          src="${still}"
-          alt="${escapeHTML(episode.name)}"
-        />
+        ${
+          still
+            ? `
+              <img
+                src="${still}"
+                alt="${escapeHTML(episode.name)}"
+              />
+            `
+            : '<span class="episode-still-empty"></span>'
+        }
 
         <div class="episode-copy">
           <div>
