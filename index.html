@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <script src="/src/new-ui/canonical-redirect.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function() {
+        const canonicalOrigin = 'https://movie-i-guess.web.app';
+        const localHosts = ['localhost', '127.0.0.1', '0.0.0.0', '::1'];
+        const isLocalHost = localHosts.includes(window.location.hostname);
+        const isHttp = window.location.protocol.startsWith('http');
+        const isCanonicalRoot = window.location.origin === canonicalOrigin && (window.location.pathname === '/' || window.location.pathname === '');
+
+        if (isHttp && !isLocalHost && !isCanonicalRoot) {
+          window.location.replace(canonicalOrigin + '/');
+        }
+      })();
+    </script>  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#141414" />
   <title>MovieIGuess</title>
   <link rel="icon" href="src/assets/logo.png" />
