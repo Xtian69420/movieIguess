@@ -27,6 +27,33 @@ function parseSSEBlock(block) {
   };
 }
 
+function getFilenameFromContentDisposition(value) {
+  const header = String(value || '');
+  const encodedFilename = header.match(/filename\*=([^;]+)/i)?.[1];
+  const filename = encodedFilename || header.match(/filename="?([^";]+)"?/i)?.[1];
+
+  if (!filename) return '';
+
+  try {
+    return decodeURIComponent(filename.replace(/^UTF-8''/i, '')).trim();
+  } catch {
+    return filename.trim();
+  }
+}
+
+function getFileExtension(url) {
+  try {
+    const parsedUrl = new URL(url);
+    const disposition = parsedUrl.searchParams.get('response-content-disposition');
+    const filename = getFilenameFromContentDisposition(disposition);
+    const extension = filename.match(/\.([a-z0-9]{2,5})$/i)?.[1];
+
+    return extension ? extension.toUpperCase() : '';
+  } catch {
+    return '';
+  }
+}
+
 async function scrapeProvider(providerId, media, onProgress) {
   const params = new URLSearchParams({
     id: providerId,
@@ -138,7 +165,7 @@ function normalizeStreams(data, providerId) {
           ? 'Direct'
           : 'Source';
 
-      const format = String(qualityInfo.type || 'file').toUpperCase();
+      const format = getFileExtension(qualityInfo.url) || String(qualityInfo.type || 'file').toUpperCase();
 
       results.push({
         id: stream.id,
