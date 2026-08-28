@@ -7,7 +7,11 @@ import {
   getActiveProfileSession,
   clearActiveProfile
 } from './profile-store.js';
-import { openPreWatchPage } from './prewatch-page.js';
+import {
+  openPreWatchPage,
+  openDownloadModal,
+  downloadIcon
+} from './prewatch-page.js';
 
 const API_KEY = '97df57ffd9278a37bc12191e00332053';
 
@@ -268,36 +272,36 @@ const MY_LIST_KEY = 'movieiguess.myList.v1';
 const WATCH_PROGRESS_KEY = 'movieiguess.watchProgress.v1';
 const WATCH_SERVER_KEY = 'movieiguess.watchServer.v1';
 
-function ensureKofiBadge() {
-  if (document.querySelector('[data-kofi-badge]')) return;
+function ensureKofiWidget() {
+  if (document.querySelector('[data-kofi-widget]')) return;
 
-  const badge = document.createElement('a');
+  const drawWidget = () => {
+    if (!window.kofiWidgetOverlay?.draw) return;
 
-  badge.href = 'https://ko-fi.com/B7N425LQ8A';
-  badge.target = '_blank';
-  badge.rel = 'noopener noreferrer';
-  badge.dataset.kofiBadge = '';
-  badge.innerHTML = `
-    <img
-      height="36"
-      src="https://storage.ko-fi.com/cdn/kofi1.png?v=6"
-      alt="Buy Me a Coffee at ko-fi.com"
-    />
-  `;
+    window.kofiWidgetOverlay.draw('christinex', {
+      type: 'floating-chat',
+      'floating-chat.donateButton.text': 'Support me',
+      'floating-chat.donateButton.background-color': '#d9534f',
+      'floating-chat.donateButton.text-color': '#fff'
+    });
+  };
 
-  document.body.appendChild(badge);
+  const script = document.createElement('script');
+  script.src = 'https://storage.ko-fi.com/cdn/scripts/overlay-widget.js';
+  script.dataset.kofiWidget = '';
+  script.onload = drawWidget;
+
+  document.body.appendChild(script);
 }
 
 function syncKofiBadge() {
-  const badge = document.querySelector('[data-kofi-badge]');
-
-  badge?.classList.toggle(
-    'hidden-during-playback',
+  document.body.classList.toggle(
+    'hide-kofi-widget',
     Boolean(app?.querySelector('.watch-screen'))
   );
 }
 
-ensureKofiBadge();
+ensureKofiWidget();
 
 const WATCH_SERVERS = [
   {
@@ -3433,21 +3437,109 @@ function renderTop10Card(item, index) {
       tabindex="0"
     >
 
-      <div class="top10-number">
-        ${index + 1}
-      </div>
+      <div class="top10-card-inner">
 
-      <div class="top10-poster">
+        <div
+          class="top10-number"
+          aria-hidden="true"
+        >
+          ${renderTop10Rank(index + 1)}
+        </div>
 
-        <img
-          src="${poster}"
-          alt="${escapeHTML(getItemTitle(item))}"
-          loading="lazy"
-        />
+        <div class="top10-poster">
+
+          <img
+            src="${poster}"
+            alt="${escapeHTML(getItemTitle(item))}"
+            loading="lazy"
+          />
+
+        </div>
 
       </div>
 
     </article>
+  `;
+}
+
+function renderTop10Rank(rank) {
+  const rankWidth = rank > 9 ? 149 : 144;
+
+  return `
+    <svg
+      viewBox="0 0 ${rankWidth} 250"
+      width="${rankWidth}"
+      height="250"
+      aria-hidden="true"
+      preserveAspectRatio="xMaxYMid meet"
+    >
+      <defs>
+        <linearGradient
+          id="top10-rank-gradient-${rank}"
+          x1="0"
+          y1="125"
+          x2="${rankWidth}"
+          y2="125"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop
+            offset="0"
+            stop-color="white"
+            stop-opacity="0.62"
+          />
+          <stop
+            offset="1"
+            stop-color="white"
+            stop-opacity="0"
+          />
+        </linearGradient>
+      </defs>
+
+      ${rank === 10
+        ? `
+          <text
+            x="0"
+            y="220"
+            font-family="Arial Black, Arial, sans-serif"
+            font-size="205"
+            font-weight="900"
+            fill="url(#top10-rank-gradient-${rank})"
+            stroke="rgba(255, 255, 255, 0.2)"
+            stroke-width="2"
+          >
+            1
+          </text>
+
+          <text
+            x="202"
+            y="220"
+            text-anchor="end"
+            font-family="Arial Black, Arial, sans-serif"
+            font-size="205"
+            font-weight="900"
+            fill="url(#top10-rank-gradient-${rank})"
+            stroke="rgba(255, 255, 255, 0.2)"
+            stroke-width="2"
+          >
+            0
+          </text>
+        `
+        : `
+          <text
+            x="${rankWidth}"
+            y="220"
+            text-anchor="end"
+            font-family="Arial Black, Arial, sans-serif"
+            font-size="205"
+            font-weight="900"
+            fill="url(#top10-rank-gradient-${rank})"
+            stroke="rgba(255, 255, 255, 0.2)"
+            stroke-width="2"
+          >
+            ${rank}
+          </text>
+        `}
+    </svg>
   `;
 }
 
@@ -3538,6 +3630,7 @@ async function openHoverPreview(
   state.hoverCard = card;
   state.hoverItem = item;
   state.hoverMuted = true;
+  document.body.classList.add('kofi-preview-active');
 
   const rect =
     card.getBoundingClientRect();
@@ -4185,6 +4278,8 @@ function destroyHoverPreview(
     }, 140);
   }
 
+  document.body.classList.remove('kofi-preview-active');
+
   if (resetItem) {
     state.hoverCard = null;
     state.hoverItem = null;
@@ -4689,11 +4784,11 @@ function wireCards() {
         Number(card.dataset.item);
 
       const item =
-        state.rows[rowIndex]?.items[itemIndex] ||
         state.allItems.find(candidate =>
           getCacheKey(candidate) ===
           card.dataset.mediaKey
-        );
+        ) ||
+        state.rows[rowIndex]?.items[itemIndex];
 
       if (!item) return;
 
@@ -5251,6 +5346,7 @@ async function openDetails(item) {
           <button
             class="modal-play-button"
             data-watch
+            title="Play"
           >
             ${playIcon()} Play
           </button>
@@ -5263,6 +5359,7 @@ async function openDetails(item) {
             }"
             data-modal-add
             aria-label="Add to My List"
+            title="Add to My List"
           >
             ${
               isInProfileList(details)
@@ -5270,6 +5367,24 @@ async function openDetails(item) {
                 : plusIcon()
             }
           </button>
+
+          <span class="modal-download-hint-wrap">
+            <button
+              class="modal-circle"
+              data-modal-download
+              aria-label="Download"
+              title="Download"
+            >
+              ${downloadIcon()}
+            </button>
+
+            <span
+              class="modal-download-hint"
+              role="note"
+            >
+              New feature: try it out!
+            </span>
+          </span>
 
           <button
             class="modal-circle ${
@@ -5279,6 +5394,7 @@ async function openDetails(item) {
             }"
             data-modal-heart
             aria-label="I like this"
+            title="I like this"
           >
             ${heartIcon()}
           </button>
@@ -5386,6 +5502,14 @@ async function openDetails(item) {
   document.body.appendChild(modal);
   openModalElement(modal);
 
+  const downloadHint = modal.querySelector(
+    '.modal-download-hint'
+  );
+
+  setTimeout(() => {
+    downloadHint?.classList.add('is-hidden');
+  }, 5000);
+
   populateSimilarLogos(modal, similar);
   wireSimilarCards(modal, similar);
 
@@ -5454,6 +5578,33 @@ async function openDetails(item) {
       );
 
       markCardSaved(details);
+    };
+
+  modal
+    .querySelector('[data-modal-download]')
+    .onclick = event => {
+      event.stopPropagation();
+
+      showToast('Try this new Feature!');
+
+      openDownloadModal(details, {
+        app,
+        container: modal,
+        api,
+        getMediaType,
+        escapeHTML,
+        chevronDownIcon,
+        IMG_W500,
+        selectedSeason:
+          getMediaType(details) === 'tv'
+            ? null
+            : selectedSeason,
+        selectedEpisode: 1,
+        episodeTitle:
+          getMediaType(details) === 'tv'
+            ? ''
+            : title
+      });
     };
 
   const seasonMenu =
