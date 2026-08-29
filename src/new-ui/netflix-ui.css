@@ -6874,21 +6874,3 @@ iframe[src*="ko-fi.com"],
   background: #fff;
   transition: width 0.2s ease;
 }
-
-/* ShrtFly-enabled download buttons */
-button.preplay-download-source {
-  width: 100%;
-  margin: 0;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-button.preplay-download-source:disabled {
-  cursor: wait;
-  opacity: 0.72;
-}
-
-button.preplay-download-source.is-preparing {
-  transform: none;
-}
