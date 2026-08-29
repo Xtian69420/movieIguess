@@ -458,7 +458,7 @@ async function openDownloadOptionsModal(details, options) {
           <h2 id="preplay-download-title" data-download-modal-title>${escapeHTML(activeEpisodeTitle || getSelectionText())}</h2>
           <p data-download-modal-selection>${escapeHTML(getSelectionText())}</p>
           <p style="margin-top: 8px; font-size: 0.8rem; line-height: 1.5; color: rgba(255,255,255,0.78);">
-            If the link is not working, try a different browser or disable your ad blocker for now, then turn it back on after downloading.
+            If the link is not working, you may have an ad blocker enabled. Disable it for now, then turn it back on after downloading.
           </p>
         </div>
 
