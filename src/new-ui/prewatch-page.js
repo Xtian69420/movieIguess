@@ -1,4 +1,6 @@
-﻿export async function openPreWatchPage(item, deps) {
+import { createShrtFlyUrl } from './shrtfly.js';
+
+export async function openPreWatchPage(item, deps) {
   const {
     app,
     api,
@@ -455,6 +457,9 @@ async function openDownloadOptionsModal(details, options) {
           <span class="preplay-modal-kicker">Download</span>
           <h2 id="preplay-download-title" data-download-modal-title>${escapeHTML(activeEpisodeTitle || getSelectionText())}</h2>
           <p data-download-modal-selection>${escapeHTML(getSelectionText())}</p>
+          <p style="margin-top: 8px; font-size: 0.8rem; line-height: 1.5; color: rgba(255,255,255,0.78);">
+            If the link is not working, you may have an ad blocker enabled. Disable it for now, then turn it back on after downloading.
+          </p>
         </div>
 
         <button
@@ -621,11 +626,10 @@ async function openDownloadOptionsModal(details, options) {
       body.innerHTML = `
         <div class="preplay-download-list">
           ${safeSources.map((source, index) => `
-            <a
+            <button
+              type="button"
               class="preplay-download-source"
-              href="${escapeHTML(source.url)}"
-              target="_blank"
-              rel="noopener noreferrer"
+              data-download-source="${index}"
             >
               <span class="preplay-download-source-icon">${downloadIcon()}</span>
               <span class="preplay-download-source-copy">
@@ -633,10 +637,92 @@ async function openDownloadOptionsModal(details, options) {
                 ${source.meta ? `<small>${escapeHTML(source.meta)}</small>` : ''}
               </span>
               <span class="preplay-download-source-arrow">›</span>
-            </a>
+            </button>
           `).join('')}
         </div>
+        <div class="preplay-download-note" style="margin-top: 14px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(255,255,255,0.03); color: rgba(255,255,255,0.8); font-size: 0.82rem; line-height: 1.5;">
+          <strong style="display:block; margin-bottom: 4px; color: #fff;">Link not working?</strong>
+          <span>You may have an ad blocker enabled. Disable it for this download, then turn it back on after the file finishes downloading.</span>
+        </div>
       `;
+
+      body.querySelectorAll('[data-download-source]').forEach(button => {
+        button.addEventListener('click', async () => {
+          const sourceIndex = Number(button.dataset.downloadSource);
+          const source = safeSources[sourceIndex];
+
+          if (!source?.url || button.disabled) return;
+
+          const copy = button.querySelector('.preplay-download-source-copy');
+          const originalHTML = copy?.innerHTML || '';
+
+          // Reserve a new tab during the user's click. This avoids popup
+          // blockers rejecting window.open() after the asynchronous API call.
+          const downloadWindow = window.open('about:blank', '_blank');
+
+          if (downloadWindow) {
+            try {
+              downloadWindow.opener = null;
+              downloadWindow.document.title = 'Preparing download...';
+              downloadWindow.document.body.innerHTML = `
+                <p style="font-family:system-ui,sans-serif;padding:24px">
+                  Preparing your download...
+                </p>
+              `;
+            } catch {
+              // Some browsers restrict access to the temporary tab document.
+            }
+          }
+
+          button.disabled = true;
+          button.classList.add('is-preparing');
+
+          if (copy) {
+            copy.innerHTML = `
+              <strong>Preparing download...</strong>
+              <small>Creating monetized link</small>
+            `;
+          }
+
+          try {
+            const monetizedUrl = await createShrtFlyUrl(source.url);
+
+            console.log('[ShrtFly]', source.url, '→', monetizedUrl);
+
+            if (downloadWindow && !downloadWindow.closed) {
+              downloadWindow.location.replace(monetizedUrl);
+            } else {
+              // Fallback if the browser blocked the temporary popup.
+              window.location.href = monetizedUrl;
+            }
+          } catch (error) {
+            console.error('Could not create ShrtFly link:', error);
+
+            if (downloadWindow && !downloadWindow.closed) {
+              downloadWindow.close();
+            }
+
+            if (copy) {
+              copy.innerHTML = `
+                <strong>Could not prepare download</strong>
+                <small>Please try again</small>
+              `;
+            }
+
+            setTimeout(() => {
+              if (copy) copy.innerHTML = originalHTML;
+              button.disabled = false;
+              button.classList.remove('is-preparing');
+            }, 2000);
+
+            return;
+          }
+
+          if (copy) copy.innerHTML = originalHTML;
+          button.disabled = false;
+          button.classList.remove('is-preparing');
+        });
+      });
     } catch (error) {
       console.warn('Download provider unavailable:', error);
       body.innerHTML = `
