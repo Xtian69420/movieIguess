@@ -775,7 +775,7 @@ function showProfileGate(manage = false) {
 
         setActiveProfile(profile.id);
 
-        renderHome({ showLoadingVideo: true });
+        renderHome();
       });
     });
 
@@ -1072,7 +1072,7 @@ function openProfileEditor(profile = null) {
     if (profile) {
       showProfileGate(true);
     } else {
-      renderHome({ showLoadingVideo: true });
+      renderHome();
     }
   };
 
@@ -1920,41 +1920,14 @@ async function loadMediaExtras(item) {
    RENDER HOME
 ========================================================= */
 
-async function renderHome({ showLoadingVideo = false } = {}) {
+async function renderHome() {
   app.innerHTML = `
     <div class="home-loading">
-      ${showLoadingVideo ? `
-        <video
-          class="loading-video"
-          src="src/assets/loading.mp4"
-          autoplay
-          playsinline
-          preload="auto"
-          aria-hidden="true"
-        ></video>
-      ` : ''}
-
       <div class="loading-fallback" aria-label="Loading">
         <span class="loading-spinner"></span>
       </div>
     </div>
   `;
-
-  const loadingFallback = app.querySelector('.loading-fallback');
-  const loadingVideo = app.querySelector('.loading-video');
-  const videoFinished = loadingVideo
-    ? new Promise(resolve => {
-        const finishLoading = () => resolve();
-
-        loadingVideo.addEventListener('ended', finishLoading, { once: true });
-        loadingVideo.addEventListener('error', finishLoading, { once: true });
-        loadingVideo.addEventListener('playing', () => {
-          loadingFallback.classList.add('is-hidden');
-        }, { once: true });
-
-        loadingVideo.play().catch(finishLoading);
-      })
-    : Promise.resolve();
 
   try {
     await loadHomeData();
@@ -1962,7 +1935,6 @@ async function renderHome({ showLoadingVideo = false } = {}) {
     console.error(error);
   }
 
-  await videoFinished;
   paintHome();
 }
 
