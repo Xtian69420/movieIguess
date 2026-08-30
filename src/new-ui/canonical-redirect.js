@@ -1,6 +1,7 @@
 (function() {
-  // Legacy Firebase host intentionally disabled: https://movie-i-guess.web.app
-  const canonicalOrigin = 'https://xtian69420.github.io/movieIguess';
+  const canonicalUrl = 'https://xtian69420.github.io/movieIguess/';
+  const canonicalOrigin = new URL(canonicalUrl).origin;
+  const canonicalPath = new URL(canonicalUrl).pathname;
   const localHosts = [
     'localhost',
     '127.0.0.1',
@@ -17,8 +18,8 @@
   const isCanonicalRoot =
     window.location.origin === canonicalOrigin &&
     (
-      window.location.pathname === '/' ||
-      window.location.pathname === ''
+      window.location.pathname === canonicalPath ||
+      window.location.pathname === canonicalPath.replace(/\/$/, '')
     );
 
   if (
@@ -26,6 +27,6 @@
     !isLocalHost &&
     !isCanonicalRoot
   ) {
-    window.location.replace(`${canonicalOrigin}/`);
+    window.location.replace(canonicalUrl);
   }
 })();
