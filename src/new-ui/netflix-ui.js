@@ -295,9 +295,15 @@ function ensureKofiWidget() {
 }
 
 function syncKofiBadge() {
+  const shouldHideKofi = Boolean(
+    app?.querySelector('.watch-screen') ||
+    app?.querySelector('.profile-gate') ||
+    document.body.querySelector('.editor-backdrop.is-open')
+  );
+
   document.body.classList.toggle(
     'hide-kofi-widget',
-    Boolean(app?.querySelector('.watch-screen'))
+    shouldHideKofi
   );
 }
 
@@ -591,6 +597,10 @@ function clearTimer(name) {
 function openModalElement(element) {
   requestAnimationFrame(() => {
     element?.classList.add('is-open');
+
+    if (element?.classList.contains('editor-backdrop')) {
+      document.body.classList.add('hide-kofi-widget');
+    }
   });
 }
 
@@ -598,6 +608,10 @@ function closeModalElement(element, callback) {
   if (!element) return;
 
   element.classList.remove('is-open');
+
+  if (element.classList.contains('editor-backdrop')) {
+    document.body.classList.remove('hide-kofi-widget');
+  }
 
   setTimeout(() => {
     element.remove();
@@ -817,9 +831,19 @@ function openProfileEditor(profile = null) {
   overlay.innerHTML = `
     <div class="profile-editor">
 
-      <h2>
-        ${profile ? 'Edit Profile' : 'Add Profile'}
-      </h2>
+      <div class="profile-editor-header">
+        <h2>
+          ${profile ? 'Edit Profile' : 'Add Profile'}
+        </h2>
+
+        <button
+          type="button"
+          class="editor-close"
+          aria-label="Close profile editor"
+        >
+          ${icons.close}
+        </button>
+      </div>
 
       <label>Name</label>
 
@@ -916,23 +940,13 @@ function openProfileEditor(profile = null) {
 
       <div class="editor-actions">
 
-        <button class="save">
-          Save
-        </button>
-
-        <button class="cancel">
+        <button type="button" class="cancel">
           Cancel
         </button>
 
-        ${
-          profile
-            ? `
-              <button class="delete">
-                Delete
-              </button>
-            `
-            : ''
-        }
+        <button type="button" class="save">
+          Save
+        </button>
 
       </div>
 
@@ -1011,6 +1025,9 @@ function openProfileEditor(profile = null) {
     overlay,
     selectedTitles
   );
+
+  overlay.querySelector('.editor-close').onclick = () =>
+    closeModalElement(overlay);
 
   overlay.querySelector('.cancel').onclick = () =>
     closeModalElement(overlay);
