@@ -319,24 +319,15 @@ iframe[src*="ko-fi.com"],
 }
 
 .profile-editor-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  margin: -32px -32px 18px;
-  padding: 18px 18px 12px;
+  margin: 0 0 18px;
+  padding: 0;
 
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(24, 24, 24, 1),
-      rgba(24, 24, 24, 0.92) 82%,
-      rgba(24, 24, 24, 0)
-    );
+  background: transparent;
 }
 
 .profile-editor-header h2 {
@@ -657,12 +648,25 @@ iframe[src*="ko-fi.com"],
 .editor-actions .save {
   background: white;
   color: black;
+  transition: transform 0.16s ease, filter 0.16s ease, background-color 0.16s ease;
+}
+
+.editor-actions .save:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.96);
 }
 
 .editor-actions .cancel {
   background: rgba(255, 255, 255, 0.08);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.16);
+  transition: transform 0.16s ease, background-color 0.16s ease, border-color 0.16s ease;
+}
+
+.editor-actions .cancel:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.26);
 }
 
 .editor-actions .delete {
