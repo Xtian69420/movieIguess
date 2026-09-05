@@ -10,6 +10,7 @@ import {
 import {
   openPreWatchPage,
   openDownloadModal,
+  openEpisodePicker,
   downloadIcon
 } from './prewatch-page.js';
 
@@ -452,6 +453,8 @@ const state = {
   hoverCard: null,
   hoverItem: null,
   hoverMuted: true,
+
+  watchActivityCleanup: null,
 
   mediaCache: new Map()
 };
@@ -6030,9 +6033,23 @@ async function openWatch(item) {
   destroyHoverPreview();
   clearTimer('heroAdvanceTimer');
   clearTimer('heroCollapseTimer');
+  state.watchActivityCleanup?.();
+  state.watchActivityCleanup = null;
 
   const title =
     getItemTitle(item);
+
+  const details =
+    getMediaType(item) === 'tv' && !item.seasons
+      ? (await loadMediaExtras(item)).details
+      : item;
+
+  const watchItem = {
+    ...details,
+    ...item,
+    watchSeason: item.watchSeason || 1,
+    watchEpisode: item.watchEpisode || 1
+  };
 
   const server =
     getSelectedWatchServer();
@@ -6040,13 +6057,18 @@ async function openWatch(item) {
   const rating =
     getAgeRating(item);
 
-  const iframeUrl =
-    getWatchUrl(item, server);
-
-  saveWatchProgress(item, {
+  saveWatchProgress(watchItem, {
     serverId: server.id,
     startedAt: Date.now()
   });
+
+  const isSeries = getMediaType(watchItem) === 'tv';
+  const currentEpisode = isSeries
+    ? `S${watchItem.watchSeason}:E${watchItem.watchEpisode}`
+    : '';
+  const watchDescription =
+    watchItem.overview ||
+    'Continue watching where you left off.';
 
   app.innerHTML = `
     <section class="watch-screen">
@@ -6057,12 +6079,42 @@ async function openWatch(item) {
         ${chevronLeftIcon()} Back
       </button>
 
-      <button
-        class="watch-server-button"
-        data-server-picker
-      >
-        Server: ${escapeHTML(server.name)}
-      </button>
+      <div class="watch-controls">
+        ${isSeries ? `
+          <button
+            class="watch-episode-button"
+            data-episode-picker
+          >
+            Select Episode: ${currentEpisode}
+          </button>
+        ` : ''}
+
+        <button
+          class="watch-server-button"
+          data-server-picker
+        >
+          Server: ${escapeHTML(server.name)}
+        </button>
+
+        <button
+          class="watch-info-button"
+          data-watch-info
+          aria-label="Show title information"
+          title="Show title information"
+        >
+          ${infoCircleIcon()}
+        </button>
+      </div>
+
+      <div class="watch-idle-overlay" data-watch-idle-overlay>
+        <div class="watch-idle-copy">
+          <span class="watch-idle-kicker">You’re watching</span>
+          <h1>${escapeHTML(title)}</h1>
+          <strong>${escapeHTML(title)}</strong>
+          ${isSeries ? `<h2>Episode ${watchItem.watchSeason}: Ep. ${watchItem.watchEpisode}</h2>` : ''}
+          <p>${escapeHTML(watchDescription)}</p>
+        </div>
+      </div>
 
       <div
         class="watch-rating-badge"
@@ -6074,7 +6126,7 @@ async function openWatch(item) {
       <div class="watch-player">
         <iframe
           class="watch-frame"
-          src="${iframeUrl}"
+          src="${getWatchUrl(watchItem, server)}"
           title="${escapeHTML(title)}"
           allow="autoplay; encrypted-media; fullscreen *; picture-in-picture"
           allowfullscreen
@@ -6103,8 +6155,72 @@ async function openWatch(item) {
   app
     .querySelector('[data-server-picker]')
     .onclick = () => {
-      openServerPicker(item);
+      openServerPicker(watchItem);
     };
+
+  app
+    .querySelector('[data-episode-picker]')
+    ?.addEventListener('click', () => {
+      openEpisodePicker(watchItem, {
+        app,
+        container: app.querySelector('.watch-screen'),
+        api,
+        escapeHTML,
+        chevronDownIcon,
+        IMG_W500,
+        selectedSeason: watchItem.watchSeason,
+        selectedEpisode: watchItem.watchEpisode,
+        onSelect: async (seasonNumber, episodeNumber) => {
+          await openWatch({
+            ...watchItem,
+            watchSeason: seasonNumber,
+            watchEpisode: episodeNumber
+          });
+        }
+      });
+    });
+
+  const watchScreen = app.querySelector('.watch-screen');
+  const idleOverlay = watchScreen.querySelector('[data-watch-idle-overlay]');
+  let infoTimer = null;
+
+  const clearInfoTimer = () => {
+    if (infoTimer) {
+      clearTimeout(infoTimer);
+      infoTimer = null;
+    }
+  };
+
+  const showWatchInfo = () => {
+    if (idleOverlay.classList.contains('is-visible')) {
+      idleOverlay.classList.remove('is-visible');
+      watchScreen.classList.remove('watch-info-open');
+      clearInfoTimer();
+      return;
+    }
+
+    idleOverlay.classList.add('is-visible');
+    watchScreen.classList.add('watch-info-open');
+  };
+
+  const closeWatch = () => {
+    clearInfoTimer();
+    state.watchActivityCleanup?.();
+    state.watchActivityCleanup = null;
+    paintHome();
+  };
+
+  app
+    .querySelector('[data-watch-back]')
+    .onclick = closeWatch;
+
+  watchScreen
+    .querySelector('[data-watch-info]')
+    .addEventListener('click', showWatchInfo);
+
+  state.watchActivityCleanup = () => {
+    clearInfoTimer();
+  };
 }
 
 function openServerPicker(item) {

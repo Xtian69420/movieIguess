@@ -842,7 +842,7 @@ async function loadEpisodeDetails(seriesId, seasonNumber, episodeNumber, api) {
   }
 }
 
-async function openEpisodePicker(details, options) {
+export async function openEpisodePicker(details, options) {
   const {
     app,
     api,
@@ -881,7 +881,7 @@ async function openEpisodePicker(details, options) {
           class="preplay-episode-close"
           data-episode-modal-close
           aria-label="Close"
-        >Ã—</button>
+        >&times;</button>
       </header>
 
       <div class="preplay-season-picker">
@@ -935,7 +935,12 @@ async function openEpisodePicker(details, options) {
     </section>
   `;
 
-  app.querySelector('.preplay-page')?.appendChild(overlay);
+  const modalHost =
+    options.container ||
+    app.querySelector('.preplay-page') ||
+    app;
+
+  modalHost.appendChild(overlay);
 
   requestAnimationFrame(() => {
     overlay.classList.add('is-open');
@@ -988,6 +993,7 @@ async function openEpisodePicker(details, options) {
               <button
                 class="preplay-episode-option ${isCurrent ? 'active' : ''}"
                 data-preplay-episode="${episode.episode_number}"
+                ${isCurrent ? 'aria-current="true"' : ''}
                 type="button"
               >
                 <span class="preplay-episode-thumb">
@@ -996,6 +1002,7 @@ async function openEpisodePicker(details, options) {
                     alt="${escapeHTML(episode.name || `Episode ${episode.episode_number}`)}"
                   />
                   <span class="preplay-episode-play">&#9654;</span>
+                  ${isCurrent ? '<span class="preplay-current-badge">Now Watching</span>' : ''}
                 </span>
 
                 <span class="preplay-episode-info">
