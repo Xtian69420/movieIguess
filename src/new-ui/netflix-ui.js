@@ -312,57 +312,70 @@ ensureKofiWidget();
 
 const WATCH_SERVERS = [
   {
+    id: 'vidfast',
+    name: 'Steve',
+    movie: id => `https://vidfast.vc/movie/${id}`,
+    tv: (id, season, episode) =>
+      `https://vidfast.vc/tv/${id}/${season}/${episode}`
+  },
+  {
     id: 'videasy',
-    name: 'Netflix',
+    name: 'Max',
     movie: id => `https://player.videasy.net/movie/${id}`,
     tv: (id, season, episode) =>
       `https://player.videasy.net/tv/${id}/${season}/${episode}`
   },
   {
+    id: 'cinesrc',
+    name: 'Eleven',
+    movie: id => `https://cinesrc.st/embed/movie/${id}`,
+    tv: id => `https://cinesrc.st/embed/tv/${id}`
+  },
+  {
     id: 'vidsrc1',
-    name: 'Vidsrc 1',
+    name: 'Lucas',
     movie: id => `https://www.vidsrc.wtf/api/1/movie?id=${id}`,
     tv: (id, season, episode) =>
       `https://www.vidsrc.wtf/api/1/tv?id=${id}&s=${season}&e=${episode}`
   },
   {
     id: 'vidsrc2',
-    name: 'Vidsrc 2',
+    name: 'Dustin',
     movie: id => `https://vidsrc.wtf/api/2/movie?id=${id}`,
     tv: (id, season, episode) =>
       `https://vidsrc.wtf/api/2/tv?id=${id}&s=${season}&e=${episode}`
   },
   {
     id: 'premium',
-    name: 'Premium',
+    name: 'Nancy',
     movie: id => `https://111movies.com/movie/${id}`,
     tv: (id, season, episode) =>
       `https://111movies.com/tv/${id}/${season}/${episode}`
   },
   {
     id: 'vidsrc3',
-    name: 'Multi-embed',
+    name: 'Jonathan',
     movie: id => `https://www.vidsrc.wtf/api/3/movie/?id=${id}`,
     tv: (id, season, episode) =>
       `https://www.vidsrc.wtf/api/3/tv/?id=${id}&s=${season}&e=${episode}`
   },
   {
     id: 'smashy',
-    name: 'Smashy',
+    name: 'Billy',
     movie: id => `https://smashyplayer.top/#mv${id}`,
     tv: (id, season, episode) =>
       `https://smashyplayer.top/#tv${id}s${season}e${episode}`
   },
   {
     id: 'vidlinkpro',
-    name: 'VidLinkPro',
+    name: 'Eddie',
     movie: id => `https://vidlink.pro/movie/${id}?autoplay=true&title=true`,
     tv: (id, season, episode) =>
       `https://vidlink.pro/tv/${id}/${season}/${episode}?autoplay=true&title=true`
   },
   {
     id: 'autoembed',
-    name: 'Prime',
+    name: 'Mike',
     movie: id =>
       `https://test.autoembed.cc/embed/movie/${id}?autoplay=true&server=5`,
     tv: (id, season, episode) =>
@@ -370,42 +383,42 @@ const WATCH_SERVERS = [
   },
   {
     id: 'multiembed',
-    name: 'Purple',
+    name: 'Robin',
     movie: id => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
     tv: (id, season, episode) =>
       `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
   },
   {
     id: 'primewire',
-    name: 'Prime 2',
+    name: 'Hopper',
     movie: id => `https://www.primewire.tf/embed/movie?tmdb=${id}`,
     tv: (id, season, episode) =>
       `https://www.primewire.tf/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`
   },
   {
     id: 'vidrock',
-    name: 'VidRock',
+    name: 'Joyce',
     movie: id => `https://vidrock.net/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidrock.net/tv/${id}/${season}/${episode}`
   },
   {
     id: 'mega',
-    name: 'Mega',
+    name: 'Murray',
     movie: id => `https://vidrock.net/mega/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidrock.net/mega/tv/${id}/${season}/${episode}`
   },
   {
     id: 'vidnest',
-    name: 'VidNest',
+    name: 'Brenner',
     movie: id => `https://vidnest.fun/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidnest.fun/tv/${id}/${season}/${episode}`
   },
   {
     id: 'vidzee',
-    name: 'Vidzee',
+    name: 'Erica',
     movie: id => `https://player.vidzee.wtf/embed/movie/${id}`,
     tv: (id, season, episode) =>
       `https://player.vidzee.wtf/embed/tv/${id}/${season}/${episode}`
