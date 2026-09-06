@@ -313,69 +313,71 @@ ensureKofiWidget();
 const WATCH_SERVERS = [
   {
     id: 'vidfast',
-    name: 'Steve',
+    name: 'Walter White',
+    isNew: true,
     movie: id => `https://vidfast.vc/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidfast.vc/tv/${id}/${season}/${episode}`
   },
   {
     id: 'videasy',
-    name: 'Max',
+    name: 'Michael Scofield',
     movie: id => `https://player.videasy.net/movie/${id}`,
     tv: (id, season, episode) =>
       `https://player.videasy.net/tv/${id}/${season}/${episode}`
   },
   {
     id: 'cinesrc',
-    name: 'Eleven',
+    name: 'Dexter Morgan',
+    isNew: true,
     movie: id => `https://cinesrc.st/embed/movie/${id}`,
     tv: id => `https://cinesrc.st/embed/tv/${id}`
   },
   {
     id: 'vidsrc1',
-    name: 'Lucas',
+    name: 'Patrick Jane',
     movie: id => `https://www.vidsrc.wtf/api/1/movie?id=${id}`,
     tv: (id, season, episode) =>
       `https://www.vidsrc.wtf/api/1/tv?id=${id}&s=${season}&e=${episode}`
   },
   {
     id: 'vidsrc2',
-    name: 'Dustin',
+    name: 'Jon Snow',
     movie: id => `https://vidsrc.wtf/api/2/movie?id=${id}`,
     tv: (id, season, episode) =>
       `https://vidsrc.wtf/api/2/tv?id=${id}&s=${season}&e=${episode}`
   },
   {
     id: 'premium',
-    name: 'Nancy',
+    name: 'Eleven',
     movie: id => `https://111movies.com/movie/${id}`,
     tv: (id, season, episode) =>
       `https://111movies.com/tv/${id}/${season}/${episode}`
   },
   {
     id: 'vidsrc3',
-    name: 'Jonathan',
+    name: 'Rick Grimes',
     movie: id => `https://www.vidsrc.wtf/api/3/movie/?id=${id}`,
     tv: (id, season, episode) =>
       `https://www.vidsrc.wtf/api/3/tv/?id=${id}&s=${season}&e=${episode}`
   },
   {
     id: 'smashy',
-    name: 'Billy',
+    name: 'Sergio Marquina',
     movie: id => `https://smashyplayer.top/#mv${id}`,
     tv: (id, season, episode) =>
       `https://smashyplayer.top/#tv${id}s${season}e${episode}`
   },
   {
     id: 'vidlinkpro',
-    name: 'Eddie',
+    name: 'Tommy Shelby',
     movie: id => `https://vidlink.pro/movie/${id}?autoplay=true&title=true`,
     tv: (id, season, episode) =>
       `https://vidlink.pro/tv/${id}/${season}/${episode}?autoplay=true&title=true`
   },
   {
     id: 'autoembed',
-    name: 'Mike',
+    name: 'Harry Potter',
     movie: id =>
       `https://test.autoembed.cc/embed/movie/${id}?autoplay=true&server=5`,
     tv: (id, season, episode) =>
@@ -383,42 +385,42 @@ const WATCH_SERVERS = [
   },
   {
     id: 'multiembed',
-    name: 'Robin',
+    name: 'Frodo Baggins',
     movie: id => `https://multiembed.mov/?video_id=${id}&tmdb=1`,
     tv: (id, season, episode) =>
       `https://multiembed.mov/?video_id=${id}&tmdb=1&s=${season}&e=${episode}`
   },
   {
     id: 'primewire',
-    name: 'Hopper',
+    name: 'Bruce Wayne',
     movie: id => `https://www.primewire.tf/embed/movie?tmdb=${id}`,
     tv: (id, season, episode) =>
       `https://www.primewire.tf/embed/tv?tmdb=${id}&season=${season}&episode=${episode}`
   },
   {
     id: 'vidrock',
-    name: 'Joyce',
+    name: 'Joseph Cooper',
     movie: id => `https://vidrock.net/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidrock.net/tv/${id}/${season}/${episode}`
   },
   {
     id: 'mega',
-    name: 'Murray',
+    name: 'Jack Dawson',
     movie: id => `https://vidrock.net/mega/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidrock.net/mega/tv/${id}/${season}/${episode}`
   },
   {
     id: 'vidnest',
-    name: 'Brenner',
+    name: 'Tony Stark',
     movie: id => `https://vidnest.fun/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidnest.fun/tv/${id}/${season}/${episode}`
   },
   {
     id: 'vidzee',
-    name: 'Erica',
+    name: 'Andy Dufresne',
     movie: id => `https://player.vidzee.wtf/embed/movie/${id}`,
     tv: (id, season, episode) =>
       `https://player.vidzee.wtf/embed/tv/${id}/${season}/${episode}`
@@ -6109,6 +6111,10 @@ async function openWatch(item) {
           Server: ${escapeHTML(server.name)}
         </button>
 
+        <span class="watch-server-tooltip" data-server-tooltip role="status">
+          Check out the new servers!
+        </span>
+
         <button
           class="watch-info-button"
           data-watch-info
@@ -6158,6 +6164,12 @@ async function openWatch(item) {
       .querySelector('[data-watch-rating]')
       ?.classList.add('hidden');
   }, 5200);
+
+  setTimeout(() => {
+    app
+      .querySelector('[data-server-tooltip]')
+      ?.classList.add('is-hidden');
+  }, 3000);
 
   app
     .querySelector('[data-watch-back]')
@@ -6268,6 +6280,7 @@ function openServerPicker(item) {
             data-server-id="${server.id}"
           >
             <span>${escapeHTML(server.name)}</span>
+            ${server.isNew ? '<small class="server-new-badge">NEW 🔥</small>' : ''}
             ${server.id === activeServer.id ? checkIcon() : ''}
           </button>
         `).join('')}
