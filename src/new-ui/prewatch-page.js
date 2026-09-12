@@ -355,7 +355,7 @@ export function openDownloadModal(details, options) {
         </p>
 
         <p>
-          Please consider supporting the site for continuous service.
+          Please consider supporting the site to help cover server and deployment costs and keep the service running continuously.
         </p>
 
         <img
