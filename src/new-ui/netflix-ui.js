@@ -458,6 +458,8 @@ const state = {
   searchRequestId: 0,
   searchTimer: null,
   currentView: 'home',
+  mobileFeatureTooltipShown: false,
+  mobileFeatureTooltipTimer: null,
 
   heroRevealTimer: null,
   heroAdvanceTimer: null,
@@ -2604,12 +2606,37 @@ function openMobileDownloadNotice() {
         data-mobile-download-close aria-label="Close">×</button>
       <div class="mobile-download-notice-art" aria-hidden="true">
         <span class="mobile-download-notice-glow"></span>
-        <span class="mobile-download-notice-phone">${mobileVersionIcon()}</span>
+        <span class="mobile-download-notice-phone">
+          <span class="mobile-phone-speaker"></span>
+          <span class="mobile-phone-screen">
+            <span class="mobile-phone-scene mobile-phone-skeleton">
+              <i class="mobile-phone-skeleton-hero"></i>
+              <i class="mobile-phone-skeleton-line"></i>
+              <i class="mobile-phone-skeleton-line short"></i>
+              <span class="mobile-phone-skeleton-row">
+                <i></i><i></i><i></i>
+              </span>
+            </span>
+            <span class="mobile-phone-scene mobile-phone-home">
+              <b>M</b>
+              <i class="mobile-phone-feature"></i>
+              <strong>Trending Now</strong>
+              <span class="mobile-phone-poster-row"><i></i><i></i><i></i></span>
+            </span>
+            <span class="mobile-phone-scene mobile-phone-details">
+              <i class="mobile-phone-details-art"></i>
+              <strong>Movie Night</strong>
+              <span class="mobile-phone-play">▶ Play</span>
+              <span class="mobile-phone-detail-lines"><i></i><i></i></span>
+            </span>
+          </span>
+          <span class="mobile-phone-home-bar"></span>
+        </span>
       </div>
       <div class="mobile-download-notice-body">
         <span class="preplay-modal-kicker">Mobile version</span>
         <h2 id="mobile-download-notice-title">MovieIGuess mobile app is in development</h2>
-        <p>I am building a smoother mobile app version of MovieIGuess so it feels better on phones. It is not ready yet, but I am shaping it carefully.</p>
+        <p>I’m working on a smoother mobile version of MovieIGuess to make the experience better on phones. It’s still a work in progress, but I’m taking my time to get it right.</p>
         <aside class="mobile-download-support-card">
           <span class="mobile-download-support-heart" aria-hidden="true">♥</span>
           <div>
@@ -2813,6 +2840,14 @@ function renderNavbar(profile) {
         >
           ${mobileVersionIcon()}
           <span>Mobile Version</span>
+          <span
+            class="mobile-feature-tooltip"
+            data-mobile-feature-tooltip
+            aria-hidden="true"
+          >
+            <strong>New feature!</strong>
+            Try the Mobile Version preview
+          </span>
         </button>
 
       </nav>
@@ -4464,6 +4499,26 @@ function wireHomeEvents() {
       openMobileDownloadNotice();
     });
 
+  const mobileFeatureTooltip =
+    app.querySelector('[data-mobile-feature-tooltip]');
+
+  if (
+    mobileFeatureTooltip &&
+    !state.mobileFeatureTooltipShown &&
+    window.matchMedia('(min-width: 761px)').matches
+  ) {
+    state.mobileFeatureTooltipShown = true;
+
+    requestAnimationFrame(() => {
+      mobileFeatureTooltip.classList.add('show');
+    });
+
+    state.mobileFeatureTooltipTimer = setTimeout(() => {
+      mobileFeatureTooltip.classList.remove('show');
+      state.mobileFeatureTooltipTimer = null;
+    }, 5000);
+  }
+
 /* =========================================================
    PROFILE MENU
 ========================================================= */
@@ -5490,7 +5545,8 @@ async function openDetails(item) {
               class="modal-download-hint"
               role="note"
             >
-              New feature: try it out!
+              <strong>New feature!</strong>
+              Try the new download option
             </span>
           </span>
 
@@ -6213,7 +6269,8 @@ async function openWatch(item) {
         </button>
 
         <span class="watch-server-tooltip" data-server-tooltip role="status">
-          Check out the new servers!
+          <strong>New feature!</strong>
+          Check out the new servers
         </span>
 
         <button
@@ -6270,7 +6327,7 @@ async function openWatch(item) {
     app
       .querySelector('[data-server-tooltip]')
       ?.classList.add('is-hidden');
-  }, 3000);
+  }, 5000);
 
   app
     .querySelector('[data-watch-back]')
