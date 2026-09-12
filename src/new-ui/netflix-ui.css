@@ -174,26 +174,16 @@ body.genre-dropdown-open [class*="floatingchat"] {
   overflow: hidden;
 }
 
-.profile-avatar-face,
-.avatar-sprite {
-  background-image: url('../assets/profile-avatars.png');
-  background-repeat: no-repeat;
-  background-size: 400% 200%;
-}
-
-.avatar-1 { background-position: 0 0; }
-.avatar-2 { background-position: 33.333% 0; }
-.avatar-3 { background-position: 66.667% 0; }
-.avatar-4 { background-position: 100% 0; }
-.avatar-5 { background-position: 0 100%; }
-.avatar-6 { background-position: 33.333% 100%; }
-.avatar-7 { background-position: 66.667% 100%; }
-.avatar-8 { background-position: 100% 100%; }
-
 .profile-avatar-face {
   position: relative;
   border-bottom: 4px solid var(--profile-accent, transparent);
   background-color: var(--profile-accent, #333);
+}
+
+.profile-smiley {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .profile-edit-badge {
@@ -453,9 +443,20 @@ body.genre-dropdown-open [class*="floatingchat"] {
 .avatar-sprite {
   display: block;
   width: 100%;
+  height: 100%;
   aspect-ratio: 1;
   border-radius: 5px;
+  overflow: hidden;
 }
+
+.avatar-1 { --profile-accent: #0b63ce; }
+.avatar-2 { --profile-accent: #e50914; }
+.avatar-3 { --profile-accent: #f5a623; }
+.avatar-4 { --profile-accent: #7b61ff; }
+.avatar-5 { --profile-accent: #00a878; }
+.avatar-6 { --profile-accent: #d85b9a; }
+.avatar-7 { --profile-accent: #008f9c; }
+.avatar-8 { --profile-accent: #585858; }
 
 .color-row {
   display: flex;

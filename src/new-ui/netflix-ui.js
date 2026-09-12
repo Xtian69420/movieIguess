@@ -13,6 +13,7 @@ import {
   openEpisodePicker,
   downloadIcon
 } from './prewatch-page.js';
+import { createAIChat, aiSparkleIcon } from './ai-chat.js';
 
 const API_KEY = '97df57ffd9278a37bc12191e00332053';
 
@@ -230,14 +231,14 @@ const GENRE_OPTIONS = [
 ];
 
 const PROFILE_AVATARS = [
-  { id: 'avatar-1', label: 'Blue adventurer' },
-  { id: 'avatar-2', label: 'Red music fan' },
-  { id: 'avatar-3', label: 'Golden retriever' },
-  { id: 'avatar-4', label: 'Purple daydreamer' },
-  { id: 'avatar-5', label: 'Green explorer' },
-  { id: 'avatar-6', label: 'Pink optimist' },
-  { id: 'avatar-7', label: 'Teal storyteller' },
-  { id: 'avatar-8', label: 'Orange gamer' }
+  { id: 'avatar-1', label: 'Happy face' },
+  { id: 'avatar-2', label: 'Cool face' },
+  { id: 'avatar-3', label: 'Surprised face' },
+  { id: 'avatar-4', label: 'Sleepy face' },
+  { id: 'avatar-5', label: 'Wink face' },
+  { id: 'avatar-6', label: 'Laughing face' },
+  { id: 'avatar-7', label: 'Serious face' },
+  { id: 'avatar-8', label: 'Curious face' }
 ];
 
 const CATALOG_ROWS = [
@@ -329,6 +330,7 @@ function ensureKofiWidget() {
 function syncKofiBadge() {
   const shouldHideKofi = Boolean(
     app?.querySelector('.watch-screen') ||
+    app?.querySelector('.ai-chat-view') ||
     app?.querySelector('.profile-gate') ||
     document.body.querySelector('.editor-backdrop.is-open')
   );
@@ -530,6 +532,27 @@ const icons = {
   close: '×'
 };
 
+const aiChat = createAIChat({
+  getMount: () => app.querySelector('[data-content]'),
+  getItems: () => uniqueMediaItems(state.allItems),
+  getTitle: getItemTitle,
+  getYear: getItemYear,
+  getKey: getCacheKey,
+  getMediaType,
+  escape: escapeHTML,
+  imageBase: IMG_W500,
+  backdropBase: IMG_W780,
+  isSaved: isInProfileList,
+  findCandidates: findAICandidates,
+  wireCards,
+  populateCardLogos,
+  icons: { info: infoCircleIcon(), play: playIcon(), plus: plusIcon(), check: checkIcon() },
+  onInfo: openDetails,
+  onWatch: openPlayOptions,
+  onList: item => saveToProfileList(item).added,
+  onToast: showToast
+});
+
 /* =========================================================
    HELPERS
 ========================================================= */
@@ -698,6 +721,200 @@ async function api(path) {
   return response.json();
 }
 
+async function findAICandidates(filters = {}, options = {}) {
+  const requestedType =
+    String(filters.mediaType || filters.type || 'any').toLowerCase();
+  const mediaType =
+    requestedType === 'tv' || requestedType === 'series'
+      ? 'tv'
+      : 'movie';
+  const excludeKeys = options.excludeKeys || new Set();
+
+  if (filters.referenceTitle) {
+    const referenceItems = await findAIReferenceCandidates(
+      filters.referenceTitle,
+      mediaType,
+      excludeKeys
+    );
+
+    if (referenceItems.length) return referenceItems;
+  }
+
+  const genreIds = getAIGenreIds(filters.genres, mediaType);
+  const moodParams = getAIMoodParams(filters.moods, !genreIds.length);
+  const withoutGenreIds = getAIAvoidGenreIds(filters.avoid, mediaType);
+  const countries = getAICountries(filters);
+  const languages = getAILanguages(filters);
+  const path = [
+    `/discover/${mediaType}?language=en-US`,
+    mediaType === 'movie' ? 'include_adult=false' : '',
+    'sort_by=popularity.desc',
+    `page=${Math.max(1, Number(options.page) || 1)}`,
+    countries.length || languages.length ? 'vote_count.gte=20' : 'vote_count.gte=80',
+    genreIds.length ? `with_genres=${genreIds.join(',')}` : '',
+    countries.length ? `with_origin_country=${countries.join('|')}` : '',
+    languages.length ? `with_original_language=${languages[0]}` : '',
+    withoutGenreIds.length ? `without_genres=${withoutGenreIds.join(',')}` : '',
+    moodParams
+  ]
+    .filter(Boolean)
+    .join('&');
+
+  try {
+    const response = await api(path);
+    const items = (response.results || [])
+      .filter(item =>
+        item?.id &&
+        item.poster_path &&
+        (item.title || item.name) &&
+        !isAIAvoidedItem(item, filters.avoid) &&
+        !excludeKeys.has(`${mediaType}-${item.id}`)
+      )
+      .map(item => ({ ...item, media_type: mediaType }))
+      .slice(0, 40);
+
+    state.allItems = uniqueMediaItems([...state.allItems, ...items]);
+    return items;
+  } catch (error) {
+    console.warn('AI TMDB search unavailable:', error);
+    return [];
+  }
+}
+
+async function findAIReferenceCandidates(title, mediaType, excludeKeys) {
+  try {
+    const query = encodeURIComponent(String(title).trim());
+    const search = await api(
+      `/search/${mediaType}?language=en-US&query=${query}&page=1&include_adult=false`
+    );
+    const reference = (search.results || []).find(item =>
+      item?.id &&
+      (item.poster_path || item.backdrop_path)
+    );
+
+    if (!reference) return [];
+
+    const referenceKey = `${mediaType}-${reference.id}`;
+    const [recommendations, similar] = await Promise.all([
+      api(`/${mediaType}/${reference.id}/recommendations?language=en-US&page=1`).catch(() => ({ results: [] })),
+      api(`/${mediaType}/${reference.id}/similar?language=en-US&page=1`).catch(() => ({ results: [] }))
+    ]);
+
+    const items = uniqueMediaItems([
+      ...(recommendations.results || []),
+      ...(similar.results || [])
+    ])
+      .filter(item =>
+        item?.id &&
+        item.poster_path &&
+        (item.title || item.name) &&
+        `${mediaType}-${item.id}` !== referenceKey &&
+        !excludeKeys.has(`${mediaType}-${item.id}`)
+      )
+      .map(item => ({ ...item, media_type: mediaType }))
+      .slice(0, 40);
+
+    state.allItems = uniqueMediaItems([...state.allItems, ...items]);
+    return items;
+  } catch (error) {
+    console.warn('AI reference search unavailable:', error);
+    return [];
+  }
+}
+
+function getAIGenreIds(genres = [], mediaType = 'movie') {
+  const values = Array.isArray(genres) ? genres : [genres];
+  const ids = values.flatMap(value => {
+    const normalized = String(value || '').toLowerCase();
+    const match = GENRE_OPTIONS.find(genre =>
+      genre.label.toLowerCase() === normalized ||
+      normalized.includes(genre.label.toLowerCase())
+    );
+
+    return match?.[mediaType] ? [match[mediaType]] : [];
+  });
+
+  return [...new Set(ids)];
+}
+
+function getAIAvoidGenreIds(avoid = [], mediaType = 'movie') {
+  const values = Array.isArray(avoid) ? avoid : [avoid];
+
+  if (!values.some(value => /anime|animation|animated/i.test(String(value)))) {
+    return [];
+  }
+
+  return mediaType === 'tv' ? [16] : [16];
+}
+
+function getAICountries(filters = {}) {
+  const values = [
+    ...(Array.isArray(filters.countries) ? filters.countries : [filters.countries]),
+    ...(Array.isArray(filters.country) ? filters.country : [filters.country])
+  ];
+
+  return [...new Set(values
+    .filter(Boolean)
+    .map(value => String(value).trim().toUpperCase())
+    .map(value => {
+      if (/^(KOREAN|KOREA|SOUTH KOREA|KR)$/.test(value)) return 'KR';
+      if (/^(JAPANESE|JAPAN|JP)$/.test(value)) return 'JP';
+      return value.length === 2 ? value : '';
+    })
+    .filter(Boolean))];
+}
+
+function getAILanguages(filters = {}) {
+  const values = [
+    ...(Array.isArray(filters.languages) ? filters.languages : [filters.languages]),
+    ...(Array.isArray(filters.language) ? filters.language : [filters.language])
+  ];
+
+  return [...new Set(values
+    .filter(Boolean)
+    .map(value => String(value).trim().toLowerCase())
+    .map(value => {
+      if (/^(korean|ko)$/.test(value)) return 'ko';
+      if (/^(japanese|ja)$/.test(value)) return 'ja';
+      return value.length === 2 ? value : '';
+    })
+    .filter(Boolean))];
+}
+
+function isAIAvoidedItem(item, avoid = []) {
+  const values = Array.isArray(avoid) ? avoid : [avoid];
+
+  if (!values.some(value => /anime|animation|animated/i.test(String(value)))) {
+    return false;
+  }
+
+  return (item.genre_ids || []).includes(16);
+}
+
+function getAIMoodParams(moods = [], includeGenre = true) {
+  const value = (Array.isArray(moods) ? moods : [moods])
+    .join(' ')
+    .toLowerCase();
+
+  if (/(sad|emotional|cry|heartbreak)/.test(value)) {
+    return `${includeGenre ? 'with_genres=18&' : ''}vote_average.gte=6.5`;
+  }
+
+  if (/(laugh|funny|comedy|feel good)/.test(value)) {
+    return `${includeGenre ? 'with_genres=35&' : ''}vote_average.gte=6`;
+  }
+
+  if (/(scare|scary|horror|creepy)/.test(value)) {
+    return `${includeGenre ? 'with_genres=27,9648&' : ''}vote_average.gte=5.8`;
+  }
+
+  if (/(mind.?bending|surprise|unexpected|twist|puzzle)/.test(value)) {
+    return `${includeGenre ? 'with_genres=9648,53&' : ''}vote_average.gte=6`;
+  }
+
+  return '';
+}
+
 /* =========================================================
    YOUTUBE
 ========================================================= */
@@ -787,6 +1004,7 @@ function showProfileGate(manage = false) {
                 class="profile-avatar profile-avatar-face ${getProfileAvatar(profile)}"
                 style="--profile-accent:${profile.color}"
               >
+                ${profileAvatarSVG(getProfileAvatar(profile))}
                 ${
                   manage
                     ? '<span class="profile-edit-badge">✎</span>'
@@ -932,7 +1150,9 @@ function openProfileEditor(profile = null) {
             aria-label="${escapeHTML(avatar.label)}"
             title="${escapeHTML(avatar.label)}"
           >
-            <span class="avatar-sprite ${avatar.id}"></span>
+            <span class="avatar-sprite ${avatar.id}">
+              ${profileAvatarSVG(avatar.id)}
+            </span>
           </button>
         `).join('')}
       </div>
@@ -1240,6 +1460,67 @@ function getProfileAvatar(profile) {
   return PROFILE_AVATARS.some(item => item.id === avatar)
     ? avatar
     : PROFILE_AVATARS[0].id;
+}
+
+function profileAvatarSVG(avatarId = 'avatar-1') {
+  const index = Math.max(
+    0,
+    PROFILE_AVATARS.findIndex(avatar => avatar.id === avatarId)
+  );
+  const faces = [
+    {
+      brows: ['M27 37c5-4 12-4 17 0', 'M56 37c5-4 12-4 17 0'],
+      eyes: '<circle cx="36" cy="45" r="4.5" fill="#fff" /><circle cx="64" cy="45" r="4.5" fill="#fff" />',
+      mouth: '<path d="M34 58c9 10 23 10 32 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" />'
+    },
+    {
+      brows: ['M27 36h18', 'M55 36h18'],
+      eyes: '<path d="M28 44h17" stroke="#fff" stroke-width="5" stroke-linecap="round" /><path d="M55 44h17" stroke="#fff" stroke-width="5" stroke-linecap="round" />',
+      mouth: '<path d="M36 62c10 5 20 5 28 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" />'
+    },
+    {
+      brows: ['M27 35c5-6 13-6 18 0', 'M55 35c5-6 13-6 18 0'],
+      eyes: '<circle cx="36" cy="45" r="5.5" fill="#fff" /><circle cx="64" cy="45" r="5.5" fill="#fff" />',
+      mouth: '<circle cx="50" cy="63" r="8" fill="none" stroke="#fff" stroke-width="5" />'
+    },
+    {
+      brows: ['M27 38c6 2 12 2 18 0', 'M55 38c6 2 12 2 18 0'],
+      eyes: '<path d="M30 46c5 3 10 3 15 0" stroke="#fff" stroke-width="4" stroke-linecap="round" /><path d="M55 46c5 3 10 3 15 0" stroke="#fff" stroke-width="4" stroke-linecap="round" />',
+      mouth: '<path d="M38 64h24" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" />'
+    },
+    {
+      brows: ['M27 37c5-4 12-4 17 0', 'M56 38c5-2 11-2 16 0'],
+      eyes: '<circle cx="36" cy="45" r="4.5" fill="#fff" /><path d="M56 45c5 3 11 3 16 0" stroke="#fff" stroke-width="4" stroke-linecap="round" />',
+      mouth: '<path d="M35 59c8 8 22 8 30 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" />'
+    },
+    {
+      brows: ['M28 35c5-5 12-5 17 0', 'M55 35c5-5 12-5 17 0'],
+      eyes: '<path d="M29 45c5 4 11 4 16 0" stroke="#fff" stroke-width="4" stroke-linecap="round" /><path d="M55 45c5 4 11 4 16 0" stroke="#fff" stroke-width="4" stroke-linecap="round" />',
+      mouth: '<path d="M33 57c8 16 26 16 34 0" fill="rgba(255,255,255,.22)" stroke="#fff" stroke-width="5" stroke-linecap="round" />'
+    },
+    {
+      brows: ['M27 38l18-4', 'M55 34l18 4'],
+      eyes: '<circle cx="36" cy="46" r="4" fill="#fff" /><circle cx="64" cy="46" r="4" fill="#fff" />',
+      mouth: '<path d="M37 63h26" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" />'
+    },
+    {
+      brows: ['M28 34c5-5 12-3 16 2', 'M56 38c5 2 11 1 16-2'],
+      eyes: '<circle cx="36" cy="45" r="4.5" fill="#fff" /><circle cx="64" cy="45" r="4.5" fill="#fff" />',
+      mouth: '<path d="M38 61c7 5 17 6 24 0" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" />'
+    }
+  ];
+  const face = faces[index] || faces[0];
+
+  return `
+    <svg class="profile-smiley" viewBox="0 0 100 100" aria-hidden="true">
+      <rect x="0" y="0" width="100" height="100" rx="7" fill="var(--profile-accent, #333)" />
+      <path d="M0 72c19-10 35-13 50-9s31 3 50-8v45H0Z" fill="rgba(0,0,0,.16)" />
+      <path d="${face.brows[0]}" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="4" stroke-linecap="round" />
+      <path d="${face.brows[1]}" fill="none" stroke="rgba(255,255,255,.72)" stroke-width="4" stroke-linecap="round" />
+      ${face.eyes}
+      ${face.mouth}
+    </svg>
+  `;
 }
 
 function syncKidsTitleChoices(
@@ -2106,6 +2387,7 @@ function paintHome() {
 
       <section
         class="hero${heroBackground ? '' : ' no-art'}"
+        ${state.currentView === 'ai' ? 'hidden' : ''}
         style="
           ${heroBackground ? `background-image:url('${heroBackground}')` : ''}
         "
@@ -2235,6 +2517,8 @@ function paintHome() {
 
   wireHomeEvents();
 
+  if (state.currentView === 'ai') aiChat.wire();
+
   if (['genres', 'movies', 'shows'].includes(state.currentView)) {
     wireGenreControls();
     wireGenreInfiniteScroll();
@@ -2242,8 +2526,12 @@ function paintHome() {
 
   populateCardLogos();
 
-  setupHeroTrailer();
-  scheduleHeroAdvance();
+  if (state.currentView === 'ai') {
+    stopHeroTrailer();
+  } else {
+    setupHeroTrailer();
+    scheduleHeroAdvance();
+  }
 }
 
 function renderHomeContent() {
@@ -2255,6 +2543,10 @@ function renderHomeContent() {
 }
 
 function renderViewContent(view) {
+  if (view === 'ai') {
+    return aiChat.render();
+  }
+
   if (view === 'home') {
     return renderHomeContent();
   }
@@ -2528,6 +2820,7 @@ function repaintGenreView() {
   wireRails();
   wireCards();
   populateCardLogos();
+
   wireGenreInfiniteScroll();
 }
 
@@ -3096,6 +3389,15 @@ function switchContentView(view) {
   state.currentView = view;
   state.searchTerm = '';
 
+  const heroElement = app.querySelector('.hero');
+  if (heroElement) heroElement.hidden = view === 'ai';
+
+  if (view === 'ai') {
+    stopHeroTrailer();
+  }
+
+  syncKofiBadge();
+
   if (fixedType) {
     state.genreType = fixedType;
   }
@@ -3107,6 +3409,17 @@ function switchContentView(view) {
   }
 
   destroyHoverPreview();
+
+  if (previousView === 'ai' && view !== 'ai') {
+    paintHome();
+    syncKofiBadge();
+
+    if (isCatalogView && (shouldReloadCatalog || !state.genreItems.length)) {
+      loadGenreTitles(true);
+    }
+
+    return;
+  }
 
   app
     .querySelectorAll('[data-nav-view]')
@@ -3135,6 +3448,12 @@ function switchContentView(view) {
   wireRails();
   wireCards();
   populateCardLogos();
+
+  if (view === 'ai') {
+    aiChat.wire();
+    syncKofiBadge();
+    return;
+  }
 
   if (isCatalogView) {
     wireGenreControls();
@@ -3175,6 +3494,8 @@ function renderNavbar(profile) {
         >
           Home
         </a>
+
+        <a class="nav-ai-link ${state.currentView === 'ai' ? 'active' : ''}" href="#ai" data-nav-view="ai"><span class="nav-ai-spark">✦</span> AI</a>
 
         <a
           class="${state.currentView === 'shows' ? 'active' : ''}"
@@ -3312,7 +3633,9 @@ function renderNavbar(profile) {
           <span
             class="profile-nav-avatar profile-avatar-face ${getProfileAvatar(profile)}"
             style="--profile-accent:${profile.color}"
-          ></span>
+          >
+            ${profileAvatarSVG(getProfileAvatar(profile))}
+          </span>
 
           <span class="profile-arrow">
             ▼
@@ -3445,6 +3768,8 @@ function renderNavbar(profile) {
               Browse by Languages
             </span>
           </a>
+
+          <a class="profile-menu-link ${state.currentView === 'ai' ? 'active' : ''}" href="#ai" data-nav-view="ai"><span class="profile-menu-icon">${aiSparkleIcon()}</span><span>AI</span></a>
 
           <a
             class="profile-menu-link ${
@@ -3603,6 +3928,11 @@ function setupHeroTrailer() {
   const frame = app.querySelector('#hero-trailer');
   const cover = app.querySelector('[data-hero-video-cover]');
 
+  if (state.currentView === 'ai') {
+    stopHeroTrailer();
+    return;
+  }
+
   if (!frame || !cover) return;
 
   clearTimer('heroRevealTimer');
@@ -3692,10 +4022,23 @@ function setupHeroTrailer() {
   );
 }
 
+function stopHeroTrailer() {
+  clearTimer('heroRevealTimer');
+  clearTimer('heroAdvanceTimer');
+  clearTimer('heroCollapseTimer');
+
+  const frame = app.querySelector('#hero-trailer');
+  if (frame) {
+    sendYouTubeCommand(frame, 'pauseVideo');
+    frame.src = 'about:blank';
+  }
+}
+
 function scheduleHeroAdvance() {
   clearTimer('heroAdvanceTimer');
 
   if (
+    state.currentView === 'ai' ||
     state.heroItems.length < 2 ||
     state.searchTerm
   ) {
