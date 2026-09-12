@@ -2608,8 +2608,8 @@ function openMobileDownloadNotice() {
       </div>
       <div class="mobile-download-notice-body">
         <span class="preplay-modal-kicker">Mobile version</span>
-        <h2 id="mobile-download-notice-title">MovieIGuess mobile is in development</h2>
-        <p>I am building a smoother mobile version of MovieIGuess so it feels better on phones. It is not ready yet, but I am shaping it carefully.</p>
+        <h2 id="mobile-download-notice-title">MovieIGuess mobile app is in development</h2>
+        <p>I am building a smoother mobile app version of MovieIGuess so it feels better on phones. It is not ready yet, but I am shaping it carefully.</p>
         <aside class="mobile-download-support-card">
           <span class="mobile-download-support-heart" aria-hidden="true">♥</span>
           <div>
@@ -2619,7 +2619,7 @@ function openMobileDownloadNotice() {
         </aside>
         <a class="preplay-support-link mobile-download-support-link"
           href="https://ko-fi.com/christinex" target="_blank" rel="noopener noreferrer">
-          <span aria-hidden="true">♥</span> Support me on Ko-fi
+          <span aria-hidden="true">♥</span> Buy me a coffee
         </a>
         <button type="button" class="mobile-download-later" data-mobile-download-close>Maybe later</button>
       </div>
