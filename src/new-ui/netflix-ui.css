@@ -7253,6 +7253,8 @@ body.genre-dropdown-open .content-area {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding:
     max(20px, env(safe-area-inset-top))
     max(20px, env(safe-area-inset-right))
@@ -7269,11 +7271,12 @@ body.genre-dropdown-open .content-area {
 }
 
 .preplay-download-modal {
-  width: min(520px, 100%);
+  width: min(520px, calc(100% - 20px));
+  max-width: calc(100% - 20px);
   max-height: min(720px, calc(100dvh - 40px));
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: auto;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 16px;
   background: #18181b;
@@ -7414,9 +7417,10 @@ body.genre-dropdown-open .content-area {
 
 .mobile-download-notice {
   position: relative;
-  width: min(460px, 100%);
-  max-height: min(82vh, 760px);
-  overflow: hidden;
+  width: min(460px, calc(100% - 20px));
+  max-width: calc(100% - 20px);
+  max-height: none;
+  overflow: visible;
   background: linear-gradient(155deg, rgba(38, 38, 44, 0.98), rgba(16, 16, 19, 0.99));
 }
 
