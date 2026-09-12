@@ -41,6 +41,7 @@ export function addProfile(profile) {
     id: crypto.randomUUID ? crypto.randomUUID() : `profile-${Date.now()}`,
     name: profile.name.trim(),
     color: profile.color || '#e50914',
+    avatar: profile.avatar || 'avatar-1',
     kids: Boolean(profile.kids),
     preferences: Array.isArray(profile.preferences)
       ? profile.preferences

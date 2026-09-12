@@ -185,6 +185,8 @@ const PROFILE_TITLE_CHOICES = [
   { id: 'tv-119051', tmdbId: 119051, type: 'tv', title: 'Wednesday', tags: ['popular_series', 'us_drama'] },
   { id: 'tv-93405', tmdbId: 93405, type: 'tv', title: 'Squid Game', tags: ['popular_series', 'kdrama'] },
   { id: 'tv-1396', tmdbId: 1396, type: 'tv', title: 'Breaking Bad', tags: ['popular_series', 'crime', 'us_drama'] },
+  { id: 'tv-1405', tmdbId: 1405, type: 'tv', title: 'Dexter', tags: ['popular_series', 'crime', 'us_drama'] },
+  { id: 'tv-5920', tmdbId: 5920, type: 'tv', title: 'The Mentalist', tags: ['popular_series', 'crime', 'us_drama'] },
   { id: 'tv-60625', tmdbId: 60625, type: 'tv', title: 'Rick and Morty', tags: ['popular_series', 'anime'] },
   { id: 'tv-37854', tmdbId: 37854, type: 'tv', title: 'One Piece', tags: ['popular_series', 'anime', 'action_thriller'] },
   { id: 'tv-127532', tmdbId: 127532, type: 'tv', title: 'Solo Leveling', tags: ['popular_series', 'anime', 'action_thriller'] },
@@ -207,7 +209,36 @@ const PROFILE_TITLE_CHOICES = [
   { id: 'movie-455207', tmdbId: 455207, type: 'movie', title: 'Crazy Rich Asians', tags: ['popular_movies', 'romance_romcom'] }
 ];
 
-const MIN_PROFILE_TITLE_SELECTIONS = 5;
+const PROFILE_TITLE_SELECTION_LIMIT = 3;
+
+const GENRE_OPTIONS = [
+  { label: 'All genres', movie: null, tv: null },
+  { label: 'Action', movie: 28, tv: 10759 },
+  { label: 'Adventure', movie: 12, tv: 10759 },
+  { label: 'Animation', movie: 16, tv: 16 },
+  { label: 'Comedy', movie: 35, tv: 35 },
+  { label: 'Crime', movie: 80, tv: 80 },
+  { label: 'Documentary', movie: 99, tv: 99 },
+  { label: 'Drama', movie: 18, tv: 18 },
+  { label: 'Family', movie: 10751, tv: 10751 },
+  { label: 'Fantasy', movie: 14, tv: 10765 },
+  { label: 'Horror', movie: 27, tv: 9648 },
+  { label: 'Mystery', movie: 9648, tv: 9648 },
+  { label: 'Romance', movie: 10749, tv: 18 },
+  { label: 'Science Fiction', movie: 878, tv: 10765 },
+  { label: 'Thriller', movie: 53, tv: 9648 }
+];
+
+const PROFILE_AVATARS = [
+  { id: 'avatar-1', label: 'Blue adventurer' },
+  { id: 'avatar-2', label: 'Red music fan' },
+  { id: 'avatar-3', label: 'Golden retriever' },
+  { id: 'avatar-4', label: 'Purple daydreamer' },
+  { id: 'avatar-5', label: 'Green explorer' },
+  { id: 'avatar-6', label: 'Pink optimist' },
+  { id: 'avatar-7', label: 'Teal storyteller' },
+  { id: 'avatar-8', label: 'Orange gamer' }
+];
 
 const CATALOG_ROWS = [
   [
@@ -458,6 +489,16 @@ const state = {
   searchRequestId: 0,
   searchTimer: null,
   currentView: 'home',
+  genreType: 'movie',
+  genreIndex: 0,
+  genreItems: [],
+  genreLoading: false,
+  genreLoadingMore: false,
+  genrePage: 0,
+  genreTotalPages: 1,
+  genreRequestId: 0,
+  genreControlsCleanup: null,
+  genreObserver: null,
   mobileFeatureTooltipShown: false,
   mobileFeatureTooltipTimer: null,
 
@@ -743,13 +784,13 @@ function showProfileGate(manage = false) {
               data-profile-id="${profile.id}"
             >
               <span
-                class="profile-avatar"
-                style="background:${profile.color}"
+                class="profile-avatar profile-avatar-face ${getProfileAvatar(profile)}"
+                style="--profile-accent:${profile.color}"
               >
                 ${
                   manage
-                    ? '✎'
-                    : escapeHTML(profileInitial(profile.name))
+                    ? '<span class="profile-edit-badge">✎</span>'
+                    : ''
                 }
               </span>
 
@@ -841,6 +882,7 @@ function openProfileEditor(profile = null) {
   ];
 
   let selected = profile?.color || colors[0];
+  let selectedAvatar = getProfileAvatar(profile);
   const selectedTitles =
     new Set(profile?.favoriteTitles || []);
 
@@ -876,7 +918,27 @@ function openProfileEditor(profile = null) {
       />
 
       <label class="profile-color-label">
-        Profile color
+        Choose an avatar
+      </label>
+
+      <div class="avatar-choice-grid">
+        ${PROFILE_AVATARS.map(avatar => `
+          <button
+            type="button"
+            class="avatar-choice ${
+              avatar.id === selectedAvatar ? 'selected' : ''
+            }"
+            data-avatar="${avatar.id}"
+            aria-label="${escapeHTML(avatar.label)}"
+            title="${escapeHTML(avatar.label)}"
+          >
+            <span class="avatar-sprite ${avatar.id}"></span>
+          </button>
+        `).join('')}
+      </div>
+
+      <label class="profile-color-label">
+        Accent color
       </label>
 
       <div class="color-row">
@@ -907,14 +969,14 @@ function openProfileEditor(profile = null) {
         </h3>
 
         <p>
-          Select at least 5 movies or series to tune this profile.
+          Select exactly 3 movies or series to tune this profile.
         </p>
 
         <div
           class="title-pick-count"
           data-title-pick-count
         >
-          ${selectedTitles.size}/${MIN_PROFILE_TITLE_SELECTIONS} selected
+          ${selectedTitles.size}/${PROFILE_TITLE_SELECTION_LIMIT} selected
         </div>
 
         <div class="title-pick-grid">
@@ -954,7 +1016,7 @@ function openProfileEditor(profile = null) {
           data-title-pick-error
           hidden
         >
-          Pick at least 5 titles to create this profile.
+          Pick exactly 3 titles to continue.
         </div>
       </div>
 
@@ -982,6 +1044,23 @@ function openProfileEditor(profile = null) {
 
   input.focus();
   input.select();
+
+  overlay
+    .querySelectorAll('[data-avatar]')
+    .forEach(button => {
+      button.addEventListener('click', () => {
+        selectedAvatar = button.dataset.avatar;
+
+        overlay
+          .querySelectorAll('[data-avatar]')
+          .forEach(item => {
+            item.classList.toggle(
+              'selected',
+              item === button
+            );
+          });
+      });
+    });
 
   overlay
     .querySelectorAll('[data-color]')
@@ -1020,6 +1099,23 @@ function openProfileEditor(profile = null) {
         if (selectedTitles.has(id)) {
           selectedTitles.delete(id);
         } else {
+          if (
+            selectedTitles.size >=
+              PROFILE_TITLE_SELECTION_LIMIT
+          ) {
+            const error = overlay.querySelector(
+              '[data-title-pick-error]'
+            );
+
+            if (error) {
+              error.textContent =
+                'You can select only 3 titles.';
+              error.hidden = false;
+            }
+
+            return;
+          }
+
           selectedTitles.add(id);
         }
 
@@ -1065,9 +1161,8 @@ function openProfileEditor(profile = null) {
     ).checked;
 
     if (
-      !profile &&
-      selectedTitles.size <
-        MIN_PROFILE_TITLE_SELECTIONS
+      selectedTitles.size !==
+        PROFILE_TITLE_SELECTION_LIMIT
     ) {
       overlay.querySelector(
         '[data-title-pick-error]'
@@ -1085,6 +1180,7 @@ function openProfileEditor(profile = null) {
       updateProfile(profile.id, {
         name,
         color: selected,
+        avatar: selectedAvatar,
         kids,
         preferences,
         favoriteTitles:
@@ -1094,6 +1190,7 @@ function openProfileEditor(profile = null) {
       const nextProfile = addProfile({
         name,
         color: selected,
+        avatar: selectedAvatar,
         kids,
         preferences,
         favoriteTitles:
@@ -1140,22 +1237,26 @@ function updateTitlePickState(
 
   if (count) {
     count.textContent =
-      `${selectedTitles.size}/${MIN_PROFILE_TITLE_SELECTIONS} selected`;
+      `${selectedTitles.size}/${PROFILE_TITLE_SELECTION_LIMIT} selected`;
 
     count.classList.toggle(
       'complete',
-      selectedTitles.size >=
-        MIN_PROFILE_TITLE_SELECTIONS
+      selectedTitles.size ===
+        PROFILE_TITLE_SELECTION_LIMIT
     );
   }
 
-  if (
-    error &&
-    selectedTitles.size >=
-      MIN_PROFILE_TITLE_SELECTIONS
-  ) {
+  if (error) {
     error.hidden = true;
   }
+}
+
+function getProfileAvatar(profile) {
+  const avatar = profile?.avatar;
+
+  return PROFILE_AVATARS.some(item => item.id === avatar)
+    ? avatar
+    : PROFILE_AVATARS[0].id;
 }
 
 function syncKidsTitleChoices(
@@ -2142,7 +2243,7 @@ function paintHome() {
 
       <main class="content-area" data-content>
 
-        ${renderHomeContent()}
+        ${renderViewContent(state.currentView)}
 
       </main>
 
@@ -2150,6 +2251,12 @@ function paintHome() {
   `;
 
   wireHomeEvents();
+
+  if (['genres', 'movies', 'shows'].includes(state.currentView)) {
+    wireGenreControls();
+    wireGenreInfiniteScroll();
+  }
+
   populateCardLogos();
 
   setupHeroTrailer();
@@ -2169,6 +2276,10 @@ function renderViewContent(view) {
     return renderHomeContent();
   }
 
+  if (['genres', 'movies', 'shows'].includes(view)) {
+    return renderGenreContent(view);
+  }
+
   const rows =
     getRowsForView(view);
 
@@ -2182,6 +2293,276 @@ function renderViewContent(view) {
   }
 
   return renderRows(rows);
+}
+
+function renderGenreContent(view = 'genres') {
+  const selectedGenre = GENRE_OPTIONS[state.genreIndex] || GENRE_OPTIONS[0];
+  const typeLabel = {
+    movie: 'Movies',
+    tv: 'Shows',
+    anime: 'Anime'
+  }[state.genreType];
+  const pageTitle = view === 'movies'
+    ? 'Movies'
+    : view === 'shows'
+      ? 'TV Shows'
+      : 'Genres';
+  const title = selectedGenre.movie || selectedGenre.tv
+    ? `${selectedGenre.label} ${typeLabel}`
+    : `All ${typeLabel}`;
+
+  return `
+    <section class="genre-browser" aria-labelledby="genre-browser-title">
+      <div class="genre-browser-header">
+        <div>
+          <p class="genre-browser-eyebrow">Browse</p>
+          <h2 id="genre-browser-title">${pageTitle}</h2>
+        </div>
+
+        <div class="genre-browser-filters">
+          ${view === 'genres' ? renderGenreDropdown(
+              'Type',
+              'type',
+              state.genreType,
+              [
+                ['movie', 'Movies'],
+                ['tv', 'Shows'],
+                ['anime', 'Anime']
+              ]
+            ) : ''}
+
+          ${renderGenreDropdown(
+            'Genre',
+            'genre',
+            String(state.genreIndex),
+            GENRE_OPTIONS.map((genre, index) => [String(index), genre.label])
+          )}
+        </div>
+      </div>
+    </section>
+
+    ${state.genreLoading
+      ? `<div class="genre-browser-status"><span class="loading-spinner"></span><span>Loading ${escapeHTML(title)}...</span></div>`
+      : state.genreItems.length
+        ? renderGenreGrid(title)
+        : `<div class="genre-browser-status">No titles found for this selection.</div>`
+    }
+  `;
+}
+
+function renderGenreGrid(title) {
+  const hasMore = state.genrePage < state.genreTotalPages;
+
+  return `
+    <section class="genre-results" aria-labelledby="genre-results-title">
+      <h2 id="genre-results-title">${escapeHTML(title)}</h2>
+      <div class="genre-card-grid">
+        ${state.genreItems.map((item, index) => renderCard(item, 0, index)).join('')}
+      </div>
+      ${hasMore ? `
+        <div class="genre-load-more" data-genre-load-more>
+          <span class="loading-spinner"></span>
+          <span>${state.genreLoadingMore ? 'Loading more titles...' : 'Scroll for more'}</span>
+        </div>
+      ` : `
+        <p class="genre-results-end">You’ve reached the end of these results.</p>
+      `}
+    </section>
+  `;
+}
+
+function renderGenreDropdown(label, name, value, options) {
+  const selectedLabel = options.find(option => option[0] === value)?.[1] || options[0][1];
+
+  return `
+    <div class="genre-select" data-genre-select>
+      <span class="genre-select-label">${escapeHTML(label)}</span>
+      <button
+        type="button"
+        class="genre-select-button"
+        data-genre-select-toggle
+        aria-haspopup="listbox"
+        aria-expanded="false"
+      >
+        <span>${escapeHTML(selectedLabel)}</span>
+        ${chevronDownIcon()}
+      </button>
+      <div class="genre-select-menu" data-genre-select-menu role="listbox" hidden>
+        ${options.map(option => `
+          <button
+            type="button"
+            class="${option[0] === value ? 'active' : ''}"
+            data-genre-${name}-option="${escapeHTML(option[0])}"
+            role="option"
+            aria-selected="${option[0] === value}"
+          >
+            <span>${escapeHTML(option[1])}</span>
+            ${option[0] === value ? '<span class="genre-select-check">✓</span>' : ''}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function wireGenreControls() {
+  state.genreControlsCleanup?.();
+
+  const controls = Array.from(app.querySelectorAll('[data-genre-select]'));
+  if (!controls.length) return;
+
+  const closeMenus = except => {
+    controls.forEach(control => {
+      if (control === except) return;
+      control.classList.remove('open');
+      control.querySelector('[data-genre-select-menu]').hidden = true;
+      control.querySelector('[data-genre-select-toggle]').setAttribute('aria-expanded', 'false');
+    });
+
+    if (!except) {
+      document.body.classList.remove('genre-dropdown-open');
+    }
+  };
+
+  controls.forEach(control => {
+    const toggle = control.querySelector('[data-genre-select-toggle]');
+    const menu = control.querySelector('[data-genre-select-menu]');
+
+    toggle.addEventListener('click', event => {
+      event.stopPropagation();
+      const willOpen = menu.hidden;
+      closeMenus(control);
+      menu.hidden = !willOpen;
+      control.classList.toggle('open', willOpen);
+      toggle.setAttribute('aria-expanded', String(willOpen));
+      document.body.classList.toggle('genre-dropdown-open', willOpen);
+    });
+  });
+
+  app.querySelectorAll('[data-genre-type-option]').forEach(option => {
+    option.addEventListener('click', () => {
+      state.genreType = option.dataset.genreTypeOption;
+      closeMenus();
+      loadGenreTitles(true);
+    });
+  });
+
+  app.querySelectorAll('[data-genre-genre-option]').forEach(option => {
+    option.addEventListener('click', () => {
+      state.genreIndex = Number(option.dataset.genreGenreOption);
+      closeMenus();
+      loadGenreTitles(true);
+    });
+  });
+
+  const closeOnOutsideClick = () => closeMenus();
+  const closeOnEscape = event => {
+    if (event.key === 'Escape') closeMenus();
+  };
+
+  document.addEventListener('click', closeOnOutsideClick);
+  document.addEventListener('keydown', closeOnEscape);
+  state.genreControlsCleanup = () => {
+    document.removeEventListener('click', closeOnOutsideClick);
+    document.removeEventListener('keydown', closeOnEscape);
+    document.body.classList.remove('genre-dropdown-open');
+    state.genreControlsCleanup = null;
+  };
+}
+
+async function loadGenreTitles(reset = false) {
+  if (!reset && (state.genreLoading || state.genreLoadingMore)) return;
+
+  if (reset) {
+    state.genreLoading = false;
+    state.genreLoadingMore = false;
+    state.genreItems = [];
+    state.genrePage = 0;
+    state.genreTotalPages = 1;
+  }
+
+  const nextPage = state.genrePage + 1;
+  if (nextPage > state.genreTotalPages) return;
+
+  const requestId = reset ? ++state.genreRequestId : state.genreRequestId;
+  const selectedGenre = GENRE_OPTIONS[state.genreIndex] || GENRE_OPTIONS[0];
+  const mediaType = state.genreType === 'movie' ? 'movie' : 'tv';
+  const genreId = selectedGenre[mediaType];
+  const filters = state.genreType === 'anime'
+    ? `&with_genres=${genreId && genreId !== 16 ? `16,${genreId}` : '16'}&with_origin_country=JP`
+    : genreId
+      ? `&with_genres=${genreId}`
+      : '';
+
+  state.genreLoading = state.genrePage === 0;
+  state.genreLoadingMore = state.genrePage > 0;
+  repaintGenreView();
+
+  try {
+    const response = await api(
+      `/discover/${mediaType}?language=en-US&include_adult=false&sort_by=popularity.desc&page=${nextPage}${filters}`
+    );
+
+    if (
+      requestId !== state.genreRequestId ||
+      !['genres', 'movies', 'shows'].includes(state.currentView)
+    ) return;
+
+    const newItems = (response.results || []).filter(item =>
+        (item.backdrop_path || item.poster_path) &&
+        !item.adult &&
+        isBrowseAllowedItem(item)
+      );
+
+    state.genreItems = uniqueMediaItems([...state.genreItems, ...newItems]);
+    state.genrePage = response.page || nextPage;
+    state.genreTotalPages = response.total_pages || state.genrePage;
+
+    state.allItems = uniqueMediaItems([...state.allItems, ...state.genreItems]);
+  } catch (error) {
+    console.warn('Genre titles unavailable:', error);
+    if (requestId !== state.genreRequestId) return;
+    state.genreTotalPages = state.genrePage;
+  } finally {
+    if (
+      requestId === state.genreRequestId &&
+      ['genres', 'movies', 'shows'].includes(state.currentView)
+    ) {
+      state.genreLoading = false;
+      state.genreLoadingMore = false;
+      repaintGenreView();
+    }
+  }
+}
+
+function repaintGenreView() {
+  if (!['genres', 'movies', 'shows'].includes(state.currentView)) return;
+  const content = app.querySelector('[data-content]');
+  if (!content) return;
+
+  content.innerHTML = renderGenreContent(state.currentView);
+  wireGenreControls();
+  wireRails();
+  wireCards();
+  populateCardLogos();
+  wireGenreInfiniteScroll();
+}
+
+function wireGenreInfiniteScroll() {
+  state.genreObserver?.disconnect();
+  state.genreObserver = null;
+
+  const sentinel = app.querySelector('[data-genre-load-more]');
+  if (!sentinel || state.genrePage >= state.genreTotalPages) return;
+
+  state.genreObserver = new IntersectionObserver(entries => {
+    if (entries.some(entry => entry.isIntersecting)) {
+      state.genreObserver?.disconnect();
+      loadGenreTitles();
+    }
+  }, { rootMargin: '500px 0px' });
+
+  state.genreObserver.observe(sentinel);
 }
 
 function getRowsForView(view) {
@@ -2721,8 +3102,26 @@ function markCardSaved(item) {
 }
 
 function switchContentView(view) {
+  const previousView = state.currentView;
+  const isCatalogView = ['genres', 'movies', 'shows'].includes(view);
+  const fixedType = view === 'movies' ? 'movie' : view === 'shows' ? 'tv' : null;
+  const shouldReloadCatalog = isCatalogView && (
+    previousView !== view ||
+    (fixedType && state.genreType !== fixedType)
+  );
+
   state.currentView = view;
   state.searchTerm = '';
+
+  if (fixedType) {
+    state.genreType = fixedType;
+  }
+
+  if (!isCatalogView) {
+    state.genreObserver?.disconnect();
+    state.genreObserver = null;
+    state.genreControlsCleanup?.();
+  }
 
   destroyHoverPreview();
 
@@ -2753,6 +3152,15 @@ function switchContentView(view) {
   wireRails();
   wireCards();
   populateCardLogos();
+
+  if (isCatalogView) {
+    wireGenreControls();
+    wireGenreInfiniteScroll();
+
+    if (shouldReloadCatalog || !state.genreItems.length) {
+      loadGenreTitles(true);
+    }
+  }
 }
 
 /* =========================================================
@@ -2802,14 +3210,6 @@ function renderNavbar(profile) {
         </a>
 
         <a
-          class="${state.currentView === 'games' ? 'active' : ''}"
-          href="#games"
-          data-nav-view="games"
-        >
-          Games
-        </a>
-
-        <a
           class="${state.currentView === 'popular' ? 'active' : ''}"
           href="#popular"
           data-nav-view="popular"
@@ -2823,6 +3223,14 @@ function renderNavbar(profile) {
           data-nav-view="list"
         >
           My List
+        </a>
+
+        <a
+          class="${state.currentView === 'genres' ? 'active' : ''}"
+          href="#genres"
+          data-nav-view="genres"
+        >
+          Genres
         </a>
 
         <a
@@ -2919,11 +3327,9 @@ function renderNavbar(profile) {
         >
 
           <span
-            class="profile-nav-avatar"
-            style="background:${profile.color}"
-          >
-            ${escapeHTML(profileInitial(profile.name))}
-          </span>
+            class="profile-nav-avatar profile-avatar-face ${getProfileAvatar(profile)}"
+            style="--profile-accent:${profile.color}"
+          ></span>
 
           <span class="profile-arrow">
             ▼
@@ -3005,24 +3411,6 @@ function renderNavbar(profile) {
 
           <a
             class="profile-menu-link ${
-              state.currentView === 'games'
-                ? 'active'
-                : ''
-            }"
-            href="#games"
-            data-nav-view="games"
-          >
-            <span class="profile-menu-icon">
-              ${gamesMenuIcon()}
-            </span>
-
-            <span>
-              Games
-            </span>
-          </a>
-
-          <a
-            class="profile-menu-link ${
               state.currentView === 'popular'
                 ? 'active'
                 : ''
@@ -3075,6 +3463,24 @@ function renderNavbar(profile) {
             </span>
           </a>
 
+          <a
+            class="profile-menu-link ${
+              state.currentView === 'genres'
+                ? 'active'
+                : ''
+            }"
+            href="#genres"
+            data-nav-view="genres"
+          >
+            <span class="profile-menu-icon">
+              ${genreMenuIcon()}
+            </span>
+
+            <span>
+              Genres
+            </span>
+          </a>
+
           <button
             type="button"
             class="profile-menu-link mobile-download-menu-link"
@@ -3107,9 +3513,27 @@ function renderNavbar(profile) {
               : ''
           }
 
-          <div class="profile-menu-divider"></div>
-
         </div>
+
+        <a
+          class="profile-menu-link ${
+            state.currentView === 'games'
+              ? 'active'
+              : ''
+          }"
+          href="#games"
+          data-nav-view="games"
+        >
+          <span class="profile-menu-icon">
+            ${gamesMenuIcon()}
+          </span>
+
+          <span>
+            Games
+          </span>
+        </a>
+
+        <div class="profile-menu-divider"></div>
 
         <!-- ==============================================
              PROFILE OPTIONS
@@ -5229,6 +5653,9 @@ async function searchTitles(term) {
 
   if (state.searchTerm) {
     clearTimer('heroAdvanceTimer');
+    state.genreObserver?.disconnect();
+    state.genreObserver = null;
+    state.genreControlsCleanup?.();
   }
 
   const content =
@@ -5242,6 +5669,12 @@ async function searchTitles(term) {
 
     wireRails();
     wireCards();
+
+    if (['genres', 'movies', 'shows'].includes(state.currentView)) {
+      wireGenreControls();
+      wireGenreInfiniteScroll();
+    }
+
     populateCardLogos();
     scheduleHeroAdvance();
 
@@ -6193,10 +6626,6 @@ async function openPlayOptions(item) {
     IMG_W500,
     onBack: () => {
       paintHome();
-
-      if (state.currentView !== 'home') {
-        switchContentView(state.currentView);
-      }
     }
   });
 }
@@ -6800,6 +7229,20 @@ function listMenuIcon() {
         fill="none"
         stroke="currentColor"
         stroke-width="1.8"
+        stroke-linejoin="round"
+      />
+    </svg>
+  `;
+}
+
+function genreMenuIcon() {
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
         stroke-linejoin="round"
       />
     </svg>
