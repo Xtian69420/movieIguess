@@ -209,7 +209,7 @@ const PROFILE_TITLE_CHOICES = [
   { id: 'movie-455207', tmdbId: 455207, type: 'movie', title: 'Crazy Rich Asians', tags: ['popular_movies', 'romance_romcom'] }
 ];
 
-const PROFILE_TITLE_SELECTION_LIMIT = 3;
+const PROFILE_TITLE_SELECTION_MINIMUM = 3;
 
 const GENRE_OPTIONS = [
   { label: 'All genres', movie: null, tv: null },
@@ -969,14 +969,14 @@ function openProfileEditor(profile = null) {
         </h3>
 
         <p>
-          Select exactly 3 movies or series to tune this profile.
+          Select at least 3 movies or series to tune this profile.
         </p>
 
         <div
           class="title-pick-count"
           data-title-pick-count
         >
-          ${selectedTitles.size}/${PROFILE_TITLE_SELECTION_LIMIT} selected
+          ${selectedTitles.size} selected &middot; minimum ${PROFILE_TITLE_SELECTION_MINIMUM}
         </div>
 
         <div class="title-pick-grid">
@@ -1016,7 +1016,7 @@ function openProfileEditor(profile = null) {
           data-title-pick-error
           hidden
         >
-          Pick exactly 3 titles to continue.
+          Pick at least 3 titles to continue.
         </div>
       </div>
 
@@ -1099,23 +1099,6 @@ function openProfileEditor(profile = null) {
         if (selectedTitles.has(id)) {
           selectedTitles.delete(id);
         } else {
-          if (
-            selectedTitles.size >=
-              PROFILE_TITLE_SELECTION_LIMIT
-          ) {
-            const error = overlay.querySelector(
-              '[data-title-pick-error]'
-            );
-
-            if (error) {
-              error.textContent =
-                'You can select only 3 titles.';
-              error.hidden = false;
-            }
-
-            return;
-          }
-
           selectedTitles.add(id);
         }
 
@@ -1161,8 +1144,8 @@ function openProfileEditor(profile = null) {
     ).checked;
 
     if (
-      selectedTitles.size !==
-        PROFILE_TITLE_SELECTION_LIMIT
+      selectedTitles.size <
+        PROFILE_TITLE_SELECTION_MINIMUM
     ) {
       overlay.querySelector(
         '[data-title-pick-error]'
@@ -1237,12 +1220,12 @@ function updateTitlePickState(
 
   if (count) {
     count.textContent =
-      `${selectedTitles.size}/${PROFILE_TITLE_SELECTION_LIMIT} selected`;
+      `${selectedTitles.size} selected · minimum ${PROFILE_TITLE_SELECTION_MINIMUM}`;
 
     count.classList.toggle(
       'complete',
-      selectedTitles.size ===
-        PROFILE_TITLE_SELECTION_LIMIT
+      selectedTitles.size >=
+        PROFILE_TITLE_SELECTION_MINIMUM
     );
   }
 
