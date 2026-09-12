@@ -829,7 +829,8 @@ iframe[src*="ko-fi.com"],
   min-width: 0;
 }
 
-.nav-links a {
+.nav-links a,
+.nav-download-link {
   color: #e5e5e5;
 
   text-decoration: none;
@@ -842,7 +843,25 @@ iframe[src*="ko-fi.com"],
     color 0.2s ease;
 }
 
-.nav-links a:hover {
+.nav-download-link {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-download-link svg {
+  width: 16px;
+  height: 16px;
+}
+
+.nav-links a:hover,
+.nav-download-link:hover {
   color: #b3b3b3;
 }
 
@@ -4839,6 +4858,10 @@ iframe[src*="ko-fi.com"],
     display: none;
   }
 
+  .nav-download-link {
+    display: none;
+  }
+
   .nav-right {
     gap: 14px;
   }
@@ -6606,6 +6629,10 @@ iframe[src*="ko-fi.com"],
   font-weight: 700;
 }
 
+.mobile-download-menu-link {
+  cursor: pointer;
+}
+
 .profile-menu-icon {
   width: 21px;
   height: 21px;
@@ -6922,6 +6949,149 @@ iframe[src*="ko-fi.com"],
 
 .preplay-confirm-download:hover {
   background: #f6121d;
+}
+
+.mobile-download-notice {
+  position: relative;
+  width: min(460px, 100%);
+  overflow-y: auto;
+  background: linear-gradient(155deg, rgba(38, 38, 44, 0.98), rgba(16, 16, 19, 0.99));
+}
+
+.mobile-download-notice-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 2;
+}
+
+.mobile-download-notice-art {
+  position: relative;
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 15%, rgba(70, 211, 105, 0.3), transparent 46%),
+    linear-gradient(135deg, rgba(229, 9, 20, 0.2), transparent 60%);
+}
+
+.mobile-download-notice-glow {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: rgba(70, 211, 105, 0.13);
+  filter: blur(20px);
+}
+
+.mobile-download-notice-phone {
+  position: relative;
+  width: 70px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border: 3px solid rgba(255, 255, 255, 0.88);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #46d369;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.38);
+}
+
+.mobile-download-notice-phone::after {
+  content: '';
+  position: absolute;
+  bottom: 6px;
+  width: 17px;
+  height: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.mobile-download-notice-phone svg {
+  width: 34px;
+  height: 34px;
+}
+
+.mobile-download-notice-body {
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+}
+
+.mobile-download-notice-body h2 {
+  margin: -4px 0 0;
+  font-size: 25px;
+  line-height: 1.18;
+}
+
+.mobile-download-notice-body > p {
+  margin: 0;
+  color: #c5c5ca;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.mobile-download-support-card {
+  display: flex;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.055);
+  text-align: left;
+}
+
+.mobile-download-support-heart {
+  flex: 0 0 36px;
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e50914;
+  color: #fff;
+  font-size: 18px;
+}
+
+.mobile-download-support-card strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #fff;
+  font-size: 14px;
+}
+
+.mobile-download-support-card p {
+  margin: 0;
+  color: #aaaab1;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.mobile-download-support-link {
+  gap: 8px;
+  border-color: transparent;
+  background: linear-gradient(135deg, #ff5e5b, #e50914);
+  box-shadow: 0 10px 28px rgba(229, 9, 20, 0.22);
+}
+
+.mobile-download-support-link:hover {
+  background: linear-gradient(135deg, #ff6f6c, #f6121d);
+}
+
+.mobile-download-later {
+  justify-self: center;
+  border: 0;
+  background: transparent;
+  color: #a1a1aa;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.mobile-download-later:hover {
+  color: #fff;
 }
 
 .download-episode-controls {

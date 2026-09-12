@@ -2591,6 +2591,71 @@ function showToast(message) {
   }, 2200);
 }
 
+function openMobileDownloadNotice() {
+  document.querySelector('[data-mobile-download-notice]')?.remove();
+
+  const modal = document.createElement('div');
+  modal.className = 'preplay-download-overlay mobile-download-notice-overlay';
+  modal.dataset.mobileDownloadNotice = '';
+  modal.innerHTML = `
+    <section class="preplay-download-modal mobile-download-notice" role="dialog"
+      aria-modal="true" aria-labelledby="mobile-download-notice-title">
+      <button type="button" class="preplay-download-close mobile-download-notice-close"
+        data-mobile-download-close aria-label="Close">×</button>
+      <div class="mobile-download-notice-art" aria-hidden="true">
+        <span class="mobile-download-notice-glow"></span>
+        <span class="mobile-download-notice-phone">${mobileVersionIcon()}</span>
+      </div>
+      <div class="mobile-download-notice-body">
+        <span class="preplay-modal-kicker">Mobile version</span>
+        <h2 id="mobile-download-notice-title">MovieIGuess mobile is in development</h2>
+        <p>I am building a smoother mobile version of MovieIGuess so it feels better on phones. It is not ready yet, but I am shaping it carefully.</p>
+        <aside class="mobile-download-support-card">
+          <span class="mobile-download-support-heart" aria-hidden="true">♥</span>
+          <div>
+            <strong>Support me</strong>
+            <p>I built MovieIGuess with care and I keep it free for everyone.</p>
+          </div>
+        </aside>
+        <a class="preplay-support-link mobile-download-support-link"
+          href="https://ko-fi.com/christinex" target="_blank" rel="noopener noreferrer">
+          <span aria-hidden="true">♥</span> Support me on Ko-fi
+        </a>
+        <button type="button" class="mobile-download-later" data-mobile-download-close>Maybe later</button>
+      </div>
+    </section>
+  `;
+
+  document.body.appendChild(modal);
+  openModalElement(modal);
+
+  const handleKeydown = event => {
+    if (event.key === 'Escape') close();
+  };
+  const close = () => {
+    document.removeEventListener('keydown', handleKeydown);
+    closeModalElement(modal);
+  };
+
+  modal.querySelectorAll('[data-mobile-download-close]')
+    .forEach(button => button.addEventListener('click', close));
+  modal.addEventListener('click', event => {
+    if (event.target === modal) close();
+  });
+  document.addEventListener('keydown', handleKeydown);
+  modal.querySelector('[data-mobile-download-close]')?.focus();
+}
+
+function mobileVersionIcon() {
+  return `
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="7" y="2.5" width="10" height="19" rx="2.5" fill="none" stroke="currentColor" stroke-width="2" />
+      <path d="M10 5.5h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <circle cx="12" cy="18" r="1" fill="currentColor" />
+    </svg>
+  `;
+}
+
 function markCardSaved(item) {
   const key =
     `${getMediaType(item)}-${item.id}`;
@@ -2740,6 +2805,15 @@ function renderNavbar(profile) {
         >
           Browse by Languages
         </a>
+
+        <button
+          type="button"
+          class="nav-download-link"
+          data-mobile-download-nav
+        >
+          ${mobileVersionIcon()}
+          <span>Mobile Version</span>
+        </button>
 
       </nav>
 
@@ -2965,6 +3039,20 @@ function renderNavbar(profile) {
               Browse by Languages
             </span>
           </a>
+
+          <button
+            type="button"
+            class="profile-menu-link mobile-download-menu-link"
+            data-mobile-download
+          >
+            <span class="profile-menu-icon">
+              ${mobileVersionIcon()}
+            </span>
+
+            <span>
+              Mobile Version
+            </span>
+          </button>
 
           ${
             isKidsProfile
@@ -4370,6 +4458,12 @@ function wireHomeEvents() {
       );
     });
 
+  app
+    .querySelector('[data-mobile-download-nav]')
+    ?.addEventListener('click', () => {
+      openMobileDownloadNotice();
+    });
+
 /* =========================================================
    PROFILE MENU
 ========================================================= */
@@ -4413,6 +4507,13 @@ if (
       'true'
     );
   };
+
+  profileMenu
+    .querySelector('[data-mobile-download]')
+    ?.addEventListener('click', () => {
+      closeProfileMenu();
+      openMobileDownloadNotice();
+    });
 
   profileMenuButton.addEventListener(
     'click',
