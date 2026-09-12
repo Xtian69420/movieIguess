@@ -175,6 +175,28 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
       search.moods.length > 1;
   }
 
+  function lastAssistantAskedQuestion() {
+    const lastAssistant = [...session.messages]
+      .reverse()
+      .find(entry => entry.role === 'assistant');
+
+    return Boolean(
+      lastAssistant &&
+      (
+        lastAssistant.type === 'question' ||
+        /\?/.test(lastAssistant.message || '')
+      )
+    );
+  }
+
+  function recentUserContext(count = 2) {
+    return session.messages
+      .filter(entry => entry.role === 'user')
+      .slice(-count)
+      .map(entry => entry.message)
+      .join(' ');
+  }
+
   function isMoreRequest(value) {
     return /\b(more|more like this|similar|another|others|show more|give me more)\b/i.test(value);
   }
@@ -343,12 +365,13 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
     refresh();
 
     try {
-      const alreadyAskedQuestion = session.messages.some(entry =>
-        entry.role === 'assistant' &&
-        entry.type === 'question'
-      );
       const currentMessage = label || value;
-      const inferredSearch = inferSearchFromText(currentMessage);
+      const alreadyAskedQuestion = lastAssistantAskedQuestion();
+      const inferredSearch = inferSearchFromText(
+        alreadyAskedQuestion
+          ? recentUserContext(2)
+          : currentMessage
+      );
 
       let aiResponse = moreRequest && session.lastSearch
         ? {
