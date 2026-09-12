@@ -55,9 +55,13 @@ export function createAIChat(config) {
     return `You are MovieIGuess AI, a conversational movie and show finder.
 Always return one valid JSON object only. No markdown, no prose outside JSON.
 Supported types: question, message, search, recommendations, error.
+You will receive a dynamic conversationContext object. Use it instead of guessing where the conversation ended.
+The latestUserMessage controls the next action.
+Use previous turns only when conversationContext.isContinuation is true, when latestUserMessage answers the last assistant question, or when latestUserMessage asks for more/similar results.
+If latestUserMessage is a new full request, treat old context as background only and do not let it override the new request.
 Limit back-and-forth. Prefer one detailed follow-up question that gathers multiple useful signals at once: format, emotional intensity, pacing, genre, and anything to avoid.
 Ask at most one follow-up question before searching unless the user's request is impossible to interpret.
-If the user gives a mood like sad, funny, scary, romantic, intense, cozy, or surprising, ask one bundled question in the message text, not tiny separate questions.
+If enough info exists in latestUserMessage plus logicalCurrentIntent, return type search.
 Do not include suggested response options. Leave options as an empty array or omit it.
 After the user answers your bundled question, return type search with filters instead of asking again.
 If you already have format plus mood/genre, return type search immediately.
@@ -66,10 +70,14 @@ Search JSON shape: {"type":"search","message":"I know what you're looking for.",
 Question JSON shape: {"type":"question","message":"Do you want a sad movie you can finish tonight, an emotional series to stay with, or something bittersweet but not too heavy?","options":[]}`;
   }
 
-  function recommendationPrompt(candidates, isMoreRequest = false) {
+  function recommendationPrompt(candidates, context, isMoreRequest = false) {
     return `Choose ${isMoreRequest ? 'fresh additional' : 'the best'} recommendations only from these TMDB candidates.
 Return every strong match from the candidate list. Do not use a fixed count.
+Use conversationContext to understand the user's current intent, but never recommend titles outside the candidate list.
+Avoid repeating anything in conversationContext.alreadyRecommended.
 Return JSON only: {"type":"recommendations","message":"...","recommendations":[{"id":123,"mediaType":"movie","reason":"Short helpful reason"}]}
+conversationContext:
+${JSON.stringify(context)}
 Never recommend a title unless its id and mediaType are in this list:
 ${JSON.stringify(candidates.map(item => ({
       id: item.id,
@@ -123,6 +131,11 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
       languages.push('ja');
     }
 
+    if (/\bpsychological\b/.test(text)) {
+      genres.push('Thriller', 'Mystery');
+      moods.push('intense', 'mind-bending');
+    }
+
     [
       ['Action', /\baction\b/],
       ['Adventure', /\badventure\b/],
@@ -131,21 +144,21 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
       ['Crime', /\bcrime|detective|serial killer\b/],
       ['Drama', /\bsad|emotional|drama|cry|heartbreak\b/],
       ['Horror', /\bscary|scare|horror|creepy\b/],
-      ['Mystery', /\bmystery|mind.?bending|twist|confusing|puzzle\b/],
+      ['Mystery', /\bmystery|mind.?bending|psychological|twist|confusing|puzzle\b/],
       ['Romance', /\bromance|romantic|love\b/],
       ['Science Fiction', /\bsci.?fi|science fiction|space|future\b/],
-      ['Thriller', /\bthriller|thrilling|tense|intense|suspense\b/]
+      ['Thriller', /\bthriller|psychological|thrilling|tense|intense|suspense\b/]
     ].forEach(([genre, pattern]) => {
       if (pattern.test(text)) genres.push(genre);
     });
 
     [
-      ['mind-bending', /\bmind.?bending|twist|confusing|puzzle\b/],
+      ['mind-bending', /\bmind.?bending|psychological|twist|confusing|puzzle\b/],
       ['sad', /\bsad|cry|heartbreak\b/],
       ['emotional', /\bemotional|drama\b/],
       ['funny', /\bfunny|laugh|light\b/],
       ['scary', /\bscary|horror|creepy\b/],
-      ['intense', /\bintense|thrilling|tense|suspense\b/]
+      ['intense', /\bintense|psychological|thrilling|tense|suspense\b/]
     ].forEach(([mood, pattern]) => {
       if (pattern.test(text)) moods.push(mood);
     });
@@ -197,6 +210,12 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
       .join(' ');
   }
 
+  function latestAssistantMessage() {
+    return [...session.messages]
+      .reverse()
+      .find(entry => entry.role === 'assistant') || null;
+  }
+
   function isMoreRequest(value) {
     return /\b(more|more like this|similar|another|others|show more|give me more)\b/i.test(value);
   }
@@ -205,6 +224,65 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
     return new Set(session.messages
       .flatMap(entry => entry.recommendations || [])
       .map(entry => `${entry.mediaType}-${entry.id}`));
+  }
+
+  function alreadyRecommended() {
+    return session.messages
+      .flatMap(entry => entry.recommendations || [])
+      .map(entry => {
+        const item = findRecommendationItem(entry);
+
+        return item
+          ? {
+              id: item.id,
+              mediaType: config.getMediaType(item),
+              title: config.getTitle(item)
+            }
+          : {
+              id: entry.id,
+              mediaType: entry.mediaType,
+              title: entry.title || ''
+            };
+      })
+      .filter(entry => entry.id && entry.mediaType);
+  }
+
+  function compactTurns() {
+    return session.messages
+      .slice(-10)
+      .map(entry => ({
+        role: entry.role,
+        type: entry.type || (entry.role === 'user' ? 'user' : 'message'),
+        message: entry.message,
+        search: entry.search || null,
+        recommendationCount: entry.recommendations?.length || 0
+      }));
+  }
+
+  function buildConversationContext({
+    latestUserMessage,
+    inferredSearch,
+    moreRequest,
+    alreadyAskedQuestion
+  }) {
+    const assistant = latestAssistantMessage();
+
+    return {
+      latestUserMessage,
+      recentTurns: compactTurns(),
+      lastAssistantMessage: assistant
+        ? {
+            type: assistant.type || 'message',
+            message: assistant.message
+          }
+        : null,
+      lastSearch: session.lastSearch,
+      logicalCurrentIntent: inferredSearch,
+      alreadyRecommended: alreadyRecommended(),
+      isMoreRequest: moreRequest,
+      isAnsweringFollowUp: alreadyAskedQuestion,
+      isContinuation: moreRequest || alreadyAskedQuestion
+    };
   }
 
   function fillRecommendations(aiResponse, candidates) {
@@ -304,16 +382,106 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
       ? `<div class="ai-recommendation-rail-wrap"><h3>Recommended for you</h3><div class="ai-rail-container"><button class="ai-rail-arrow ai-rail-arrow-left" data-ai-rail-prev aria-label="Scroll recommendations left">‹</button><div class="ai-recommendations" data-ai-rail>${entry.recommendations.map(item => {
           const candidate = findRecommendationItem(item);
           return candidate ? recommendation(candidate, item.reason) : '';
-        }).join('')}</div><button class="ai-rail-arrow ai-rail-arrow-right" data-ai-rail-next aria-label="Scroll recommendations right">›</button></div></div>`
+        }).join('')}</div><button class="ai-rail-arrow ai-rail-arrow-right" data-ai-rail-next aria-label="Scroll recommendations right">›</button></div><div class="ai-support-note"><div class="ai-bubble assistant"><p>If you enjoy the service, consider supporting the site to help keep it running and improve future features.</p><button type="button" class="ai-support-button" data-ai-support-open>Support this site</button></div></div></div>`
       : '';
 
     return `<div class="ai-message-row assistant"><span class="ai-avatar">${aiSparkleIcon()}</span><div class="ai-response"><div class="ai-bubble assistant">${config.escape(entry.message)}</div>${cards}</div></div>`;
   }
 
+  function openSupportModal() {
+    document.querySelector('[data-ai-support-modal]')?.remove();
+
+    const modal = document.createElement('div');
+    modal.className = 'preplay-download-overlay mobile-download-notice-overlay';
+    modal.dataset.aiSupportModal = 'true';
+    modal.innerHTML = `
+      <section class="preplay-download-modal mobile-download-notice" role="dialog"
+        aria-modal="true" aria-labelledby="ai-support-title">
+        <button type="button" class="preplay-download-close mobile-download-notice-close"
+          data-ai-support-close aria-label="Close">×</button>
+
+        <div class="mobile-download-notice-art" aria-hidden="true">
+          <span class="mobile-download-notice-glow"></span>
+          <span class="mobile-download-notice-phone">
+            <span class="mobile-phone-speaker"></span>
+            <span class="mobile-phone-screen">
+              <span class="mobile-phone-scene mobile-phone-skeleton">
+                <i class="mobile-phone-skeleton-hero"></i>
+                <i class="mobile-phone-skeleton-line"></i>
+                <i class="mobile-phone-skeleton-line short"></i>
+                <span class="mobile-phone-skeleton-row">
+                  <i></i><i></i><i></i>
+                </span>
+              </span>
+              <span class="mobile-phone-scene mobile-phone-home">
+                <b>M</b>
+                <i class="mobile-phone-feature"></i>
+                <strong>Trending Now</strong>
+                <span class="mobile-phone-poster-row"><i></i><i></i><i></i></span>
+              </span>
+              <span class="mobile-phone-scene mobile-phone-details">
+                <i class="mobile-phone-details-art"></i>
+                <strong>Movie Night</strong>
+                <span class="mobile-phone-play">▶ Play</span>
+                <span class="mobile-phone-detail-lines"><i></i><i></i></span>
+              </span>
+            </span>
+            <span class="mobile-phone-home-bar"></span>
+          </span>
+        </div>
+
+        <div class="mobile-download-notice-body">
+          <span class="preplay-modal-kicker">Support this site</span>
+          <h2 id="ai-support-title">Support Migi</h2>
+          <p>This site is completely free. Donations are optional and help keep Migi running and improving.</p>
+
+          <aside class="mobile-download-support-card">
+            <span class="mobile-download-support-heart" aria-hidden="true">♥</span>
+            <div>
+              <strong>Support the experience</strong>
+              <p>Your support helps cover hosting, feature upgrades, and ongoing improvements.</p>
+            </div>
+          </aside>
+
+          <img
+            class="preplay-support-qr"
+            src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fko-fi.com%2Fchristinex"
+            alt="QR code for Ko-fi support"
+            width="220"
+            height="220"
+          />
+
+          <a class="preplay-support-link mobile-download-support-link"
+            href="https://ko-fi.com/christinex" target="_blank" rel="noopener noreferrer">
+            <span aria-hidden="true">♥</span> Buy me a coffee
+          </a>
+        </div>
+      </section>
+    `;
+
+    document.body.appendChild(modal);
+    requestAnimationFrame(() => modal.classList.add('is-open'));
+
+    const close = () => {
+      modal.classList.remove('is-open');
+      setTimeout(() => modal.remove(), 220);
+    };
+
+    modal.querySelectorAll('[data-ai-support-close]').forEach(button => {
+      button.addEventListener('click', close);
+    });
+
+    modal.addEventListener('click', event => {
+      if (event.target === modal) close();
+    });
+
+    modal.querySelector('[data-ai-support-close]')?.focus();
+  }
+
   function render() {
     const active = session.messages.length > 0;
 
-    return `<section class="ai-chat-view ${active ? 'has-messages' : ''}" aria-labelledby="ai-title"><header class="ai-chat-header"><div class="ai-heading-mark">${aiSparkleIcon()}</div><div><p>MovieIGuess AI</p><span><i></i> Ready to help</span></div><button data-ai-new>${config.icons.plus} New conversation</button></header><div class="ai-chat-scroll" data-ai-scroll>${!active ? `<div class="ai-welcome"><span class="ai-welcome-icon">${aiSparkleIcon()}</span><p class="ai-eyebrow">YOUR PERSONAL WATCH GUIDE</p><h1 id="ai-title">What do you feel like watching?</h1><p>Tell me a mood, a genre, or the kind of night you're having. I'll help narrow it down.</p><div class="ai-prompt-grid">${quickPrompts.map(([label, value]) => `<button data-ai-prompt="${value}"><span>${label}</span><small>→</small></button>`).join('')}</div></div>` : `<div class="ai-conversation">${session.messages.map(message).join('')}${session.typing ? `<div class="ai-message-row assistant"><span class="ai-avatar">${aiSparkleIcon()}</span><div class="ai-typing" aria-label="AI is typing"><i></i><i></i><i></i></div></div>` : ''}</div>`}</div><form class="ai-composer" data-ai-form><div class="ai-input-wrap"><input data-ai-input maxlength="300" autocomplete="off" placeholder="Describe what you want to watch..." aria-label="Message MovieIGuess AI"><button type="submit" aria-label="Send message">↑</button></div><p>AI can make mistakes.</p></form></section>`;
+    return `<section class="ai-chat-view ${active ? 'has-messages' : ''}" aria-labelledby="ai-title"><header class="ai-chat-header"><div class="ai-heading-mark">${aiSparkleIcon()}</div><div><p>Migi</p><span><i></i> your watch partner</span></div><button data-ai-new>${config.icons.plus} New conversation</button></header><div class="ai-chat-scroll" data-ai-scroll>${!active ? `<div class="ai-welcome"><span class="ai-welcome-icon">${aiSparkleIcon()}</span><p class="ai-eyebrow">YOUR PERSONAL WATCH GUIDE</p><h1 id="ai-title">What do you feel like watching?</h1><p>Tell me a mood, a genre, or the kind of night you're having. I'll help narrow it down.</p><div class="ai-prompt-grid">${quickPrompts.map(([label, value]) => `<button data-ai-prompt="${value}"><span>${label}</span><small>→</small></button>`).join('')}</div></div>` : `<div class="ai-conversation">${session.messages.map(message).join('')}${session.typing ? `<div class="ai-message-row assistant"><span class="ai-avatar">${aiSparkleIcon()}</span><div class="ai-typing" aria-label="AI is typing"><i></i><i></i><i></i></div></div>` : ''}</div>`}</div><form class="ai-composer" data-ai-form><div class="ai-input-wrap"><input data-ai-input maxlength="300" autocomplete="off" placeholder="Describe what you want to watch..." aria-label="Message Migi"><button type="submit" aria-label="Send message">↑</button></div><p>AI can make mistakes.</p></form></section>`;
   }
 
   function refresh() {
@@ -325,20 +493,6 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
       const scroll = config.getMount().querySelector('[data-ai-scroll]');
       if (scroll) scroll.scrollTop = scroll.scrollHeight;
     });
-  }
-
-  function groqHistory() {
-    return session.messages
-      .filter(entry => entry.role === 'user' || entry.role === 'assistant')
-      .map(entry => ({
-        role: entry.role,
-        content: JSON.stringify({
-          type: entry.type,
-          message: entry.message,
-          options: entry.options,
-          search: entry.search
-        })
-      }));
   }
 
   async function send(value, label = '') {
@@ -372,6 +526,12 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
           ? recentUserContext(2)
           : currentMessage
       );
+      const conversationContext = buildConversationContext({
+        latestUserMessage: currentMessage,
+        inferredSearch,
+        moreRequest,
+        alreadyAskedQuestion
+      });
 
       let aiResponse = moreRequest && session.lastSearch
         ? {
@@ -395,10 +555,19 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
           }
         : await callGroq([
             { role: 'system', content: alreadyAskedQuestion ? searchPrompt() : systemPrompt() },
-            ...groqHistory()
+            {
+              role: 'user',
+              content: JSON.stringify({
+                task: 'decide_next_ai_chat_response',
+                conversationContext
+              })
+            }
           ]);
 
-      if (alreadyAskedQuestion && aiResponse.type === 'question') {
+      if (
+        (alreadyAskedQuestion && aiResponse.type === 'question') ||
+        (hasSpecificSearchContext(inferredSearch) && aiResponse.type === 'question')
+      ) {
         aiResponse = {
           type: 'search',
           message: 'I know what you are looking for.',
@@ -420,13 +589,19 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
             type: 'message',
             message: moreRequest
               ? 'I could not find more fresh matches for that same vibe. Try adding one extra detail.'
-              : 'I could not find a strong TMDB match for that. Want to try a different mood or genre?'
+              : 'I could not find a strong match. Try Creating a new conversation.'
           };
         } else {
           aiResponse = await callGroq([
             { role: 'system', content: systemPrompt() },
-            { role: 'user', content: currentMessage },
-            { role: 'user', content: recommendationPrompt(candidates, moreRequest) }
+            {
+              role: 'user',
+              content: recommendationPrompt(
+                candidates,
+                conversationContext,
+                moreRequest
+              )
+            }
           ]);
 
           aiResponse.recommendations = fillRecommendations(aiResponse, candidates)
@@ -458,6 +633,10 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
 
     mount.querySelectorAll('[data-ai-prompt]').forEach(button => {
       button.onclick = () => send(button.dataset.aiPrompt, button.textContent.replace('→', '').trim());
+    });
+
+    mount.querySelectorAll('[data-ai-support-open]').forEach(button => {
+      button.addEventListener('click', openSupportModal);
     });
 
     mount.querySelector('[data-ai-new]')?.addEventListener('click', () => {

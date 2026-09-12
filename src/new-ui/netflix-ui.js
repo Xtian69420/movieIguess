@@ -751,7 +751,7 @@ async function findAICandidates(filters = {}, options = {}) {
     'sort_by=popularity.desc',
     `page=${Math.max(1, Number(options.page) || 1)}`,
     countries.length || languages.length ? 'vote_count.gte=20' : 'vote_count.gte=80',
-    genreIds.length ? `with_genres=${genreIds.join(',')}` : '',
+    genreIds.length ? `with_genres=${genreIds.join('|')}` : '',
     countries.length ? `with_origin_country=${countries.join('|')}` : '',
     languages.length ? `with_original_language=${languages[0]}` : '',
     withoutGenreIds.length ? `without_genres=${withoutGenreIds.join(',')}` : '',
@@ -3301,6 +3301,15 @@ function openMobileDownloadNotice() {
             <p>I built MovieIGuess with care and I keep it free for everyone.</p>
           </div>
         </aside>
+
+        <img
+          class="preplay-support-qr"
+          src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https%3A%2F%2Fko-fi.com%2Fchristinex"
+          alt="QR code for Ko-fi support"
+          width="220"
+          height="220"
+        />
+
         <a class="preplay-support-link mobile-download-support-link"
           href="https://ko-fi.com/christinex" target="_blank" rel="noopener noreferrer">
           <span aria-hidden="true">♥</span> Buy me a coffee
