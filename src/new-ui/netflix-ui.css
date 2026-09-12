@@ -7166,7 +7166,7 @@ iframe[src*="ko-fi.com"],
 
 @media (max-width: 760px) {
   .preplay-download-overlay {
-    align-items: flex-end;
+    align-items: center;
     padding:
       12px
       12px
