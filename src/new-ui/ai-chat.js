@@ -433,7 +433,6 @@ Return JSON only: {"type":"search","message":"I know what you're looking for.","
         <div class="mobile-download-notice-body">
           <span class="preplay-modal-kicker">Support this site</span>
           <h2 id="ai-support-title">Support Migi</h2>
-          <p>This site is completely free. Donations are optional and help keep Migi running and improving.</p>
 
           <aside class="mobile-download-support-card">
             <span class="mobile-download-support-heart" aria-hidden="true">♥</span>

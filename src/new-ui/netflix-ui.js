@@ -3293,7 +3293,6 @@ function openMobileDownloadNotice() {
       <div class="mobile-download-notice-body">
         <span class="preplay-modal-kicker">Mobile version</span>
         <h2 id="mobile-download-notice-title">MovieIGuess mobile app is in development</h2>
-        <p>I’m working on a smoother mobile version of MovieIGuess to make the experience better on phones. It’s still a work in progress, but I’m taking my time to get it right.</p>
         <aside class="mobile-download-support-card">
           <span class="mobile-download-support-heart" aria-hidden="true">♥</span>
           <div>
