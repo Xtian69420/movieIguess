@@ -345,19 +345,20 @@ ensureKofiWidget();
 
 const WATCH_SERVERS = [
   {
+    id: 'videasy',
+    name: 'Michael Scofield',
+    isNew: true,
+    movie: id => `https://player.videasy.net/movie/${id}`,
+    tv: (id, season, episode) =>
+      `https://player.videasy.net/tv/${id}/${season}/${episode}`
+  },
+  {
     id: 'vidfast',
     name: 'Walter White',
     isNew: true,
     movie: id => `https://vidfast.vc/movie/${id}`,
     tv: (id, season, episode) =>
       `https://vidfast.vc/tv/${id}/${season}/${episode}`
-  },
-  {
-    id: 'videasy',
-    name: 'Michael Scofield',
-    movie: id => `https://player.videasy.net/movie/${id}`,
-    tv: (id, season, episode) =>
-      `https://player.videasy.net/tv/${id}/${season}/${episode}`
   },
   {
     id: 'cinesrc',
@@ -3211,6 +3212,7 @@ function getSelectedWatchServer() {
 
   return (
     WATCH_SERVERS.find(server => server.id === saved) ||
+    WATCH_SERVERS.find(server => server.id === 'videasy') ||
     WATCH_SERVERS[0]
   );
 }
