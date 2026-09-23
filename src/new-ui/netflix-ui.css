@@ -7760,15 +7760,23 @@ body.genre-dropdown-open .content-area {
 
 .mobile-download-notice-body {
   display: grid;
-  gap: 14px;
+  gap: 8px;
   padding: 24px;
   text-align: center;
 }
 
 .mobile-download-notice-body h2 {
-  margin: -4px 0 0;
+  margin: 0;
   font-size: 25px;
   line-height: 1.18;
+}
+
+.mobile-download-notice-body h5 {
+  margin: 0;
+  color: #c5c5ca;
+  font-size: 15px;
+  line-height: 1.55;
+  font-weight: 400;
 }
 
 .mobile-download-notice-body > p {
